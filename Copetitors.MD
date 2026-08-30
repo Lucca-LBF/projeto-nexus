@@ -1,1 +1,0 @@
-#Analise de competidores
