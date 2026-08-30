@@ -5,63 +5,75 @@ Abaixo estão apresentados o funcionamento, os pontos fortes e os pontos fracos 
 ---
 
 ### 1. Insights Hub (Siemens)
-* **Funcionamento:** Antigo *MindSphere*, o **Insights Hub** é a solução de IoT industrial da Siemens integrada ao ecossistema Xcelerator. Atua conectando ativos do chão de fábrica (PLCs, sensores, máquinas) por meio de gateways industriais (*MindConnect*) ou *Siemens Industrial Edge*, coletando dados em tempo real, estruturando gêmeos digitais e fornecendo dashboards analíticos.
-* **Pontos Fortes:**
-  * **Integração Nativa Robusta:** Conexão fluida com o hardware da Siemens e padrões industriais tradicionais.
-  * **Modelagem de Ativos (Digital Twin):** Excelente representação hierárquica e estruturada de ativos e processos complexos.
-  * **Flexibilidade Multi-cloud:** Capacidade de operação híbrida, local ou em diferentes provedores de nuvem.
-* **Pontos Fracos:**
-  * **Ferramentas Low-Code Limitadas:** Não oferece um ambiente nativo avançado de desenvolvimento *low-code* voltado para criação rápida de aplicações customizadas.
-  * **Ausência de EAM Nativo:** Não realiza a automação direta de ordens de serviço, exigindo integração com sistemas externos de manutenção.
-  * **Realidade Aumentada (AR):** Recursos de RA não são nativos na plataforma principal.
+
+ **Funcionamento:** Antigo *MindSphere*, o **Insights Hub** é a solução de IoT industrial da Siemens integrada ao ecossistema Xcelerator. Atua conectando ativos do chão de fábrica (PLCs, sensores, máquinas) por meio de gateways industriais (*MindConnect*) ou *Siemens Industrial Edge*, coletando dados em tempo real, estruturando gêmeos digitais e fornecendo dashboards analíticos.
+ **Pontos Fortes:**
+   **Integração Nativa Robusta:** Conexão fluida com o hardware da Siemens e padrões industriais tradicionais.
+   **Modelagem de Ativos (Digital Twin):** Excelente representação hierárquica e estruturada de ativos e processos complexos.
+   **Flexibilidade Multi-cloud:** Capacidade de operação híbrida, local ou em diferentes provedores de nuvem.
+***Pontos Fracos:**
+   **Ferramentas Low-Code Limitadas:** Não oferece um ambiente nativo avançado de desenvolvimento *low-code* voltado para criação rápida de aplicações customizadas.
+   **Ausência de EAM Nativo:** Não realiza a automação direta de ordens de serviço, exigindo integração com sistemas externos de manutenção.
+   **Realidade Aumentada (AR):** Recursos de RA não são nativos na plataforma principal.
 
 ---
 
 ### 2. AWS IoT SiteWise
-* **Funcionamento:** Serviço gerenciado da Amazon Web Services projetado para coletar, armazenar, estruturar e monitorar dados de equipamentos industriais em escala global. Utiliza gateways de borda (*AWS IoT Greengrass*) para extrair dados de servidores OPC-UA e enviá-los para a nuvem AWS, onde são modelados e visualizados através do *SiteWise Monitor*.
-* **Pontos Fortes:**
-  * **Escalabilidade Enterprise Global:** Arquitetura de nuvem extremamente robusta capaz de gerenciar volumes massivos de dados de múltiplas plantas.
-  * **Painéis Prontos:** O *SiteWise Monitor* entrega interfaces e dashboards intuitivos rapidamente.
-  * **Monitoramento Preditivo com IA:** Integração facilitada com serviços de Machine Learning da AWS (como o *Amazon Lookout for Equipment*).
-* **Pontos Fracos:**
-  * **Ecossistema Fechado (Vendor Lock-in):** Baixa flexibilidade para arquiteturas *multi-cloud* ou ambientes locais independentes.
-  * **Protocolos Industriais Nativos Limitados:** Requer adaptadores adicionais via *Greengrass* para cobrir uma gama ampla de protocolos legados.
-  * **Foco Restrito:** Não possui ferramentas *low-code*, EAM ou RA integradas.
+
+ **Funcionamento:** Serviço gerenciado da Amazon Web Services projetado para coletar, armazenar, estruturar e monitorar dados de equipamentos industriais em escala global. Utiliza gateways de borda (*AWS IoT Greengrass*) para extrair dados de servidores OPC-UA e enviá-los para a nuvem AWS, onde são modelados e visualizados através do *SiteWise Monitor*.
+ **Pontos Fortes:**
+   **Escalabilidade Enterprise Global:** Arquitetura de nuvem extremamente robusta capaz de gerenciar volumes massivos de dados de múltiplas plantas.
+   **Painéis Prontos:** O *SiteWise Monitor* entrega interfaces e dashboards intuitivos rapidamente.
+   **Monitoramento Preditivo com IA:** Integração facilitada com serviços de Machine Learning da AWS (como o *Amazon Lookout for Equipment*).
+***Pontos Fracos:**
+   **Ecossistema Fechado (Vendor Lock-in):** Baixa flexibilidade para arquiteturas *multi-cloud* ou ambientes locais independentes.
+   **Protocolos Industriais Nativos Limitados:** Requer adaptadores adicionais via *Greengrass* para cobrir uma gama ampla de protocolos legados.
+   **Foco Restrito:** Não possui ferramentas *low-code*, EAM ou RA integradas.
 
 ---
 
 ### 3. Azure IoT Hub
-* **Funcionamento:** Plataforma de infraestrutura gerenciada pela Microsoft que atua como um hub central de mensagens bidirecionais entre aplicativos de IoT e os dispositivos conectados. Funciona como uma camada de conectividade segura e gerenciamento de dispositivos, servindo de base para arquiteturas de IoT mais amplas na nuvem Azure.
-* **Pontos Fortes:**
-  * **Conectividade e Protocolos:** Excelente suporte a protocolos de comunicação padrão e gerenciamento seguro de milhões de dispositivos conectados.
-  * **Escalabilidade Corporativa:** Infraestrutura global altamente confiável e segura da Microsoft Azure.
-* **Pontos Fracos:**
-  * **Foco em Infraestrutura (PaaS):** Por ser primariamente um hub de conectividade, carece de recursos prontos como modelagem avançada de gêmeos digitais industriais, IA preditiva nativa ou dashboards industriais sem o uso de serviços complementares (como *Azure Digital Twins*).
-  * **Ausência de Recursos Operacionais:** Não dispõe de ferramentas *low-code*, automação de ordens de serviço (EAM) ou RA integradas.
+
+ **Funcionamento:** Plataforma de infraestrutura gerenciada pela Microsoft que atua como um hub central de mensagens bidirecionais entre aplicativos de IoT e os dispositivos conectados. Funciona como uma camada de conectividade segura e gerenciamento de dispositivos, servindo de base para arquiteturas de IoT mais amplas na nuvem Azure.
+**Pontos Fortes:**
+   **Conectividade e Protocolos:** Excelente suporte a protocolos de comunicação padrão e gerenciamento seguro de milhões de dispositivos conectados.
+   **Escalabilidade Corporativa:** Infraestrutura global altamente confiável e segura da Microsoft Azure.
+ **Pontos Fracos:**
+   **Foco em Infraestrutura (PaaS):** Por ser primariamente um hub de conectividade, carece de recursos prontos como modelagem avançada de gêmeos digitais industriais, IA preditiva nativa ou dashboards industriais sem o uso de serviços complementares (como *Azure Digital Twins*).
+   **Ausência de Recursos Operacionais:** Não dispõe de ferramentas *low-code*, automação de ordens de serviço (EAM) ou RA integradas.
 
 ---
 
 ### 4. IBM Maximo + Tractian
-* **Funcionamento:** Combinação estratégica que une o **IBM Maximo** (líder global em *Enterprise Asset Management* - EAM) com a tecnologia de monitoramento preditivo plug-and-play da **Tractian** (sensores IoT e software de IA). A solução integra o monitoramento de vibração, temperatura e saúde dos ativos em tempo real com a gestão avançada de ordens de serviço e manutenção.
-* **Pontos Fortes:**
-  * **Automação de Ordens de Serviço (EAM):** Diferencial crítico. A detecção de anomalias gera ordens de serviço automáticas no sistema de manutenção corporativa.
-  * **IA Preditiva Avançada:** Combinação excelente de algoritmos especializados em prever falhas mecânicas e elétricas.
-  * **Chão de Fábrica e Gêmeos:** Forte capacidade de integração com ativos industriais físicos e representação digital de saúde.
-* **Pontos Fracos:**
-  * **Desenvolvimento Customizado:** Não é uma plataforma voltada para desenvolvimento *low-code* de aplicações genéricas.
-  * **Realidade Aumentada:** Não possui recursos nativos robustos de RA para suporte operacional em campo.
-  * **Ecossistema Acoplado:** Depende da sinergia específica entre as ferramentas IBM e Tractian.
+
+ **Funcionamento:** Combinação estratégica que une o **IBM Maximo** (líder global em *Enterprise Asset Management* - EAM) com a tecnologia de monitoramento preditivo plug-and-play da **Tractian** (sensores IoT e software de IA). A solução integra o monitoramento de vibração, temperatura e saúde dos ativos em tempo real com a gestão avançada de ordens de serviço e manutenção.
+***Pontos Fortes:**
+ 
+   **Automação de Ordens de Serviço (EAM):** Diferencial crítico. A detecção de anomalias gera ordens de serviço automáticas no sistema de manutenção corporativa.
+   **IA Preditiva Avançada:** Combinação excelente de algoritmos especializados em prever falhas mecânicas e elétricas.
+   **Chão de Fábrica e Gêmeos:** Forte capacidade de integração com ativos industriais físicos e representação digital de saúde.
+***Pontos Fracos:**
+   **Desenvolvimento Customizado:** Não é uma plataforma voltada para desenvolvimento *low-code* de aplicações genéricas.
+   **Realidade Aumentada:** Não possui recursos nativos robustos de RA para suporte operacional em campo.
+   **Ecossistema Acoplado:** Depende da sinergia específica entre as ferramentas IBM e Tractian.
 
 ---
 
 ### 5. ThingWorx (PTC)
-* **Funcionamento:** Plataforma líder de IoT Industrial (IIoT) e AR desenvolvida especificamente para a transformação digital industrial. Oferece um ambiente completo de desenvolvimento *low-code* para criar aplicações, modelar gêmeos digitais complexos, conectar sistemas heterogêneos e integrar recursos visuais avançados.
+
+  **Funcionamento:**
+
+ Plataforma líder de IoT Industrial (IIoT) e AR desenvolvida especificamente para a transformação digital industrial. Oferece um ambiente completo de desenvolvimento *low-code* para criar aplicações, modelar gêmeos digitais complexos, conectar sistemas heterogêneos e integrar recursos visuais avançados.
+
 * **Pontos Fortes:**
   * **Ferramentas Low-Code Líderes:** Permite construir e implantar aplicações industriais customizadas com extrema rapidez e agilidade.
   * **Realidade Aumentada (AR) Nativa:** Integração única com a tecnologia *Vuforia*, permitindo sobrepor dados de IoT e instruções de trabalho em 3D sobre os ativos físicos.
   * **Versatilidade e Conectividade:** Amplo suporte a protocolos industriais, múltiplos ambientes de nuvem e modelagem avançada de gêmeos digitais.
 * **Pontos Fracos:**
   * **Ausência de EAM Nativo:** Não possui um sistema de gestão de manutenção corporativa integrado de fábrica, exigindo a integração com softwares terceiros (como SAP ou IBM Maximo) para automação de ordens de serviço.
+
+![benchmark do figma](Foto_bench-FDS.png)
+
 # Matriz Comparativa: Plataformas de IoT e Gestão de Ativos Industriais
 
 | Critérios / Tópicos | Insights Hub (Siemens) | AWS IoT SiteWise | Azure IoT Hub | IBM Maximo + Tractian | ThingWorx (PTC) |
