@@ -103,3 +103,27 @@ Abaixo estão apresentados o funcionamento, os pontos fortes e os pontos fracos 
 8. *Realidade Aumentada (AR) Integrada:* Visualização de dados e métricas de IoT sobrepostos aos ativos físicos através de RA.
 9. *Painéis de Visualização Prontos (Dashboard):* Disponibilidade de interfaces gráficas intuitivas para acompanhamento imediato de KPIs.
 10. *Escalabilidade Enterprise Global:* Capacidade comprovada de gerenciar grandes volumes de dados distribuídos em múltiplas plantas industriais.
+# Requisitos Não Lineares / Casos de Uso Industriais
+
+Conforme ilustrado nos cartões de requisitos estratégicos abaixo, o sistema deve atender a fluxos operacionais avançados que combinam IoT, IA e gestão de manutenção:
+
+> ### 1. Automação de Ordens de Serviço
+> Criar fluxos onde os alertas gerados pela IoT acionem automaticamente ordens de serviço e chamados de manutenção sem intervenção manual.
+
+> ### 2. Centralização e Visibilidade Global
+> Consolidar dados de diferentes marcas e hardwares em um único painel centralizado para eliminar silos de informação entre plantas industriais.
+
+> ### 3. Manutenção Preditiva Baseada em IA
+> Utilizar modelos de inteligência artificial sobre os dados coletados para prever a vida útil restante dos componentes críticos com maior precisão.
+
+> ### 4. Suporte Operacional com Realidade Aumentada (AR)
+> Implementar interfaces de realidade aumentada para sobrepor métricas em tempo real e instruções de montagem/manutenção diretamente sobre os ativos.
+
+---
+
+## Descrição Detalhada dos Requisitos Não Lineares
+
+1. **Automação de Ordens de Serviço (EAM Integration):** Foco em eliminar o tempo de resposta humano entre a detecção de uma anomalia pelo sensor e a abertura do chamado no sistema de gestão de manutenção.
+2. **Consolidação e Visibilidade Centralizada:** Quebra de silos operacionais, permitindo a ingestão heterogênea de dados industriais de múltiplos fornecedores em um dashboard unificado.
+3. **Manutenção Preditiva com Machine Learning:** Aplicação de algoritmos avançados para prognóstico de falhas, saindo do modelo reativo ou preventivo baseado apenas em tempo de uso.
+4. **Integração com Realidade Aumentada (AR) em Campo:** Capaz de acelerar o diagnóstico e a intervenção técnica em campo através de sobreposição visual de dados de IoT e manuais em 3D.
