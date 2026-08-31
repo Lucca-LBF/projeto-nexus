@@ -89,7 +89,7 @@ Abaixo estão apresentados o funcionamento, os pontos fortes e os pontos fracos 
 | **Painéis de Visualização Prontos (Dashboard)** | ✅ | ✅ | ❌ | ✅ | ✅ |
 | **Escalabilidade Enterprise Global** | ✅ | ✅ | ✅ | ✅ | ✅ |
 
----
+----
 
 ### Detalhamento dos Tópicos Avaliados:
 
