@@ -103,7 +103,7 @@ Abaixo estão apresentados o funcionamento, os pontos fortes e os pontos fracos 
 8. *Realidade Aumentada (AR) Integrada:* Visualização de dados e métricas de IoT sobrepostos aos ativos físicos através de RA.
 9. *Painéis de Visualização Prontos (Dashboard):* Disponibilidade de interfaces gráficas intuitivas para acompanhamento imediato de KPIs.
 10. *Escalabilidade Enterprise Global:* Capacidade comprovada de gerenciar grandes volumes de dados distribuídos em múltiplas plantas industriais.
-# Requisitos Não Lineares / Casos de Uso Industriais
+# Requisitos Não Triviais Para o projeto
 
 Conforme ilustrado nos cartões de requisitos estratégicos abaixo, o sistema deve atender a fluxos operacionais avançados que combinam IoT, IA e gestão de manutenção:
 
