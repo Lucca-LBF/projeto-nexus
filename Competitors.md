@@ -121,7 +121,7 @@ Conforme ilustrado nos cartões de requisitos estratégicos abaixo, o sistema de
 
 ---
 
-## Descrição Detalhada dos Requisitos Não Lineares
+## Descrição Detalhada dos Requisitos Não Triviais
 
 1. **Automação de Ordens de Serviço (EAM Integration):** Foco em eliminar o tempo de resposta humano entre a detecção de uma anomalia pelo sensor e a abertura do chamado no sistema de gestão de manutenção.
 2. **Consolidação e Visibilidade Centralizada:** Quebra de silos operacionais, permitindo a ingestão heterogênea de dados industriais de múltiplos fornecedores em um dashboard unificado.
