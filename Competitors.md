@@ -89,7 +89,7 @@ Abaixo estão apresentados o funcionamento, os pontos fortes e os pontos fracos 
 | **Painéis de Visualização Prontos (Dashboard)** | ✅ | ✅ | ❌ | ✅ | ✅ |
 | **Escalabilidade Enterprise Global** | ✅ | ✅ | ✅ | ✅ | ✅ |
 
----
+----
 
 ### Detalhamento dos Tópicos Avaliados:
 
@@ -103,7 +103,7 @@ Abaixo estão apresentados o funcionamento, os pontos fortes e os pontos fracos 
 8. *Realidade Aumentada (AR) Integrada:* Visualização de dados e métricas de IoT sobrepostos aos ativos físicos através de RA.
 9. *Painéis de Visualização Prontos (Dashboard):* Disponibilidade de interfaces gráficas intuitivas para acompanhamento imediato de KPIs.
 10. *Escalabilidade Enterprise Global:* Capacidade comprovada de gerenciar grandes volumes de dados distribuídos em múltiplas plantas industriais.
-# Requisitos Não Lineares / Casos de Uso Industriais
+# Requisitos Não Triviais Para o projeto
 
 Conforme ilustrado nos cartões de requisitos estratégicos abaixo, o sistema deve atender a fluxos operacionais avançados que combinam IoT, IA e gestão de manutenção:
 
@@ -121,7 +121,7 @@ Conforme ilustrado nos cartões de requisitos estratégicos abaixo, o sistema de
 
 ---
 
-## Descrição Detalhada dos Requisitos Não Lineares
+## Descrição Detalhada dos Requisitos Não Triviais
 
 1. **Automação de Ordens de Serviço (EAM Integration):** Foco em eliminar o tempo de resposta humano entre a detecção de uma anomalia pelo sensor e a abertura do chamado no sistema de gestão de manutenção.
 2. **Consolidação e Visibilidade Centralizada:** Quebra de silos operacionais, permitindo a ingestão heterogênea de dados industriais de múltiplos fornecedores em um dashboard unificado.
