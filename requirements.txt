@@ -1,0 +1,24 @@
+# --- Core (Framework e Configurações) ---
+Django>=5.0,<5.1
+python-dotenv>=1.0.0  # Para gerenciar variáveis de ambiente de forma segura
+
+# --- Banco de Dados ---
+# Assumindo PostgreSQL (recomendado para aplicações robustas)
+psycopg2-binary>=2.9.9
+
+# --- Simulação e Manipulação de Dados (O "Cérebro") ---
+numpy>=1.26.0  # Cálculos numéricos de alta performance
+pandas>=2.2.0  # Manipulação e estruturação dos dados gerados/lidos
+scipy>=1.12.0  # (Opcional) Ferramentas matemáticas, estatísticas e de engenharia
+
+# --- Dashboard e Visualização ---
+plotly>=5.18.0  # Excelente para gráficos interativos (fácil de passar para templates Django)
+# django-plotly-dash>=2.2.0  # (Opcional) Se quiser usar o Dash (framework da Plotly) integrado ao Django
+
+# --- Processamento Assíncrono (Essencial para Simuladores) ---
+celery>=5.3.6  # Para rodar a simulação em segundo plano sem travar o site
+redis>=5.0.1  # Message broker padrão e rápido para o Celery
+
+# --- Produção e Servidor ---
+gunicorn>=21.2.0  # Servidor WSGI para produção
+whitenoise>=6.6.0  # Para servir arquivos estáticos (CSS, JS, Imagens) facilmente
