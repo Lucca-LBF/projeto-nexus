@@ -125,5 +125,175 @@ def dashboard(request):
         + economia_manutencao
         + economia_paradas
     )
+    # ==========================================================
+    # GRÁFICO 1
+    # COMPARAÇÃO DE CUSTOS
+    # ==========================================================
 
-    
+    grafico_custos = go.Figure()
+
+    grafico_custos.add_trace(
+        go.Bar(
+            x=[
+                "Energia",
+                "Manutenção",
+                "Paradas",
+            ],
+            y=[
+                custo_energia_sem_iot,
+                CUSTO_MANUTENCAO_SEM_IOT,
+                custo_paradas_sem_iot,
+            ],
+            name="Sem IoT",
+        )
+    )
+
+    grafico_custos.add_trace(
+        go.Bar(
+            x=[
+                "Energia",
+                "Manutenção",
+                "Paradas",
+            ],
+            y=[
+                custo_energia_com_iot,
+                custo_manutencao_com_iot,
+                custo_paradas_com_iot,
+            ],
+            name="Com IoT",
+        )
+    )
+
+    grafico_custos.update_layout(
+        title="Comparação de custos operacionais",
+        xaxis_title="Categoria",
+        yaxis_title="Custo (R$)",
+        barmode="group",
+        template="plotly_white",
+    )
+
+    grafico_custos_html = pio.to_html(
+        grafico_custos,
+        full_html=False
+    )
+
+    # ==========================================================
+    # GRÁFICO 2
+    # ECONOMIA POR CATEGORIA
+    # ==========================================================
+
+    grafico_economia = go.Figure()
+
+    grafico_economia.add_trace(
+        go.Bar(
+            x=[
+                "Energia",
+                "Manutenção",
+                "Paradas",
+            ],
+            y=[
+                economia_energia,
+                economia_manutencao,
+                economia_paradas,
+            ],
+            name="Economia",
+        )
+    )
+
+    grafico_economia.update_layout(
+        title="Economia gerada pelo uso de IoT",
+        xaxis_title="Categoria",
+        yaxis_title="Economia (R$)",
+        template="plotly_white",
+    )
+
+    grafico_economia_html = pio.to_html(
+        grafico_economia,
+        full_html=False
+    )
+
+    # ==========================================================
+    # GRÁFICO 3
+    # CUSTO TOTAL
+    # ==========================================================
+
+    grafico_total = go.Figure()
+
+    grafico_total.add_trace(
+        go.Pie(
+            labels=[
+                "Sem IoT",
+                "Com IoT",
+            ],
+            values=[
+                custo_total_sem_iot,
+                custo_total_com_iot,
+            ],
+            hole=0.45,
+        )
+    )
+
+    grafico_total.update_layout(
+        title="Comparação do custo operacional total",
+        template="plotly_white",
+    )
+
+    grafico_total_html = pio.to_html(
+        grafico_total,
+        full_html=False
+    )
+
+    # ==========================================================
+    # PERCENTUAL DE ECONOMIA
+    # ==========================================================
+
+    if custo_total_sem_iot > 0:
+        percentual_economia = (
+            economia_total
+            / custo_total_sem_iot
+        ) * 100
+    else:
+        percentual_economia = 0
+
+    # ==========================================================
+    # CONTEXTO
+    # ==========================================================
+
+    contexto = {
+
+        "custo_total_sem_iot":
+            round(custo_total_sem_iot, 2),
+
+        "custo_total_com_iot":
+            round(custo_total_com_iot, 2),
+
+        "economia_total":
+            round(economia_total, 2),
+
+        "percentual_economia":
+            round(percentual_economia, 2),
+
+        "economia_energia":
+            round(economia_energia, 2),
+
+        "economia_manutencao":
+            round(economia_manutencao, 2),
+
+        "economia_paradas":
+            round(economia_paradas, 2),
+
+        "grafico_custos":
+            grafico_custos_html,
+
+        "grafico_economia":
+            grafico_economia_html,
+
+        "grafico_total":
+            grafico_total_html,
+    }
+
+    return render(
+        request,
+        "dashboard/index.html",
+        contexto
+    )
