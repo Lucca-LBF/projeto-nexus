@@ -91,11 +91,19 @@
         marker: {size: 6}
     };
 
-    const layout = {
-        xaxis: { title: 'Dias de Operação' },
-        yaxis: { title: 'Custo Diário (R$)', rangemode: 'tozero' },
-        margin: { l: 60, r: 30, t: 20, b: 40 },
-        legend: { orientation: 'h', y: -0.2 } 
+const layout = {
+        paper_bgcolor: '#1F2833',
+        plot_bgcolor: '#1F2833',  
+        font: { color: '#C5C6C7' }, 
+        xaxis: { 
+            title: 'Dias de Operação',
+            gridcolor: 'rgba(102, 252, 241, 0.1)' // Grade ciano bem fraca
+        },
+        yaxis: { 
+            title: 'Custo Diário (R$)', 
+            rangemode: 'tozero',
+            gridcolor: 'rgba(102, 252, 241, 0.1)'
+        },
     };
 
     Plotly.newPlot('meu_grafico_iot', [trace1, trace2], layout);

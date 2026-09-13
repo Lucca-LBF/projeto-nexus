@@ -1,0 +1,97 @@
+
+:root {
+    --nexus-bg: #0B0C10;  
+    --nexus-surface: #1F2833;  
+    --nexus-primary: #45A29E;  
+    --nexus-secondary: #66FCF1;    
+    --nexus-accent: #7b2cbf;     
+    --nexus-text: #C5C6C7;         
+    --nexus-title: #FFFFFF;        
+    --nexus-border: rgba(102, 252, 241, 0.2);
+}
+
+/* --- Estilos Gerais --- */
+body {
+    background-color: var(--nexus-bg) !important;
+    color: var(--nexus-text) !important;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+    color: var(--nexus-title) !important;
+}
+
+/* --- Barra de Navegação (Navbar) --- */
+.navbar {
+    background-color: var(--nexus-surface) !important;
+    border-bottom: 2px solid var(--nexus-accent);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.navbar-brand {
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+/* Destaque para a palavra NEXUS */
+.nexus-highlight {
+    color: var(--nexus-secondary);
+    text-shadow: 0 0 10px rgba(102, 252, 241, 0.5);
+}
+
+/* --- Cards e Painéis --- */
+.card {
+    background-color: var(--nexus-surface) !important;
+    border: 1px solid var(--nexus-border) !important;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.card-header {
+    background-color: rgba(0,0,0,0.2) !important;
+    border-bottom: 1px solid var(--nexus-border) !important;
+}
+
+/* --- Formulários --- */
+.form-label {
+    color: var(--nexus-primary);
+}
+
+.form-control {
+    background-color: var(--nexus-bg) !important;
+    border: 1px solid var(--nexus-border) !important;
+    color: var(--nexus-text) !important;
+}
+
+.form-control:focus {
+    border-color: var(--nexus-secondary) !important;
+    box-shadow: 0 0 8px rgba(102, 252, 241, 0.4) !important;
+}
+
+/* --- Botões --- */
+.btn-primary {
+    background-color: var(--nexus-primary) !important;
+    border-color: var(--nexus-primary) !important;
+    color: #000 !important;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--nexus-secondary) !important;
+    border-color: var(--nexus-secondary) !important;
+    box-shadow: 0 0 15px rgba(102, 252, 241, 0.6);
+}
+
+/* --- Cards de Resumo (ROI e Economia) --- */
+.card-roi {
+    border-left: 4px solid var(--nexus-secondary) !important;
+}
+
+.card-economia {
+    border-left: 4px solid var(--nexus-accent) !important;
+}
+
+.text-info { color: var(--nexus-secondary) !important; }
+.text-success { color: var(--nexus-accent) !important; } /* Usando o roxo para "sucesso/economia" */
