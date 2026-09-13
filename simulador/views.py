@@ -5,9 +5,9 @@ import numpy as np
 def calcular_simulacao(request):
     # 1. RECEBER OS DADOS DO FORMULÁRIO
     if request.method == 'POST':
-        num_maquinas = int(request.POST.get('num_maquinas', 100))
-        custo_hora_parada = float(request.POST.get('custo_hora_parada', 5000))
-        custo_sensor_iot = float(request.POST.get('custo_sensor_iot', 300)) # Valor padrão mais realista para sensor mensal
+        num_maquinas = int(request.POST.get('num_maquinas', 15))
+        custo_hora_parada = float(request.POST.get('custo_hora_parada', 540))
+        custo_sensor_iot = float(request.POST.get('custo_sensor_iot', 8000)) # Valor padrão mais realista para sensor mensal
     else:
         num_maquinas = 100
         custo_hora_parada = 5000.0
