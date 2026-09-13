@@ -1,31 +1,49 @@
 
+/* static/css/style.css */
+
+/* --- Variáveis Globais de Cores (Tema Nexus) --- */
 :root {
-    --nexus-bg: #0B0C10;  
-    --nexus-surface: #1F2833;  
-    --nexus-primary: #45A29E;  
-    --nexus-secondary: #66FCF1;    
-    --nexus-accent: #7b2cbf;     
-    --nexus-text: #C5C6C7;         
-    --nexus-title: #FFFFFF;        
-    --nexus-border: rgba(102, 252, 241, 0.2);
+    --nexus-bg-1: #0B0C10;         /* Fundo principal quase preto */
+    --nexus-bg-2: #09121c;         /* Azul escuro profundo */
+    --nexus-bg-3: #0c1826;         /* Azul meia-noite */
+    --nexus-surface: #1F2833;      /* Fundo de cards e painéis */
+    --nexus-primary: #45A29E;      /* Ciano/Azul claro para destaques */
+    --nexus-secondary: #66FCF1;    /* Ciano brilhante para botões e hover */
+    --nexus-accent: #7b2cbf;       /* Roxo profundo para detalhes */
+    --nexus-text: #C5C6C7;         /* Texto geral cinza claro */
+    --nexus-title: #FFFFFF;        /* Títulos em branco puro */
+    --nexus-border: rgba(102, 252, 241, 0.2); /* Borda suave ciano */
 }
 
-/* --- Estilos Gerais --- */
+/* --- Estilos Gerais com Fundo Animado --- */
 body {
-    background-color: var(--nexus-bg) !important;
+    /* Gradiente combinando as cores escuras e azuladas */
+    background: linear-gradient(135deg, var(--nexus-bg-1), var(--nexus-bg-2), var(--nexus-bg-3), var(--nexus-bg-2)) !important;
+    background-size: 400% 400% !important; /* Tamanho expandido para permitir movimento */
+    animation: gradientBG 15s ease infinite !important; /* Movimento de 15 segundos repetido */
     color: var(--nexus-text) !important;
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+}
+
+/* Keyframes: A mágica que faz o fundo se mover */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 h1, h2, h3, h4, h5, h6, .navbar-brand {
     color: var(--nexus-title) !important;
 }
 
-/* --- Barra de Navegação (Navbar) --- */
+/* --- Barra de Navegação (Navbar) - Separação Aprimorada --- */
 .navbar {
-    background-color: var(--nexus-surface) !important;
-    border-bottom: 2px solid var(--nexus-accent);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    background-color: rgba(31, 40, 51, 0.95) !important; /* Fundo escuro levemente transparente */
+    backdrop-filter: blur(5px); /* Efeito de vidro esfumaçado */
+    border-bottom: 2px solid var(--nexus-secondary); /* Linha divisória de destaque */
+    box-shadow: 0 4px 20px rgba(102, 252, 241, 0.15); /* Brilho projetado para baixo */
+    margin-bottom: 2.5rem !important; /* Espaçamento físico entre o topo e os cards */
 }
 
 .navbar-brand {
@@ -45,11 +63,11 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
     background-color: var(--nexus-surface) !important;
     border: 1px solid var(--nexus-border) !important;
     border-radius: 10px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Sombra intensa para saltar do fundo */
 }
 
 .card-header {
-    background-color: rgba(0,0,0,0.2) !important;
+    background-color: rgba(0,0,0,0.3) !important;
     border-bottom: 1px solid var(--nexus-border) !important;
 }
 
@@ -59,7 +77,7 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .form-control {
-    background-color: var(--nexus-bg) !important;
+    background-color: rgba(11, 12, 16, 0.7) !important;
     border: 1px solid var(--nexus-border) !important;
     color: var(--nexus-text) !important;
 }
@@ -94,4 +112,4 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .text-info { color: var(--nexus-secondary) !important; }
-.text-success { color: var(--nexus-accent) !important; } /* Usando o roxo para "sucesso/economia" */
+.text-success { color: var(--nexus-accent) !important; }

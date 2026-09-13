@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 def calcular_simulacao(request):
-    # 1. RECEBER OS DADOS
+
     if request.method == 'POST':
         num_maquinas = int(request.POST.get('num_maquinas', 10))
         custo_hora_parada = float(request.POST.get('custo_hora_parada', 5000))
@@ -41,8 +41,8 @@ def calcular_simulacao(request):
         roi = 0
     contexto = {
         'num_maquinas': num_maquinas,
-        'custo_hora_parada': int(custo_hora_parada), # Envia de volta pro form
-        'custo_sensor_iot': int(custo_sensor_iot),   # Envia de volta pro form
+        'custo_hora_parada': int(custo_hora_parada), 
+        'custo_sensor_iot': int(custo_sensor_iot),   
         'economia_mensal': f"R$ {economia_mensal:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.'),
         'roi': f"{roi:.1f}%",
         'dados_grafico_dias': df['Dia'].tolist(),
