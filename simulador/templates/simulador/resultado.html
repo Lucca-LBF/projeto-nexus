@@ -1,0 +1,103 @@
+{% extends 'base.html' %} 
+
+{% block content %}
+<div class="row">
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Dados da Operação</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">Insira os dados da fábrica para simular a economia mensal com manutenção preditiva (IoT).</p>
+                
+                <form method="POST" action="{% url 'resultado_simulacao' %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Número de Máquinas</label>
+                        <input type="number" class="form-control" name="num_maquinas" value="{{ num_maquinas|default:'10' }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Custo de 1 Hora Parada (R$)</label>
+                        <input type="number" class="form-control" name="custo_hora_parada" value="5000" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Custo Mensal do Sensor IoT (R$)</label>
+                        <input type="number" class="form-control" name="custo_sensor_iot" value="150" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">Atualizar Simulação</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 border-start border-success border-4">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase mb-1">Economia Mensal Estimada</h6>
+                        <h3 class="text-success mb-0">{{ economia_mensal }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 border-start border-info border-4">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase mb-1">Retorno sobre Investimento (ROI)</h6>
+                        <h3 class="text-info mb-0">{{ roi }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title text-secondary">Projeção Diária de Custos de Falha (30 Dias)</h5>
+                
+                <div id="meu_grafico_iot" style="width: 100%; height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    const dias = {{ dados_grafico_dias|safe }};
+    const custosSemIot = {{ dados_grafico_sem_iot|safe }};
+    const custosComIot = {{ dados_grafico_com_iot|safe }};
+
+    const trace1 = {
+        x: dias,
+        y: custosSemIot,
+        mode: 'lines+markers',
+        name: 'Custos Sem IoT (Manutenção Corretiva)',
+        line: {color: '#dc3545', width: 2}, // Vermelho
+        marker: {size: 6}
+    };
+
+    const trace2 = {
+        x: dias,
+        y: custosComIot,
+        mode: 'lines+markers',
+        name: 'Custos Com IoT (Manutenção Preditiva)',
+        line: {color: '#198754', width: 3},
+        marker: {size: 6}
+    };
+
+    const layout = {
+        xaxis: { title: 'Dias de Operação' },
+        yaxis: { title: 'Custo Diário (R$)', rangemode: 'tozero' },
+        margin: { l: 60, r: 30, t: 20, b: 40 },
+        legend: { orientation: 'h', y: -0.2 } 
+    };
+
+    Plotly.newPlot('meu_grafico_iot', [trace1, trace2], layout);
+</script>
+{% endblock %}
