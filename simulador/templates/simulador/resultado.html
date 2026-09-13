@@ -1,8 +1,9 @@
-{% extends 'base.html' %} 
+{% extends 'base.html' %}
 
 {% block content %}
 <div class="row">
     
+    <!-- COLUNA ESQUERDA: Formulário -->
     <div class="col-md-4">
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-primary text-white">
@@ -16,18 +17,18 @@
                     
                     <div class="mb-3">
                         <label class="form-label fw-bold">Número de Máquinas</label>
-                        <input type="number" class="form-control" name="num_maquinas" value="{{ num_maquinas|default:'10' }}" required>
+                        <input type="number" class="form-control" name="num_maquinas" value="{{ num_maquinas|default:'100' }}" required>
                     </div>
                     
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Custo de 1 Hora Parada (R$)</label>
-                            <input type="number" class="form-control" name="custo_hora_parada" value="{{ custo_hora_parada|default:'5000' }}" required>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Custo Mensal do Sensor IoT (R$)</label>
-                            <input type="number" class="form-control" name="custo_sensor_iot" value="{{ custo_sensor_iot|default:'150' }}" required>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Custo de 1 Hora Parada (R$)</label>
+                        <input type="number" class="form-control" name="custo_hora_parada" value="{{ custo_hora_parada|default:'5000' }}" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Custo Mensal do Sensor IoT (R$)</label>
+                        <input type="number" class="form-control" name="custo_sensor_iot" value="{{ custo_sensor_iot|default:'300' }}" required>
+                    </div>
                     
                     <button type="submit" class="btn btn-primary w-100">Atualizar Simulação</button>
                 </form>
@@ -35,40 +36,45 @@
         </div>
     </div>
 
+    <!-- COLUNA DIREITA: Dashboard e Gráficos -->
     <div class="col-md-8">
         
+        <!-- Cards de Destaque Financeiro -->
         <div class="row mb-4">
             <div class="col-md-6">
-                <div class="card shadow-sm border-0 border-start border-success border-4">
+                <div class="card shadow-sm border-0 card-economia mb-3 mb-md-0">
                     <div class="card-body">
-                        <h6 class="text-muted text-uppercase mb-1">Economia Mensal Estimada</h6>
-                        <h3 class="text-success mb-0">{{ economia_mensal }}</h3>
+                        <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.85rem;">Economia Mensal Estimada</h6>
+                        <h3 class="text-success mb-0 fw-bold">{{ economia_mensal }}</h3>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="card shadow-sm border-0 border-start border-info border-4">
+                <div class="card shadow-sm border-0 card-roi">
                     <div class="card-body">
-                        <h6 class="text-muted text-uppercase mb-1">Retorno sobre Investimento (ROI)</h6>
-                        <h3 class="text-info mb-0">{{ roi }}</h3>
+                        <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.85rem;">Retorno sobre Investimento (ROI)</h6>
+                        <h3 class="text-info mb-0 fw-bold">{{ roi }}</h3>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Gráfico -->
         <div class="card shadow-sm border-0">
             <div class="card-body">
-                <h5 class="card-title text-secondary">Projeção Diária de Custos de Falha (30 Dias)</h5>
-                
-                <div id="meu_grafico_iot" style="width: 100%; height: 400px;"></div>
+                <h5 class="card-title text-secondary mb-3">Projeção Diária de Custos de Falha (30 Dias)</h5>
+                <!-- Onde o Plotly vai desenhar o gráfico -->
+                <div id="meu_grafico_iot" style="width: 100%; height: 380px;"></div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Carregando o Plotly JS -->
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 
+<!-- Script para gerar o gráfico estilizado para o tema escuro -->
 <script>
-
     const dias = {{ dados_grafico_dias|safe }};
     const custosSemIot = {{ dados_grafico_sem_iot|safe }};
     const custosComIot = {{ dados_grafico_com_iot|safe }};
@@ -77,35 +83,37 @@
         x: dias,
         y: custosSemIot,
         mode: 'lines+markers',
-        name: 'Custos Sem IoT (Manutenção Corretiva)',
-        line: {color: '#dc3545', width: 2}, // Vermelho
-        marker: {size: 6}
+        name: 'Sem IoT (Corretiva)',
+        line: {color: '#ef4444', width: 2}, // Vermelho moderno
+        marker: {size: 5}
     };
 
     const trace2 = {
         x: dias,
         y: custosComIot,
         mode: 'lines+markers',
-        name: 'Custos Com IoT (Manutenção Preditiva)',
-        line: {color: '#198754', width: 3},
-        marker: {size: 6}
+        name: 'Com IoT (Preditiva)',
+        line: {color: '#66FCF1', width: 3}, // Ciano do Nexus
+        marker: {size: 5}
     };
 
-const layout = {
-        paper_bgcolor: '#1F2833',
-        plot_bgcolor: '#1F2833',  
-        font: { color: '#C5C6C7' }, 
+    const layout = {
+        paper_bgcolor: 'transparent', // Fundo transparente para integrar com o card
+        plot_bgcolor: 'transparent',
+        font: { color: '#C5C6C7', family: 'Segoe UI' },
+        margin: { l: 50, r: 20, t: 10, b: 40 },
+        legend: { orientation: 'h', y: -0.25, x: 0.1 },
         xaxis: { 
             title: 'Dias de Operação',
-            gridcolor: 'rgba(102, 252, 241, 0.1)' // Grade ciano bem fraca
+            gridcolor: 'rgba(102, 252, 241, 0.08)' 
         },
         yaxis: { 
             title: 'Custo Diário (R$)', 
             rangemode: 'tozero',
-            gridcolor: 'rgba(102, 252, 241, 0.1)'
-        },
+            gridcolor: 'rgba(102, 252, 241, 0.08)'
+        }
     };
 
-    Plotly.newPlot('meu_grafico_iot', [trace1, trace2], layout);
+    Plotly.newPlot('meu_grafico_iot', [trace1, trace2], layout, {responsive: true});
 </script>
 {% endblock %}
