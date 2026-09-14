@@ -7,6 +7,10 @@ Relatório da analise de competidores:
 
 ![foto da entrega](Sprint01_FDS.jpg)
 
+## Segunda Entrega
+
+![foto da sprint2](Sprint02_FDS.jpg)
+
 ## Dashboard de Custos
 Busca os dados no banco de dados (EconomiaIoT) e gera gráficos comparativos usando a biblioteca Plotly.
 * Ela funciona somando os custos operacionais (Energia, Manutenção e Paradas) nos cenários Com IoT e Sem IoT, e apartir disso calcula o valor economizado e a porcentagem total de redução.
