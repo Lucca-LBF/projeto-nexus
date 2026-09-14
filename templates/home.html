@@ -2,6 +2,7 @@
 {% block header %}
 {% endblock %}
 {% block content %}
+{% load static %}
 <!-- SEÇÃO 1: O "Pitch" de Vendas (Hero Section) -->
 <div class="row align-items-center mb-5 py-5 border-bottom" style="border-color: var(--nexus-border) !important;">
     <div class="col-lg-7">
@@ -75,50 +76,50 @@
     
     <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
 
-        <img src="https://via.placeholder.com/150/1F2833/66FCF1?text=Foto+1" alt="Integrante 1" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+        <img src="{% static 'fotos/foto_de_artur.png' %}" alt="Foto de Artur" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
         <h5 class="fw-bold mb-1">Artur Valença de Carvalho</h5>
         <p class="text-muted small">CC-B</p>
     </div>
 
     <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-        <img src="https://via.placeholder.com/150/1F2833/66FCF1?text=Foto+2" alt="Integrante 2" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+        <img src="{% static 'fotos/foto_de_guilherme.jpg' %}" alt="Foto de Guilherme" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
         <h5 class="fw-bold mb-1">Guilherme Cireno Baltar</h5>
         <p class="text-muted small">CC-B</p>
     </div>
 
     <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-        <img src="https://via.placeholder.com/150/1F2833/66FCF1?text=Foto+3" alt="Integrante 3" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+        <img src="{% static 'fotos/foto_de_gustavo.jpg' %}" alt="Foto de Gustavo" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
         <h5 class="fw-bold mb-1">Gustavo Rogério Soares Filho</h5>
         <p class="text-muted small">CC-B</p>
     </div>
 
     <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-        <img src="https://via.placeholder.com/150/1F2833/66FCF1?text=Foto+4" alt="Integrante 4" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+        <img src="{% static 'fotos/foto_de_ivon.jpg' %}" alt="Foto de Ivon" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
         <h5 class="fw-bold mb-1">Ivon Buarque da Costa Neto</h5>
         <p class="text-muted small">CC-B</p>
     </div>
 
 
     <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-        <img src="https://via.placeholder.com/150/1F2833/66FCF1?text=Foto+5" alt="Integrante 5" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+        <img src="{%static 'fotos/foto_de_lucca.jpg' %}" alt="Foto de Lucca" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
         <h5 class="fw-bold mb-1">Lucca Lyra Batista Felix </h5>
         <p class="text-muted small">CC-B</p>
     </div>
 
     <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-        <img src="https://via.placeholder.com/150/1F2833/66FCF1?text=Foto+6" alt="Integrante 6" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+        <img src="{% static 'fotos/foto_de_luiz.jpg' %}" alt="Foto de Luiz" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
         <h5 class="fw-bold mb-1">Luiz Henrique de Andrade Rodrigues</h5>
         <p class="text-muted small">CC-B</p>
     </div>
 
     <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-        <img src="https://via.placeholder.com/150/1F2833/66FCF1?text=Foto+7" alt="Integrante 7" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+        <img src="{% static 'fotos/foto_de_niara.jpg' %}" alt="Foto de Niara" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
         <h5 class="fw-bold mb-1">Niara Rúbia Amorim Araújo</h5>
         <p class="text-muted small">DESIGN-B</p>
     </div>
 
     <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-        <img src="https://via.placeholder.com/150/1F2833/66FCF1?text=Foto+8" alt="Integrante 8" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+        <img src="{% static 'fotos/foto_de_solon.jpg' %}" alt="Foto de Solon" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
         <h5 class="fw-bold mb-1">Solon Antonio Coutinho Rosa Neto </h5>
         <p class="text-muted small">CC-B</p>
     </div>
