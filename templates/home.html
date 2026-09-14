@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- SEÇÃO 1: O "Pitch" de Vendas (Hero Section) -->
+<div class="row align-items-center mb-5 py-5 border-bottom" style="border-color: var(--nexus-border) !important;">
+    <div class="col-lg-7">
+        <h1 class="display-4 fw-bold mb-3" style="font-family: 'Orbitron', sans-serif;">
+            O futuro da indústria é <span class="nexus-highlight">guiado por dados.</span>
+        </h1>
+        <p class="lead mb-4 text-muted">
+            O projeto <strong>NEXUS</strong> foi criado para educar empresas sobre a importância de coletar dados operacionais por meio de Sensores IoT. Deixe o achismo de lado e comece a tomar decisões baseadas em informações reais para reduzir custos e maximizar a eficiência da sua produção.
+        </p>
+        <a href="{% url 'resultado_simulacao' %}" class="btn btn-primary btn-lg px-5 py-3 shadow">
+            📈 Testar Simulador de ROI
+        </a>
+    </div>
+    <div class="col-lg-5 text-center d-none d-lg-block">
+        <!-- Um ícone gigante ou ilustração (usando emoji para simplificar, mas você pode trocar por uma imagem) -->
+        <div style="font-size: 8rem; text-shadow: 0 0 30px var(--nexus-secondary);">⚙️📊</div>
+    </div>
+</div>
+
+<div class="row mb-5 text-center">
+    <div class="col-12 mb-4">
+        <h2 class="fw-bold">Por que implementar <span class="text-info">IoT Industrial?</span></h2>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card h-100 p-3 shadow-sm border-0">
+            <div class="card-body">
+                <h3 class="mb-3" style="font-size: 3rem;">🔍</h3>
+                <h5 class="card-title fw-bold text-info">Visibilidade em Tempo Real</h5>
+                <p class="card-text text-muted small">Saiba exatamente o que está acontecendo no chão de fábrica a qualquer momento. Chega de relatórios atrasados em planilhas.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card h-100 p-3 shadow-sm border-0">
+            <div class="card-body">
+                <h3 class="mb-3" style="font-size: 3rem;">🛑</h3>
+                <h5 class="card-title fw-bold text-info">Manutenção Preditiva</h5>
+                <p class="card-text text-muted small">Aja antes que a máquina quebre. Sensores identificam vibrações e temperaturas anormais, evitando paradas catastróficas.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card h-100 p-3 shadow-sm border-0">
+            <div class="card-body">
+                <h3 class="mb-3" style="font-size: 3rem;">💰</h3>
+                <h5 class="card-title fw-bold text-info">Redução de Custos</h5>
+                <p class="card-text text-muted small">Menos tempo ocioso significa mais produção. O investimento em tecnologia se paga rapidamente com a redução do desperdício.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SEÇÃO 3: A Equipe -->
+<div class="row mb-5">
+    <div class="col-12 text-center mb-5">
+        <h2 class="fw-bold border-top pt-5" style="border-color: var(--nexus-border) !important;">
+            A Equipe <span class="text-success">NEXUS</span>
+        </h2>
+        <p class="text-muted">Os desenvolvedores por trás deste projeto de educação tecnológica.</p>
+    </div>
+
+    <!-- INTEGRANTE 1 -->
+    <div class="col-md-3 col-sm-6 mb-4 text-center">
+        <img src="https://via.placeholder.com/150" alt="Foto Integrante 1" class="rounded-circle mb-3 border border-3 border-info" style="width: 120px; height: 120px; object-fit: cover;">
+        <h5 class="fw-bold mb-1">Nome Integrante</h5>
+        <p class="text-muted small">descrição do integrante 1</p>
+    </div>
+</div>    <!-- INTEGRANTE 2 -->
+    
+<div class="col-md-3 col-sm-6 mb-4 text-center">
+        <img src="https://via.placeholder.com/150" alt="Foto Integrante 2" class="rounded-circle mb-3 border border-3 border-info" style="width: 120px; height: 120px; object-fit: cover;">
+        <h5 class="fw-bold mb-1">Nome Integrante</h5>
+        <p class="text-muted small">descrição do integrante 2</p>
+    </div>
+</div>    <!-- INTEGRANTE 3 -->
+    
+<div class="col-md-3 col-sm-6 mb-4 text-center">
+        <img src="https://via.placeholder.com/150" alt="Foto Integrante 3" class="rounded-circle mb-3 border border-3 border-info" style="width: 120px; height: 120px; object-fit: cover;">
+        <h5 class="fw-bold mb-1">Nome Integrante</h5>
+        <p class="text-muted small">descrição do integrante 3</p>
+    </div>
+</div>    <!-- INTEGRANTE 4 -->
+   
+<div class="col-md-3 col-sm-6 mb-4 text-center">
+        <img src="https://via.placeholder.com/150" alt="Foto Integrante 4" class="rounded-circle mb-3 border border-3 border-info" style="width: 120px; height: 120px; object-fit: cover;">
+        <h5 class="fw-bold mb-1">Nome Integrante</h5>
+        <p class="text-muted small">descrição do integrante 4</p>
+    </div>
+</div>    <!-- INTEGRANTE 5 -->
+    
+<div class="col-md-3 col-sm-6 mb-4 text-center">
+        <img src="https://via.placeholder.com/150" alt="Foto Integrante 5" class="rounded-circle mb-3 border border-3 border-info" style="width: 120px; height: 120px; object-fit: cover;">
+        <h5 class="fw-bold mb-1">Nome Integrante</h5>
+        <p class="text-muted small">descrição do integrante 5</p>
+    </div>
+</div>    <!-- INTEGRANTE 6 -->
+    
+<div class="col-md-3 col-sm-6 mb-4 text-center">
+        <img src="https://via.placeholder.com/150" alt="Foto Integrante 6" class="rounded-circle mb-3 border border-3 border-info" style="width: 120px; height: 120px; object-fit: cover;">
+        <h5 class="fw-bold mb-1">Nome Integrante</h5>
+        <p class="text-muted small">descrição do integrante 6</p>
+    </div>
+</div>
+    <!-- INTEGRANTE 7 -->
+    <div class="col-md-3 col-sm-6 mb-4 text-center">
+        <img src="https://via.placeholder.com/150" alt="Foto Integrante 7" class="rounded-circle mb-3 border border-3 border-info" style="width: 120px; height: 120px; object-fit: cover;">
+        <h5 class="fw-bold mb-1">Nome Integrante</h5>
+        <p class="text-muted small">descrição do integrante 7</p>
+    </div>
+        <!-- INTEGRANTE 8 -->
+    <div class="col-md-3 col-sm-6 mb-4 text-center">
+        <img src="https://via.placeholder.com/150" alt="Foto Integrante 8" class="rounded-circle mb-3 border border-3 border-info" style="width: 120px; height: 120px; object-fit: cover;">
+        <h5 class="fw-bold mb-1">Nome Integrante</h5>
+        <p class="text-muted small">descrição do integrante 8</p>
+    </div>
+</div>
+</div>
+{% endblock %}
