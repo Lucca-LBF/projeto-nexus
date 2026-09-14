@@ -38,7 +38,7 @@ def dashboard(request):
         economia = 0
         percentual_economia = 0
 
-    # GRÁFICO DE COMPARAÇÃO
+
 
     grafico_custos = go.Figure()
 
@@ -62,7 +62,6 @@ def dashboard(request):
         full_html=False
     )
 
-    # GRÁFICO DE ECONOMIA POR CATEGORIA
 
     economia_energia = (
         dados.energia_sem_iot - dados.energia_com_iot
