@@ -11,6 +11,10 @@ Relatório da analise de competidores:
 
 ![foto da sprint2](Sprint02_FDS.jpg)
 
+## Views do Sistema
+Exibe o formulário de contato (contato.html) e renderiza a pagina inical (home.html)
+* Se receber um formulário via POST, salva os campos (nome, email, assunto, mensagem) no banco de dados (MensagemContato)
+
 ## Dashboard de Custos
 Busca os dados no banco de dados (EconomiaIoT) e gera gráficos comparativos usando a biblioteca Plotly.
 * Ela funciona somando os custos operacionais (Energia, Manutenção e Paradas) nos cenários Com IoT e Sem IoT, e apartir disso calcula o valor economizado e a porcentagem total de redução.
