@@ -1,27 +1,21 @@
 # --- Core (Framework e Configurações) ---
 Django>=5.0,<5.1
 python-dotenv>=1.0.0
-
 # --- Banco de Dados ---
 psycopg2-binary>=2.9.9
-
 # --- Geração de Dados Virtuais (Simulador IoT) ---
 numpy>=1.26.0       # Cálculos e geração de variações (ex: ruído de sensores)
 pandas>=2.2.0       # Estruturação dos dados simulados em séries temporais
 Faker>=24.0.0       # NOVO: Excelente para gerar metadados falsos (IDs de máquinas, locais, nomes)
-
 # --- Dashboard e Visualização ---
 plotly>=5.18.0      # Geração de gráficos interativos (linhas do tempo, medidores/gauges)
 djangorestframework>=3.15.0 # Para criar endpoints JSON rápidos que os gráficos vão consumir
-
 # --- Interface e Formulários ---
 django-crispy-forms>=2.1   # Para criar o formulário de input do simulador
 crispy-bootstrap5>=2024.2  # Estilização rápida do formulário usando Bootstrap 5
-
 # --- Processamento Assíncrono (Simulações Complexas) ---
 celery>=5.3.6
 redis>=5.0.1
-
 # --- Produção e Servidor ---
 gunicorn>=21.2.0
 whitenoise>=6.6.0
