@@ -10,9 +10,14 @@
         <p class="lead mb-4 text-muted">
             O projeto <strong>NEXUS</strong> foi criado para educar empresas sobre a importância de coletar dados operacionais por meio de Sensores IoT. Deixe o achismo de lado e comece a tomar decisões baseadas em informações reais para reduzir custos e maximizar a eficiência da sua produção.
         </p>
-        <a href="{% url 'resultado_simulacao' %}" class="btn btn-primary btn-lg px-5 py-3 shadow">
-            📈 Testar Simulador de ROI
-        </a>
+        <div class="d-flex gap-3 justify-content-lg-start justify-content-center">
+            <a href="{% url 'resultado_simulacao' %}" class="btn btn-primary btn-lg px-4 py-3 shadow">
+                📈 Testar Simulador
+            </a>
+            <a href="{% url 'contato' %}" class="btn btn-outline-info btn-lg px-4 py-3 shadow">
+                ✉️ Falar com a Equipe
+            </a>
+        </div>
     </div>
     <div class="col-lg-5 text-center d-none d-lg-block">
         <!-- Um ícone gigante ou ilustração (usando emoji para simplificar, mas você pode trocar por uma imagem) -->
@@ -65,10 +70,10 @@
         <p class="text-muted">Os desenvolvedores por trás deste projeto de educação tecnológica.</p>
     </div>
 
-    <!-- === LINHA 1 (4 Integrantes) === -->
+   
     
     <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-        <!-- Substitua o src pelo caminho da sua foto (veja o passo 2 abaixo) -->
+
         <img src="https://via.placeholder.com/150/1F2833/66FCF1?text=Foto+1" alt="Integrante 1" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
         <h5 class="fw-bold mb-1">Nome Integrante 1</h5>
         <p class="text-muted small">Função / Cargo</p>
@@ -92,7 +97,6 @@
         <p class="text-muted small">Função / Cargo</p>
     </div>
 
-    <!-- === LINHA 2 (Mais 4 Integrantes) === -->
 
     <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
         <img src="https://via.placeholder.com/150/1F2833/66FCF1?text=Foto+5" alt="Integrante 5" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
