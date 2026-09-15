@@ -14,12 +14,12 @@ def calcular_simulacao(request):
 
     dias_simulados = 30
     np.random.seed(42) 
-    media_horas_perdidas_dia = num_maquinas * 0.05 
+    media_horas_perdidas_dia = num_maquinas * 0.04 
     
     horas_paradas_sem_iot = np.random.normal(loc=media_horas_perdidas_dia, scale=media_horas_perdidas_dia * 0.3, size=dias_simulados)
     horas_paradas_sem_iot = np.clip(horas_paradas_sem_iot, media_horas_perdidas_dia * 0.2, None)
     custo_diario_sem_iot = horas_paradas_sem_iot * custo_hora_parada
-    reducao_tempo_parada = 0.25 
+    reducao_tempo_parada = 0.15 
     
     horas_paradas_com_iot = horas_paradas_sem_iot * (1 - reducao_tempo_parada)
     ruido_iot = np.random.normal(loc=0, scale=media_horas_perdidas_dia * 0.05, size=dias_simulados)
