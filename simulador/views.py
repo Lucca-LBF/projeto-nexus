@@ -8,9 +8,9 @@ def calcular_simulacao(request):
         custo_hora_parada = float(request.POST.get('custo_hora_parada', 85))
         custo_sensor_iot = float(request.POST.get('custo_sensor_iot', 40))
     else:
-        num_maquinas = 100
-        custo_hora_parada = 5000.0
-        custo_sensor_iot = 300.0
+        num_maquinas = 50
+        custo_hora_parada = 1200.0
+        custo_sensor_iot = 180.0
 
     dias_simulados = 30
     np.random.seed(42) 
