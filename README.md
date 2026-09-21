@@ -11,6 +11,11 @@ Relatório da analise de competidores:
 
 ![foto da sprint2](Sprint02_FDS.jpg)
 
+## Videos
+
+* Video 1 (Mostrando o Site): https://www.youtube.com/watch?v=VvhxWPgESnw
+* Video 2 (Funcionamento do Codigo): https://www.youtube.com/watch?v=V-c6cvEm9U4
+
 ## Views do Sistema
 Exibe o formulário de contato (contato.html) e renderiza a pagina inical (home.html)
 * Se receber um formulário via POST, salva os campos (nome, email, assunto, mensagem) no banco de dados (MensagemContato)
