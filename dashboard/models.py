@@ -1,12 +1,17 @@
 from django.db import models
 
 
-class EconomiaIoT(models.Model):
-    empresa = models.CharField(max_length=100)
+class SensorData(models.Model):
+    maquina = models.CharField(max_length=100)
+    temperatura = models.FloatField()
+    energia = models.FloatField()
+    producao = models.IntegerField()
+    status = models.CharField(max_length=20)
 
-    energia_sem_iot = models.FloatField()
-    energia_com_iot = models.FloatField()
+    data_hora = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.maquina
     manutencao_sem_iot = models.FloatField()
     manutencao_com_iot = models.FloatField()
 
