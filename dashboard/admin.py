@@ -4,11 +4,16 @@ from .models import SensorData
 
 @admin.register(SensorData)
 class SensorDataAdmin(admin.ModelAdmin):
-     list_display = (
+    list_display = (
         "maquina",
         "temperatura",
         "energia",
         "producao",
         "status",
+        "data_hora",
+    )
+    list_filter = (
+        "status",
+        "maquina",
         "data_hora",
     )
