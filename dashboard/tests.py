@@ -14,3 +14,8 @@ class SensorDataModelTest(TestCase):
             producao=500,
             status="Normal",
         )
+        self.assertEqual(dado.maquina, "Máquina 01")
+        self.assertEqual(dado.temperatura, 75.5)
+        self.assertEqual(dado.energia, 100.0)
+        self.assertEqual(dado.producao, 500)
+        self.assertEqual(dado.status, "Normal")
