@@ -17,3 +17,7 @@ class SensorDataAdmin(admin.ModelAdmin):
         "maquina",
         "data_hora",
     )
+    search_fields = (
+        "maquina",
+        "status",
+    )
