@@ -88,6 +88,7 @@ Abaixo estão apresentados o funcionamento, os pontos fortes e os pontos fracos 
 | **Realidade Aumentada (AR) Integrada** | ❌ | ❌ | ❌ | ❌ | ✅ |
 | **Painéis de Visualização Prontos (Dashboard)** | ✅ | ✅ | ❌ | ✅ | ✅ |
 | **Escalabilidade Enterprise Global** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Preview de simulação de corte de gastos acessível** | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 ----
 
