@@ -19,3 +19,13 @@ class SensorDataModelTest(TestCase):
         self.assertEqual(dado.energia, 100.0)
         self.assertEqual(dado.producao, 500)
         self.assertEqual(dado.status, "Normal")
+class DashboardTest(TestCase):
+
+    def test_dashboard_carrega(self):
+        SensorData.objects.create(
+            maquina="Máquina 01",
+            temperatura=75.0,
+            energia=100.0,
+            producao=500,
+            status="Normal",
+        )
