@@ -21,3 +21,6 @@ class SensorDataAdmin(admin.ModelAdmin):
         "maquina",
         "status",
     )
+    ordering = (
+        "-data_hora",
+    )
