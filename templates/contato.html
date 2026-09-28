@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mb-5">
+    <div class="col-md-8">
+        <h2 class="fw-bold mb-4 border-bottom pb-2" style="border-color: var(--nexus-border) !important;">
+            Fale com a <span class="text-success">Equipe NEXUS</span>
+        </h2>
+        
+        <p class="text-muted mb-4">Dúvidas sobre IoT? Críticas construtivas? Ideias para o projeto? Envie uma mensagem e ela será armazenada em nosso banco de dados seguro.</p>
+
+        {% if sucesso %}
+        <div class="alert alert-success bg-dark text-success border-success" role="alert">
+            ✅ Sua mensagem foi salva em nosso banco de dados com sucesso!
+        </div>
+        {% endif %}
+
+        <div class="card shadow-sm border-0 p-4">
+            <form method="POST" action="{% url 'contato' %}">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Seu Nome</label>
+                        <input type="text" class="form-control" name="nome" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Seu E-mail</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Assunto</label>
+                    <select class="form-control" name="assunto" required>
+                        <option value="Dúvida sobre IoT">Dúvida sobre IoT</option>
+                        <option value="Feedback do Simulador">Feedback do Simulador</option>
+                        <option value="Contato Comercial">Contato Comercial</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Mensagem</label>
+                    <textarea class="form-control" name="mensagem" rows="5" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 fw-bold py-2">
+                    Enviar Mensagem para o Banco de Dados
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
