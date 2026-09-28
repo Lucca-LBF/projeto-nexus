@@ -29,3 +29,8 @@ class DashboardTest(TestCase):
             producao=500,
             status="Normal",
         )
+        response = self.client.get(
+            reverse("dashboard")
+        )
+
+        self.assertEqual(response.status_code, 200)
