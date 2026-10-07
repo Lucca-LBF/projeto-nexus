@@ -1,3 +1,26 @@
 from django.contrib import admin
+from .models import SensorData
 
-# Register your models here.
+
+@admin.register(SensorData)
+class SensorDataAdmin(admin.ModelAdmin):
+    list_display = (
+        "maquina",
+        "temperatura",
+        "energia",
+        "producao",
+        "status",
+        "data_hora",
+    )
+    list_filter = (
+        "status",
+        "maquina",
+        "data_hora",
+    )
+    search_fields = (
+        "maquina",
+        "status",
+    )
+    ordering = (
+        "-data_hora",
+    )

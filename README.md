@@ -11,6 +11,8 @@ Relatório da analise de competidores:
 
 ![foto da sprint2](Sprint02_FDS.jpg)
 
+<<<<<<< HEAD
+=======
 ## Videos
 
 * Video 1 (Mostrando o Site): https://www.youtube.com/watch?v=VvhxWPgESnw
@@ -24,6 +26,7 @@ Exibe o formulário de contato (contato.html) e renderiza a pagina inical (home.
 Define o formulário do Django utilizado para coletar os dados operacionais da empresa no simulador de ROI de IoT.
 * O Formulário coleta três variáveis principais necessárias para realizar o cálculo da economia estimada, sendo elas (num_maquinas): Quantidade total de maquinas que serão monitoradas, (custo_hora_parada): Prejuízo estimado por cada hora em que uma máquina fica inativa, (custo_sensor_iot): Custo de aquisição/instalação de um sensor IoT por máquina.
 
+>>>>>>> 59fd0ce76d05fd96c12099726633c58facbab881
 ## Dashboard de Custos
 Busca os dados no banco de dados (EconomiaIoT) e gera gráficos comparativos usando a biblioteca Plotly.
 * Ela funciona somando os custos operacionais (Energia, Manutenção e Paradas) nos cenários Com IoT e Sem IoT, e apartir disso calcula o valor economizado e a porcentagem total de redução.
