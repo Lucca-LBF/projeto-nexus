@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <header>
+        <h1>Dashboard de Economia Operacional (IoT)</h1>
+        <p>Análise comparativa de custos e economia gerada pelos sensores IoT</p>
+    </header>
+
+
+    <section>
+        <h2>Resumo Geral</h2>
+        <p><strong>Custo Sem IoT:</strong> R$ {{ total_sem_iot }}</p>
+        <p><strong>Custo Com IoT:</strong> R$ {{ total_com_iot }}</p>
+        <p><strong>Economia Total:</strong> R$ {{ economia }} ({{ percentual_economia }}%)</p>
+    </section>
+
+
+    <section>
+        <h2>Economia por Categoria</h2>
+        <ul>
+            <li><strong>Energia:</strong> R$ {{ economia_energia }}</li>
+            <li><strong>Manutenção:</strong> R$ {{ economia_manutencao }}</li>
+            <li><strong>Paradas:</strong> R$ {{ economia_paradas }}</li>
+        </ul>
+    </section>
+
+
+    <section>
+        <h2>Gráficos</h2>
+        
+        <div>
+            {{ grafico_custos|safe }}
+        </div>
+
+        <div>
+            {{ grafico_economia|safe }}
+        </div>
+    </section>
+{% endblock %}

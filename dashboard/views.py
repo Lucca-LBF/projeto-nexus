@@ -142,8 +142,4 @@ def dashboard(request):
         "grafico_economia": grafico_economia_html,
     }
 
-    return render(
-        request,
-        "dashboard/index.html",
-        contexto
-    )
+    return render(request, "dashboard/index.html", contexto)
