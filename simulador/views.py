@@ -77,6 +77,17 @@ def calcular_simulacao(request):
     investimento_periodo = (num_maquinas * custo_sensor_iot) * meses_simulados
     
     resultado_liquido = economia_bruta - investimento_periodo
+
+    request.session[CHAVE_SESSAO].update({
+        'total_sem_iot': float(total_operacional_antigo),
+        'total_com_iot': float(total_operacional_novo),
+        'economia_bruta': float(economia_bruta),
+        'investimento_periodo': float(investimento_periodo),
+        'resultado_liquido': float(resultado_liquido),
+        'dados_grafico_dias': df['Dia'].tolist(),
+        'dados_grafico_sem_iot': df['Custo_Sem_IoT'].tolist(),
+        'dados_grafico_com_iot': df['Custo_Com_IoT'].tolist(),
+    })
     
     if investimento_periodo > 0:
         roi = (resultado_liquido / investimento_periodo) * 100
