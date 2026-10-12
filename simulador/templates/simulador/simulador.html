@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .form-select {
+        background-color: rgba(11, 12, 16, 0.7) !important;
+        border: 1px solid var(--nexus-border) !important;
+        color: var(--nexus-text) !important;
+    }
+    .form-select:focus {
+        border-color: var(--nexus-secondary) !important;
+        box-shadow: 0 0 8px rgba(102, 252, 241, 0.4) !important;
+    }
+    .form-select option {
+        background-color: #0b0c10;
+        color: #fff;
+    }
+</style>
+
+<div class="row justify-content-center my-5">
+    <div class="col-md-7 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0 text-info" style="font-family: 'Orbitron', sans-serif;">Simule a sua economia</h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">Informe os dados da sua operação para estimar o retorno de investir em sensores IoT.</p>
+
+                <form method="post" action="{% url 'resultado_simulacao' %}">
+                    {% csrf_token %}
+
+                    {% for campo in form %}
+                    <div class="mb-3">
+                        <label for="{{ campo.id_for_label }}" class="form-label">{{ campo.label }}</label>
+                        {{ campo }}
+                        {% if campo.help_text %}
+                        <div class="form-text text-muted">{{ campo.help_text }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <button type="submit" class="btn btn-primary w-100 mt-3 py-2">Calcular ROI</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

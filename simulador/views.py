@@ -1,6 +1,7 @@
 from django.shortcuts import render
 import pandas as pd
 import numpy as np
+from .forms import DadosEmpresaForm
 
 def calcular_simulacao(request):
     if request.method == 'POST':
@@ -93,5 +94,8 @@ def calcular_simulacao(request):
         'dados_grafico_sem_iot': df['Custo_Sem_IoT'].tolist(),
         'dados_grafico_com_iot': df['Custo_Com_IoT'].tolist(),
     }
-
     return render(request, 'simulador/resultado.html', contexto)
+
+
+def formulario_simulador(request):
+    return render(request, 'simulador/simulador.html', {'form': DadosEmpresaForm()})
