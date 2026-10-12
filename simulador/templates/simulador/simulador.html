@@ -26,6 +26,10 @@
             <div class="card-body">
                 <p class="text-muted mb-4">Informe os dados da sua operação para estimar o retorno de investir em sensores IoT.</p>
 
+                {% if tem_memoria %}
+                <p class="small text-info mb-3">Mostrando os dados da sua última simulação.</p>
+                {% endif %}
+
                 <form method="post" action="{% url 'resultado_simulacao' %}">
                     {% csrf_token %}
 
@@ -40,6 +44,9 @@
                     {% endfor %}
 
                     <button type="submit" class="btn btn-primary w-100 mt-3 py-2">Calcular ROI</button>
+                    {% if tem_memoria %}
+                    <a href="{% url 'formulario_simulador' %}?nova=1" class="btn btn-outline-info w-100 mt-2">Começar nova simulação</a>
+                    {% endif %}
                 </form>
             </div>
         </div>

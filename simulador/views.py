@@ -1,7 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 import pandas as pd
 import numpy as np
 from .forms import DadosEmpresaForm
+
+# chave da sessão onde ficam os dados da última simulação
+CHAVE_SESSAO = 'simulacao'
+
 
 def calcular_simulacao(request):
     if request.method == 'POST':
@@ -10,12 +14,21 @@ def calcular_simulacao(request):
         custo_sensor_iot = float(request.POST.get('custo_sensor_iot', 300))
         dias_simulados = int(request.POST.get('tempo_amostra', 30))
         tipo_industria = request.POST.get('tipo_industria', 'padrao')
+
+        request.session[CHAVE_SESSAO] = {
+            'num_maquinas': num_maquinas,
+            'custo_hora_parada': custo_hora_parada,
+            'custo_sensor_iot': custo_sensor_iot,
+            'tempo_amostra': dias_simulados,
+            'tipo_industria': tipo_industria,
+        }
     else:
-        num_maquinas = 40
-        custo_hora_parada = 1500.0
-        custo_sensor_iot = 35.0
-        dias_simulados = 30
-        tipo_industria = 'padrao'
+        salvo = request.session.get(CHAVE_SESSAO, {})
+        num_maquinas = salvo.get('num_maquinas', 40)
+        custo_hora_parada = salvo.get('custo_hora_parada', 1500.0)
+        custo_sensor_iot = salvo.get('custo_sensor_iot', 35.0)
+        dias_simulados = salvo.get('tempo_amostra', 30)
+        tipo_industria = salvo.get('tipo_industria', 'padrao')
 
     np.random.seed(42)
 
@@ -98,4 +111,11 @@ def calcular_simulacao(request):
 
 
 def formulario_simulador(request):
-    return render(request, 'simulador/simulador.html', {'form': DadosEmpresaForm()})
+    # ?nova=1 apaga a simulação guardada e volta ao formulário padrão
+    if request.GET.get('nova'):
+        request.session.pop(CHAVE_SESSAO, None)
+        return redirect('formulario_simulador')
+
+    salvo = request.session.get(CHAVE_SESSAO)
+    form = DadosEmpresaForm(initial=salvo) if salvo else DadosEmpresaForm()
+    return render(request, 'simulador/simulador.html', {'form': form, 'tem_memoria': bool(salvo)})
