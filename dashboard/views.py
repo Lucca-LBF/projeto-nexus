@@ -8,20 +8,6 @@ CHAVE_SESSAO = 'simulacao'
 def dashboard(request):
     simulacao = request.session.get(CHAVE_SESSAO)
 
-    if not simulacao or 'total_sem_iot' not in simulacao:
-        contexto = {
-        'total_sem_iot': 0,
-        'total_com_iot': 0,
-        'economia': 0,
-        'percentual_economia': 0,
-        'economia_energia': 0,
-        'economia_manutencao': 0,
-        'economia_paradas': 0,
-        'grafico_linhas': '',
-        'nota_explicativa': ('Realize uma simulação para visualizar os resultados.'),
-        }
-        return render(request, 'dashboard/index.html', contexto)
-
     tempo_dias = simulacao.get('tempo_amostra', 30)
 
     total_sem_iot = simulacao.get('total_sem_iot', 0)
