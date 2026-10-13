@@ -73,6 +73,15 @@ def calcular_simulacao(request):
     total_operacional_antigo = df['Custo_Sem_IoT'].sum()
     total_operacional_novo = df['Custo_Com_IoT'].sum()
     economia_bruta = total_operacional_antigo - total_operacional_novo
+
+    economia_paradas = economia_bruta
+    # Exemplo (20%, 15%)
+    custo_manutencao_periodo = total_operacional_antigo * 0.20
+    custo_energia_periodo = total_operacional_antigo * 0.15
+    # Economia estimada proporcional à redução das falhas
+    economia_manutencao = custo_manutencao_periodo * reducao_iot
+    economia_energia = custo_energia_periodo * reducao_iot
+    
     meses_simulados = dias_simulados / 30
     investimento_periodo = (num_maquinas * custo_sensor_iot) * meses_simulados
     
@@ -82,6 +91,9 @@ def calcular_simulacao(request):
         'total_sem_iot': float(total_operacional_antigo),
         'total_com_iot': float(total_operacional_novo),
         'economia_bruta': float(economia_bruta),
+        'economia_paradas': float(economia_paradas),
+        'economia_manutencao': float(economia_manutencao),
+        'economia_energia': float(economia_energia),
         'investimento_periodo': float(investimento_periodo),
         'resultado_liquido': float(resultado_liquido),
         'dados_grafico_dias': df['Dia'].tolist(),

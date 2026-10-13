@@ -13,6 +13,9 @@ def dashboard(request):
     total_sem_iot = simulacao.get('total_sem_iot', 0)
     total_com_iot = simulacao.get('total_com_iot', 0)
     economia = simulacao.get('resultado_liquido', 0)
+    economia_paradas = simulacao.get('economia_paradas', 0)
+    economia_manutencao = simulacao.get('economia_manutencao', 0)
+    economia_energia = simulacao.get('economia_energia', 0)
 
     percentual_economia = (
         economia / total_sem_iot * 100
@@ -85,6 +88,9 @@ def dashboard(request):
         'total_sem_iot': round(total_sem_iot, 2),
         'total_com_iot': round(total_com_iot, 2),
         'economia': round(economia, 2),
+        'economia_paradas': round(economia_paradas, 2),
+        'economia_manutencao': round(economia_manutencao, 2),
+        'economia_energia': round(economia_energia, 2),
         'percentual_economia': round(percentual_economia, 2),
         'grafico_linhas': grafico_html,
         'nota_explicativa': ('O gráfico apresenta os custos operacionais ao longo do período simulado.'),

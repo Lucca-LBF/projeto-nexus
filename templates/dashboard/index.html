@@ -33,23 +33,18 @@
                 <div class="card h-100 border-0 shadow-sm">
                     <div class="card-body p-4">
 
-                        <div class="d-flex justify-content-between
-                                    align-items-start">
+                        <p class="text-muted mb-2">
+                            Custo sem IoT
+                        </p>
 
-                            <div>
-                                <p class="text-muted mb-2">
-                                    Custo sem IoT
-                                </p>
+                        <h3 class="text-danger fw-bold mb-2">
+                            R$ {{ total_sem_iot|floatformat:2 }}
+                        </h3>
 
-                                <h3 class="text-danger fw-bold mb-2">
-                                    R$ {{ total_sem_iot|floatformat:2 }}
-                                </h3>
+                        <small class="text-muted">
+                            Manutenção corretiva
+                        </small>
 
-                                <small class="text-muted">
-                                    Manutenção corretiva
-                                </small>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -59,23 +54,18 @@
                 <div class="card h-100 border-0 shadow-sm">
                     <div class="card-body p-4">
 
-                        <div class="d-flex justify-content-between
-                                    align-items-start">
+                        <p class="text-muted mb-2">
+                            Custo com IoT
+                        </p>
 
-                            <div>
-                                <p class="text-muted mb-2">
-                                    Custo com IoT
-                                </p>
+                        <h3 class="text-success fw-bold mb-2">
+                            R$ {{ total_com_iot|floatformat:2 }}
+                        </h3>
 
-                                <h3 class="text-success fw-bold mb-2">
-                                    R$ {{ total_com_iot|floatformat:2 }}
-                                </h3>
+                        <small class="text-muted">
+                            Manutenção preditiva
+                        </small>
 
-                                <small class="text-muted">
-                                    Manutenção preditiva
-                                </small>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -85,28 +75,22 @@
                 <div class="card h-100 border-0 shadow-sm">
                     <div class="card-body p-4">
 
-                        <div class="d-flex justify-content-between
-                                    align-items-start">
+                        <p class="text-muted mb-2">
+                            Economia total
+                        </p>
 
-                            <div>
-                                <p class="text-muted mb-2">
-                                    Economia total
-                                </p>
+                        <h3 class="text-primary fw-bold mb-2">
+                            R$ {{ economia|floatformat:2 }}
+                        </h3>
 
-                                <h3 class="text-primary fw-bold mb-2">
-                                    R$ {{ economia|floatformat:2 }}
-                                </h3>
+                        <span class="badge bg-primary-subtle text-primary">
+                            {{ percentual_economia|floatformat:2 }}%
+                        </span>
 
-                                <span class="badge bg-primary-subtle
-                                             text-primary">
-                                    {{ percentual_economia|floatformat:2 }}%
-                                </span>
+                        <small class="text-muted d-block mt-2">
+                            Em relação ao custo sem IoT
+                        </small>
 
-                                <small class="text-muted d-block mt-2">
-                                    Em relação ao custo sem IoT
-                                </small>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -129,52 +113,60 @@
 
             <div class="row g-3">
 
+                <!-- Economia com energia -->
                 <div class="col-12 col-md-4">
-                    <div class="category-card p-3 rounded-3">
+                    <div class="category-card p-3 rounded-3 h-100">
+
                         <span class="text-muted small">
                             Energia
                         </span>
 
                         <h4 class="fw-bold mt-2 mb-0">
-                            R$ {{ economia_energia|default_if_none:0|floatformat:2 }}
+                            R$ {{ economia_energia|default:0|floatformat:2 }}
                         </h4>
 
                         <small class="text-muted">
                             Custos de consumo energético
                         </small>
+
                     </div>
                 </div>
 
+                <!-- Economia com manutenção -->
                 <div class="col-12 col-md-4">
-                    <div class="category-card p-3 rounded-3">
+                    <div class="category-card p-3 rounded-3 h-100">
+
                         <span class="text-muted small">
                             Manutenção
                         </span>
 
                         <h4 class="fw-bold mt-2 mb-0">
-                            R$ {{ economia_manutencao|default_if_none:0|floatformat:2 }}
+                            R$ {{ economia_manutencao|default:0|floatformat:2 }}
                         </h4>
 
                         <small class="text-muted">
                             Gastos com reparos e equipamentos
                         </small>
+
                     </div>
                 </div>
 
+                <!-- Economia com paradas -->
                 <div class="col-12 col-md-4">
-                    <div class="category-card p-3 rounded-3">
+                    <div class="category-card p-3 rounded-3 h-100">
+
                         <span class="text-muted small">
                             Paradas de máquinas
                         </span>
 
                         <h4 class="fw-bold mt-2 mb-0">
-                            R$ {{ economia_paradas|default_if_none:0|floatformat:2 }}
+                            R$ {{ economia_paradas|default:0|floatformat:2 }}
                         </h4>
 
                         <small class="text-muted">
-                            Custos associados à interrupção
-                            da produção
+                            Custos associados à interrupção da produção
                         </small>
+
                     </div>
                 </div>
 
@@ -206,8 +198,6 @@
             {% else %}
 
                 <div class="text-center py-5">
-                    <div class="display-5 mb-3"
-                         aria-hidden="true"></div>
 
                     <h3 class="h5 fw-bold">
                         Nenhuma simulação disponível
@@ -216,6 +206,7 @@
                     <p class="text-muted mb-0">
                         Realize uma simulação para visualizar a projeção dos custos operacionais.
                     </p>
+
                 </div>
 
             {% endif %}
@@ -228,5 +219,8 @@
             </p>
 
         </div>
+    </section>
+
+</div>
 
 {% endblock %}
