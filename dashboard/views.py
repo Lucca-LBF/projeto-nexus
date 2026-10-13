@@ -26,63 +26,88 @@ def dashboard(request):
     y_sem_iot = simulacao.get('dados_grafico_sem_iot', [])
     y_com_iot = simulacao.get('dados_grafico_com_iot', [])
 
-   
-    if tempo_dias <= 30:
-        eixo_x = [f'Dia {d}' for d in dados_dias]
-        unidade = 'Diária'
-    else:
-        num_meses = (tempo_dias + 29) // 30
-        eixo_x = [f'Mês {i}' for i in range(1, num_meses + 1)]
-        unidade = 'Mensal'
 
-        if y_sem_iot and y_com_iot:
+    grafico_html = None
+
+    if dados_dias and y_sem_iot and y_com_iot:
+
+        # Até 30 dias: exibe os valores diários
+        if tempo_dias <= 30:
+            eixo_x = [f'Dia {d}' for d in dados_dias]
+            unidade = 'Diária'
+
+        # Acima de 30 dias: agrupa os valores por mês
+        else:
+            num_meses = (tempo_dias + 29) // 30
+
+            eixo_x = [
+                f'Mês {i}'
+                for i in range(1, num_meses + 1)
+            ]
+
             y_sem_iot = [
                 sum(y_sem_iot[i * 30:(i + 1) * 30])
                 for i in range(num_meses)
             ]
+
             y_com_iot = [
                 sum(y_com_iot[i * 30:(i + 1) * 30])
                 for i in range(num_meses)
             ]
 
-    grafico = go.Figure()
+            unidade = 'Mensal'
 
-    grafico.add_trace(go.Scatter(
-        x=eixo_x,
-        y=y_sem_iot,
-        mode='lines+markers',
-        name='Operação Sem IoT (Corretiva)',
-        line=dict(color='#dc2626', width=3),
-    ))
+        grafico = go.Figure()
 
-    grafico.add_trace(go.Scatter(
-        x=eixo_x,
-        y=y_com_iot,
-        mode='lines+markers',
-        name='Operação Com IoT (Preditiva)',
-        line=dict(color='#16a34a', width=3),
-    ))
+        grafico.add_trace(go.Scatter(
+            x=eixo_x,
+            y=y_sem_iot,
+            mode='lines+markers',
+            name='Sem IoT (Corretiva)',
+            line=dict(color='#dc2626', width=3),
+            marker=dict(size=6),
+        ))
 
-    grafico.update_layout(
-        title=f'Projeção {unidade} dos Custos de Falha',
-        xaxis_title='Período de Análise',
-        yaxis_title='Custo de Falhas (R$)',
-        template='plotly_white',
-        hovermode='x unified',
-        legend=dict(
-            orientation='h',
-            yanchor='bottom',
-            y=1.02,
-            xanchor='right',
-            x=1,
-        ),
-    )
+        grafico.add_trace(go.Scatter(
+            x=eixo_x,
+            y=y_com_iot,
+            mode='lines+markers',
+            name='Com IoT (Preditiva)',
+            line=dict(color='#16a34a', width=3),
+            marker=dict(size=6),
+        ))
 
-    grafico_html = pio.to_html(
-        grafico,
-        full_html=False,
-        config={'responsive': True},
-    )
+        grafico.update_layout(
+            title=f'Projeção {unidade} dos Custos de Falha',
+            xaxis_title='Período de Análise',
+            yaxis_title='Custo de Falhas (R$)',
+            template='plotly_white',
+            hovermode='x unified',
+            autosize=True,
+            legend=dict(
+                orientation='h',
+                yanchor='bottom',
+                y=1.02,
+                xanchor='right',
+                x=1,
+            ),
+            margin=dict(l=60, r=20, t=80, b=60),
+        )
+
+        grafico.update_yaxes(
+            tickprefix='R$ ',
+            tickformat=',.2f',
+            rangemode='tozero',
+        )
+
+        grafico_html = pio.to_html(
+            grafico,
+            full_html=False,
+            config={
+                'responsive': True,
+                'displayModeBar': True,
+            },
+        )
 
     contexto = {
         'total_sem_iot': round(total_sem_iot, 2),
