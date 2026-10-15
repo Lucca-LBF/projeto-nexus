@@ -11,7 +11,7 @@ Este documento contém as especificações ágeis e os critérios de aceite para
 > **Eu quero** preencher um formulário com as características específicas da minha fábrica,
 > **Para que** a simulação reflita a realidade financeira exata do meu negócio, e não um cenário genérico.
 
-** Critérios de Aceite:**
+**Critérios de Aceite:**
 * O formulário deve conter campos para: Tipo de Fábrica, Número de Máquinas, Custo da Hora Parada e Custo do Sensor.
 * O formulário deve ter um campo de seleção (dropdown) para o "Período de Análise" (ex: 30 dias, 3 meses, 6 meses, 1 ano).
 * O sistema não deve permitir a inserção de valores negativos (validação de dados).
@@ -24,7 +24,7 @@ Este documento contém as especificações ágeis e os critérios de aceite para
 > **Eu quero** visualizar o cálculo automático de Retorno sobre Investimento e o impacto financeiro líquido com base nos dados que inseri,
 > **Para que** eu possa decidir com segurança matemática se a compra dos sensores IoT vale a pena para a minha empresa.
 
-** Critérios de Aceite:**
+**Critérios de Aceite:**
 * O sistema deve calcular a "Economia Bruta" comparando o tempo de parada sem IoT vs. com IoT.
 * O sistema deve calcular o "Investimento Total" multiplicando o custo do sensor pelo número de máquinas e pelo período de análise.
 * O sistema deve exibir claramente uma tag de "LUCRO LÍQUIDO" ou "PREJUÍZO".
@@ -37,7 +37,7 @@ Este documento contém as especificações ágeis e os critérios de aceite para
 > **Eu quero** visualizar os dados da simulação projetados em um Dashboard interativo com gráficos de linhas,
 > **Para que** eu possa comparar visualmente a eficiência da fábrica com e sem a tecnologia, sem precisar analisar linhas de planilhas manuais.
 
-** Critérios de Aceite:**
+**Critérios de Aceite:**
 * O Dashboard deve renderizar um gráfico de linhas mostrando a projeção diária (ou mensal, dependendo do período escolhido) dos custos de falha.
 * O gráfico deve conter duas linhas distintas para fácil comparação: "Operação Sem IoT" (Corretiva) e "Operação Com IoT" (Preditiva).
 * O eixo X do gráfico deve se adaptar automaticamente ao período de análise selecionado no formulário (ex: ir de 1 a 30 dias, ou de 1 a 4 meses).
@@ -52,7 +52,7 @@ Este documento contém as especificações ágeis e os critérios de aceite para
 > **Eu quero** visualizar uma página inicial clara e objetiva que explique os problemas da manutenção reativa e os benefícios da IoT,
 > **Para que** eu compreenda o valor da plataforma NEXUS e sinta confiança antes de investir meu tempo testando o simulador.
 
-** Critérios de Aceite:**
+**Critérios de Aceite:**
 * A página inicial (Home) deve conter o texto de "Pitch" principal focando na dor do cliente.
 * A Home deve conter botões de *Call to Action* (Chamada para Ação) claros e visíveis, direcionando o usuário diretamente para o "Simulador" ou para o "Contato".
 * A barra de navegação superior (Header) deve ser omitida na Landing Page para evitar distrações, mas deve reaparecer automaticamente nas páginas internas (Simulador e Contato) para garantir a navegabilidade.
@@ -64,7 +64,7 @@ Este documento contém as especificações ágeis e os critérios de aceite para
 > **Eu quero** enviar uma mensagem com minhas dúvidas, críticas ou solicitações comerciais através de uma aba de Contato segura,
 > **Para que** a equipe NEXUS possa me retornar com um atendimento personalizado ou uma proposta técnica estruturada.
 
-** Critérios de Aceite:**
+**Critérios de Aceite:**
 * O formulário deve conter campos obrigatórios para: Nome, E-mail, Assunto e Mensagem.
 * O campo de "Assunto" deve ser um menu suspenso (dropdown) com categorias pré-definidas (ex: Dúvida sobre IoT, Contato Comercial, Feedback).
 * Após o envio, a página deve recarregar exibindo um alerta visual de sucesso (ex: barra verde) para confirmar ao usuário que a ação foi concluída.
