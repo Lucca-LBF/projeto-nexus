@@ -1,33 +1,40 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row">
-    
-<div class="card-body text-light">
-            <div class="mb-3 border-bottom border-secondary pb-2">
-                <small class="text-muted text-uppercase fw-bold">Setor Industrial</small>
-                <div class="fs-5 text-info">{{ nome_industria }}</div>
-            </div>
-            
-            <div class="mb-3 border-bottom border-secondary pb-2">
-                <small class="text-muted text-uppercase fw-bold">Período Projetado</small>
-                <div class="fs-5">{{ dias_simulados }} Dias</div>
-            </div>
+<div class="row g-4">
 
-            {% for rotulo, valor in resumo %}
-            <div class="{% if forloop.last %}mb-4{% else %}mb-3{% endif %} border-bottom border-secondary pb-2">
-                <small class="text-muted text-uppercase fw-bold">{{ rotulo }}</small>
-                <div class="fs-5">{{ valor }}</div>
+    <!-- Resumo da simulação -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Resumo da simulação</h5>
             </div>
-            {% endfor %}
-            
-            <a href="{% url 'formulario_simulador' %}?nova=1" class="btn btn-outline-info w-100 mt-3 fw-bold">
-                Nova Simulação
-            </a>
+            <div class="card-body">
+                <div class="resumo-item">
+                    <small>Setor Industrial</small>
+                    <div class="fs-5 fw-bold text-info">{{ nome_industria }}</div>
+                </div>
+
+                <div class="resumo-item">
+                    <small>Período Projetado</small>
+                    <div class="fs-5">{{ dias_simulados }} Dias</div>
+                </div>
+
+                {% for rotulo, valor in resumo %}
+                <div class="resumo-item">
+                    <small>{{ rotulo }}</small>
+                    <div class="fs-5">{{ valor }}</div>
+                </div>
+                {% endfor %}
+
+                <a href="{% url 'formulario_simulador' %}?nova=1" class="btn btn-outline-info w-100 mt-2 fw-bold">
+                    Nova Simulação
+                </a>
+            </div>
         </div>
+    </div>
 
-
-    <div class="col-md-8">
+    <div class="col-lg-8">
         
 
         <div class="row mb-4">
@@ -76,7 +83,7 @@
         y: custosSemIot,
         mode: 'lines+markers',
         name: 'Sem IoT (Corretiva)',
-        line: {color: '#ef4444', width: 2},
+        line: {color: '#D63A4A', width: 2},
         marker: {size: 5}
     };
 
@@ -85,24 +92,24 @@
         y: custosComIot,
         mode: 'lines+markers',
         name: 'Com IoT (Preditiva)',
-        line: {color: '#66FCF1', width: 3}, 
+        line: {color: '#81358D', width: 3},
         marker: {size: 5}
     };
 
     const layout = {
         paper_bgcolor: 'transparent',
         plot_bgcolor: 'transparent',
-        font: { color: '#C5C6C7', family: 'Segoe UI' },
+        font: { color: '#2F2E2E', family: 'Raleway, Segoe UI, sans-serif' },
         margin: { l: 50, r: 20, t: 10, b: 40 },
         legend: { orientation: 'h', y: -0.25, x: 0.1 },
         xaxis: { 
             title: 'Dias de Operação',
-            gridcolor: 'rgba(102, 252, 241, 0.08)' 
+            gridcolor: '#EFE4F3'
         },
         yaxis: { 
             title: 'Custo Diário (R$)', 
             rangemode: 'tozero',
-            gridcolor: 'rgba(102, 252, 241, 0.08)'
+            gridcolor: '#EFE4F3'
         }
     };
 

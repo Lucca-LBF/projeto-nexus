@@ -1,31 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<style>
-    .form-select {
-        background-color: rgba(11, 12, 16, 0.7) !important;
-        border: 1px solid var(--nexus-border) !important;
-        color: var(--nexus-text) !important;
-    }
-    .form-select:focus {
-        border-color: var(--nexus-secondary) !important;
-        box-shadow: 0 0 8px rgba(102, 252, 241, 0.4) !important;
-    }
-    .form-select option {
-        background-color: #0b0c10;
-        color: #fff;
-    }
-</style>
-
 <div class="row justify-content-center my-5">
     <div class="col-md-7 col-lg-6">
         <div class="card">
             <div class="card-header">
-                <h4 class="mb-0 text-info" style="font-family: 'Orbitron', sans-serif;">Simule a sua economia</h4>
+                <h4 class="mb-0">Simule a sua economia</h4>
             </div>
             <div class="card-body">
                 <p class="text-muted mb-3" id="intro-segmento">{{ form.intro }}</p>
-                <p class="small border border-secondary rounded p-2 mb-4"><strong class="text-info">Como a Bzu ajuda:</strong> <span id="bzu-monitorar">{{ form.monitorar }}</span></p>
+                <p class="bzu-ajuda"><strong class="text-info">Como a Bzu ajuda:</strong> <span id="bzu-monitorar">{{ form.monitorar }}</span></p>
 
                 {% if tem_memoria %}
                 <p class="small text-info mb-3">Mostrando os dados da sua última simulação.</p>
@@ -42,8 +26,8 @@
                         <div class="form-text text-muted" data-ajuda="{{ campo.name }}">{{ campo.help_text }}</div>
                         {% endif %}
                         {% if campo.name == "perda_mensal" %}
-                        <button type="button" class="btn btn-link btn-sm p-0 mt-1" id="abrir-estimativa" aria-expanded="false" aria-controls="painel-estimativa">Não sei o valor, quero estimar</button>
-                        <div id="painel-estimativa" class="border border-secondary rounded p-3 mt-2" hidden>
+                        <button type="button" class="btn btn-link btn-sm p-0 mt-1 text-info" id="abrir-estimativa" aria-expanded="false" aria-controls="painel-estimativa">Não sei o valor, quero estimar</button>
+                        <div id="painel-estimativa" class="painel-estimativa" hidden>
                             <label for="estimativa-base" class="form-label small" id="estimativa-pergunta"></label>
                             <input type="number" min="0" step="0.01" id="estimativa-base" class="form-control mb-3" placeholder="Ex: 50000.00">
                             <label for="estimativa-pct" class="form-label small">Quanto disso você acha que se perde hoje?</label>
