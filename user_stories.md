@@ -4,7 +4,8 @@ Este documento contém as especificações ágeis e os critérios de aceite para
 
 ---
 
-##  Épico 1: Simulação e Visualização de Dados
+##  Simulação e Visualização de Dados
+![foto da historias do usuario 1](Historias1.png)
 
 ### História de Usuário 1: Coleta de Dados do Cenário Operacional
 > **Como** um Gestor de Operações,
@@ -45,7 +46,8 @@ Este documento contém as especificações ágeis e os critérios de aceite para
 
 ---
 
-##  Épico 2: Conversão, Atendimento e Melhoria Contínua
+##  Conversão, Atendimento e Melhoria Contínua
+![foto da historias do usuario 1](Historias1.png)
 
 ### História de Usuário 4: Apresentação da Proposta de Valor e Navegação
 > **Como** um Gestor de Indústria visitante,
