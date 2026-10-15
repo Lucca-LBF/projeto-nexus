@@ -11,40 +11,6 @@ Relatório da analise de competidores:
 
 ![foto da sprint2](Sprint02_FDS.jpg)
 
-## Historias do Usuario
-
-![foto da historias do usuario 1](Historias1.png)
-
-**Título: Coleta de Dados do Cenário Operacional**
-
-* Como um Gestor de Operações. Eu quero preencher um formulário com as características específicas da minha fábrica. Para que a simulação reflita a realidade financeira exata do meu negócio, e não um cenário genérico.
-
-* O formulário deve conter campos para: Tipo de Fábrica, Número de Máquinas, Custo da Hora Parada e Custo do Sensor.
-* O formulário deve ter um campo de seleção (dropdown) para o "Período de Análise" (ex: 30 dias, 3 meses, 6 meses, 1 ano).
-* O sistema não deve permitir a inserção de valores negativos (validação de dados).
-* Ao clicar em "Gerar Simulação", os dados devem ser enviados para o motor de cálculo do simulador.
-
-**Título: Cálculo de ROI e Viabilidade de IoT**
-
-* Como um Diretor Industrial, Eu quero visualizar o cálculo automático de Retorno sobre Investimento  e o impacto financeiro líquido com base nos dados que inseri, Para que eu possa decidir com segurança matemática se a compra dos sensores IoT vale a pena para a minha empresa.
-
-* O sistema deve calcular a "Economia Bruta" comparando o tempo de parada sem IoT vs. com IoT.
-* O sistema deve calcular o "Investimento Total" multiplicando o custo do sensor pelo número de máquinas e pelo período de análise.
-* O sistema deve exibir claramente uma tag de "LUCRO LÍQUIDO" ou "PREJUÍZO".
-* O percentual de ROI deve ser exibido em destaque na tela de resultados.
-
-**Título: Dashboard Visual de Projeção de Falhas**
-
-* Como um Gestor de Operações, Eu quero visualizar os dados da simulação projetados em um Dashboard interativo com gráficos de linhas, Para que eu possa comparar visualmente a eficiência da fábrica com e sem a tecnologia, sem precisar analisar linhas de planilhas manuais.
-* O Dashboard deve renderizar um gráfico de linhas mostrando a projeção diária (ou mensal, dependendo do período escolhido) dos custos de falha.
-* O gráfico deve conter duas linhas distintas para fácil comparação: "Operação Sem IoT" (Corretiva) e "Operação Com IoT" (Preditiva).
-* O eixo X do gráfico deve se adaptar automaticamente ao período de análise selecionado no formulário (ex: ir de 1 a 30 dias, ou de 1 a 4 meses).
-* O Dashboard deve incluir uma nota explicativa indicando que o gráfico reflete a eficiência operacional, enquanto os painéis superiores refletem o resultado financeiro.
-
-![foto da historias do usuario 2](Historias2.png)
-
-<<<<<<< HEAD
-=======
 ## Videos
 
 * Video 1 (Mostrando o Site): https://www.youtube.com/watch?v=VvhxWPgESnw
