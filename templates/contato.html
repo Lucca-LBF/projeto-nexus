@@ -1,46 +1,7 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contato | NEXUS IoT</title>
-    
-    <!-- Bootstrap CSS (Necessário para o grid e espaçamentos que o seu CSS usa) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Fontes do Google -->
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Link para o seu arquivo CSS -->
-    <link rel="stylesheet" href="style.css">
-</head>
-<body class="js"> <!-- A classe 'js' prepara o terreno para as transições fluidas -->
+{% extends 'base.html' %}
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">
-                NEXUS<span class="brand-sep">|</span><span class="nexus-highlight">IOT</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-toggle="target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">Início</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="simulador.html">Simulador</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link nav-cta" href="contato.html">Contato</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Conteúdo Principal -->
+{% block content %}
+    <!-- O Django vai encaixar isto automaticamente entre o Menu e o Footer do seu base.html -->
     <main class="page container mt-4">
         
         <!-- Cabeçalho da Página -->
@@ -54,7 +15,7 @@
 
         <div class="row g-5 align-items-start mt-2">
             
-            <!-- Coluna Esquerda: Informações e Ajuda (Animação com delay 1) -->
+            <!-- Coluna Esquerda: Informações e Ajuda -->
             <div class="col-lg-5 reveal d1">
                 
                 <div class="bzu-ajuda shadow-sm mb-4">
@@ -66,7 +27,6 @@
 
                 <div class="d-flex align-items-center mb-3">
                     <div class="icon-bubble me-3">
-                        <!-- Ícone de Email (SVG) -->
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                             <path d="M4 7.00005L10.2 11.65C11.2667 12.45 12.7333 12.45 13.8 11.65L20 7"></path>
                             <rect x="3" y="5" width="18" height="14" rx="2"></rect>
@@ -80,7 +40,7 @@
 
             </div>
 
-            <!-- Coluna Direita: Formulário (Animação com delay 2) -->
+            <!-- Coluna Direita: Formulário -->
             <div class="col-lg-7 reveal d2">
                 <div class="card hover-lift">
                     <div class="card-header">
@@ -90,19 +50,16 @@
                         
                         <form action="#" method="POST">
                             
-                            <!-- Nome -->
                             <div class="mb-3">
                                 <label for="nome" class="form-label">Nome Completo</label>
                                 <input type="text" class="form-control" id="nome" name="nome" placeholder="Ex: Gilberto Silva" required>
                             </div>
 
-                            <!-- E-mail -->
                             <div class="mb-3">
                                 <label for="email" class="form-label">E-mail Corporativo</label>
                                 <input type="email" class="form-control" id="email" name="email" placeholder="gilberto@industria.com.br" required>
                             </div>
 
-                            <!-- Assunto -->
                             <div class="mb-3">
                                 <label for="assunto" class="form-label">Assunto</label>
                                 <select class="form-select" id="assunto" name="assunto" required>
@@ -114,13 +71,11 @@
                                 </select>
                             </div>
 
-                            <!-- Mensagem -->
                             <div class="mb-4">
                                 <label for="mensagem" class="form-label">Sua Mensagem</label>
                                 <textarea class="form-control" id="mensagem" name="mensagem" rows="4" placeholder="Como podemos ajudar a modernizar a sua fábrica?" required></textarea>
                             </div>
 
-                            <!-- Botão de Enviar -->
                             <button type="submit" class="btn btn-primary w-100 fs-6 py-3">
                                 Enviar Mensagem
                             </button>
@@ -133,28 +88,4 @@
 
         </div>
     </main>
-
-    <!-- Footer -->
-    <footer class="site-footer text-center">
-        <div class="container">
-            <p class="mb-0">© 2026 <strong>NEXUS IOT</strong>. Todos os direitos reservados.</p>
-        </div>
-    </footer>
-
-    <!-- Bootstrap JS (opcional, para a navbar mobile funcionar) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Script de Transição Fluida (Revelação ao carregar) -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Um pequeno atraso para garantir que a animação da classe .page termine de carregar o fundo
-            setTimeout(() => {
-                const reveals = document.querySelectorAll('.reveal');
-                reveals.forEach(el => {
-                    el.classList.add('in');
-                });
-            }, 150);
-        });
-    </script>
-</body>
-</html>
+{% endblock %}
