@@ -19,6 +19,21 @@
         </p>
     </header>
 
+    <div class="card mb-3">
+        <div class="card-header fw-bold">Premissas da simulação</div>
+            <ul class="list-group list-group-flush">
+                {% for rotulo, valor in entradas %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>{{ rotulo }}</span>
+                        <strong>{{ valor }}</strong>
+                    </li>
+                {% endfor %}
+            </ul>
+        <div class="card-footer">
+        <a href="{% url 'formulario_simulador' %}">Editar dados e simular de novo</a>
+        </div>
+    </div>
+    
     <!-- Indicadores financeiros -->
     <section class="mb-4">
 

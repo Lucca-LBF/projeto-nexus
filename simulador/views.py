@@ -109,7 +109,7 @@ def calcular_simulacao(request):
     
     resultado_liquido = economia_bruta - investimento_periodo
 
-    request.session[CHAVE_SESSAO].update({
+    salvo.update({
         'total_sem_iot': float(total_operacional_antigo),
         'total_com_iot': float(total_operacional_novo),
         'economia_bruta': float(economia_bruta),
@@ -122,6 +122,7 @@ def calcular_simulacao(request):
         'dados_grafico_sem_iot': df['Custo_Sem_IoT'].tolist(),
         'dados_grafico_com_iot': df['Custo_Com_IoT'].tolist(),
     })
+    request.session[CHAVE_SESSAO] = salvo
     
     if investimento_periodo > 0:
         roi = (resultado_liquido / investimento_periodo) * 100
