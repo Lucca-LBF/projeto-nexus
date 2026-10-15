@@ -1,8 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <!-- O Django vai encaixar isto automaticamente entre o Menu e o Footer do seu base.html -->
-    <main class="page container mt-4">
+    <main class="page container mt-4 mb-5">
         
         <!-- Cabeçalho da Página -->
         <div class="section-title reveal">
@@ -13,74 +12,72 @@
             </p>
         </div>
 
-        <div class="row g-5 align-items-start mt-2">
+        <!-- Linha centralizada -->
+        <div class="row justify-content-center mt-4">
             
-            <!-- Coluna Esquerda: Informações e Ajuda -->
-            <div class="col-lg-5 reveal d1">
-                
-                <div class="bzu-ajuda shadow-sm mb-4">
-                    <h5 class="fw-bold" style="color: var(--bzu-purple);">Fale com Especialistas</h5>
-                    <p class="mb-0 text-muted">
-                        Nossa equipe de engenheiros de dados está pronta para ajudar você a mapear o ROI da sua operação e tirar seu projeto de manutenção preditiva do papel.
-                    </p>
-                </div>
-
-                <div class="d-flex align-items-center mb-3">
-                    <div class="icon-bubble me-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <path d="M4 7.00005L10.2 11.65C11.2667 12.45 12.7333 12.45 13.8 11.65L20 7"></path>
-                            <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-                        </svg>
-                    </div>
-                    <div>
-                        <small class="text-muted fw-bold text-uppercase d-block" style="letter-spacing: 0.05em;">E-mail Direto</small>
-                        <a href="mailto:contato@nexusiot.com.br" class="text-info fw-bold fs-5">contato@nexusiot.com.br</a>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Coluna Direita: Formulário -->
-            <div class="col-lg-7 reveal d2">
+            <!-- Coluna Central: Formulário -->
+            <div class="col-lg-7 col-md-9 reveal d2">
                 <div class="card hover-lift">
-                    <div class="card-header">
+                    
+                    <div class="card-header text-center">
                         <h5 class="fw-bold mb-0">Envie sua Mensagem</h5>
                     </div>
-                    <div class="card-body p-4">
+                    
+                    <div class="card-body p-4 p-md-5">
                         
-                        <form action="#" method="POST">
+                        <!-- Lógica do Django: Se a view enviar sucesso=True, mostra o alerta verde -->
+                        {% if sucesso %}
+                            <div class="alert alert-success text-center py-4 border-0 shadow-sm" style="background-color: #E8F5E9;" role="alert">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" fill="currentColor" class="bi bi-check-circle text-success mb-3" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                    <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                                </svg>
+                                <h4 class="fw-bold" style="color: #14916B;">Mensagem Enviada!</h4>
+                                <p class="text-muted mb-4">Agradecemos o seu contato. A nossa equipe de engenharia de dados vai analisar a sua solicitação e retornará em breve.</p>
+                                <a href="{% url 'home' %}" class="btn btn-outline-success rounded-pill fw-bold px-4 py-2">
+                                    Voltar ao Início
+                                </a>
+                            </div>
                             
-                            <div class="mb-3">
-                                <label for="nome" class="form-label">Nome Completo</label>
-                                <input type="text" class="form-control" id="nome" name="nome" placeholder="Ex: Gilberto Silva" required>
-                            </div>
+                        <!-- Se não tiver sucesso (ainda não enviou), mostra o formulário normalmente -->
+                        {% else %}
+                            <form action="" method="POST">
+                                
+                                <!-- CRACHÁ DE SEGURANÇA (Resolve o Erro 403) -->
+                                {% csrf_token %}
+                                
+                                <div class="mb-3">
+                                    <label for="nome" class="form-label">Nome Completo</label>
+                                    <input type="text" class="form-control" id="nome" name="nome" placeholder="Ex: Gilberto Silva" required>
+                                </div>
 
-                            <div class="mb-3">
-                                <label for="email" class="form-label">E-mail Corporativo</label>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="gilberto@industria.com.br" required>
-                            </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">E-mail Corporativo</label>
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="gilberto@industria.com.br" required>
+                                </div>
 
-                            <div class="mb-3">
-                                <label for="assunto" class="form-label">Assunto</label>
-                                <select class="form-select" id="assunto" name="assunto" required>
-                                    <option value="" disabled selected>Selecione um tópico...</option>
-                                    <option value="duvida">Dúvida sobre o Simulador</option>
-                                    <option value="comercial">Proposta Comercial</option>
-                                    <option value="feedback">Feedback / Sugestões</option>
-                                    <option value="outro">Outros</option>
-                                </select>
-                            </div>
+                                <div class="mb-3">
+                                    <label for="assunto" class="form-label">Assunto</label>
+                                    <select class="form-select" id="assunto" name="assunto" required>
+                                        <option value="" disabled selected>Selecione um tópico...</option>
+                                        <option value="duvida">Dúvida sobre o Simulador</option>
+                                        <option value="comercial">Proposta Comercial</option>
+                                        <option value="feedback">Feedback / Sugestões</option>
+                                        <option value="outro">Outros</option>
+                                    </select>
+                                </div>
 
-                            <div class="mb-4">
-                                <label for="mensagem" class="form-label">Sua Mensagem</label>
-                                <textarea class="form-control" id="mensagem" name="mensagem" rows="4" placeholder="Como podemos ajudar a modernizar a sua fábrica?" required></textarea>
-                            </div>
+                                <div class="mb-4">
+                                    <label for="mensagem" class="form-label">Sua Mensagem</label>
+                                    <textarea class="form-control" id="mensagem" name="mensagem" rows="4" placeholder="Como podemos ajudar a modernizar a sua fábrica?" required></textarea>
+                                </div>
 
-                            <button type="submit" class="btn btn-primary w-100 fs-6 py-3">
-                                Enviar Mensagem
-                            </button>
-                            
-                        </form>
+                                <button type="submit" class="btn btn-primary w-100 fs-6 py-3 mt-2">
+                                    Enviar Mensagem
+                                </button>
+                                
+                            </form>
+                        {% endif %}
 
                     </div>
                 </div>
