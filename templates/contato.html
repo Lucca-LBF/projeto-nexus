@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contato | NEXUS IoT</title>
+    
+    <!-- Bootstrap CSS (Necessário para o grid e espaçamentos que o seu CSS usa) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Fontes do Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Link para o seu arquivo CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="js"> <!-- A classe 'js' prepara o terreno para as transições fluidas -->
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                NEXUS<span class="brand-sep">|</span><span class="nexus-highlight">IOT</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-toggle="target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="simulador.html">Simulador</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-cta" href="contato.html">Contato</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <main class="page container mt-4">
+        
+        <!-- Cabeçalho da Página -->
+        <div class="section-title reveal">
+            <span class="eyebrow">Suporte & Vendas</span>
+            <h2>Como podemos <span class="nexus-highlight">ajudar?</span></h2>
+            <p class="text-muted mx-auto" style="max-width: 600px;">
+                Ficou com alguma dúvida sobre o simulador? Quer solicitar uma análise personalizada para a sua indústria? Envie uma mensagem e nossa equipe entrará em contato.
+            </p>
+        </div>
+
+        <div class="row g-5 align-items-start mt-2">
+            
+            <!-- Coluna Esquerda: Informações e Ajuda (Animação com delay 1) -->
+            <div class="col-lg-5 reveal d1">
+                
+                <div class="bzu-ajuda shadow-sm mb-4">
+                    <h5 class="fw-bold" style="color: var(--bzu-purple);">Fale com Especialistas</h5>
+                    <p class="mb-0 text-muted">
+                        Nossa equipe de engenheiros de dados está pronta para ajudar você a mapear o ROI da sua operação e tirar seu projeto de manutenção preditiva do papel.
+                    </p>
+                </div>
+
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-bubble me-3">
+                        <!-- Ícone de Email (SVG) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M4 7.00005L10.2 11.65C11.2667 12.45 12.7333 12.45 13.8 11.65L20 7"></path>
+                            <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                        </svg>
+                    </div>
+                    <div>
+                        <small class="text-muted fw-bold text-uppercase d-block" style="letter-spacing: 0.05em;">E-mail Direto</small>
+                        <a href="mailto:contato@nexusiot.com.br" class="text-info fw-bold fs-5">contato@nexusiot.com.br</a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Coluna Direita: Formulário (Animação com delay 2) -->
+            <div class="col-lg-7 reveal d2">
+                <div class="card hover-lift">
+                    <div class="card-header">
+                        <h5 class="fw-bold mb-0">Envie sua Mensagem</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        
+                        <form action="#" method="POST">
+                            
+                            <!-- Nome -->
+                            <div class="mb-3">
+                                <label for="nome" class="form-label">Nome Completo</label>
+                                <input type="text" class="form-control" id="nome" name="nome" placeholder="Ex: Gilberto Silva" required>
+                            </div>
+
+                            <!-- E-mail -->
+                            <div class="mb-3">
+                                <label for="email" class="form-label">E-mail Corporativo</label>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="gilberto@industria.com.br" required>
+                            </div>
+
+                            <!-- Assunto -->
+                            <div class="mb-3">
+                                <label for="assunto" class="form-label">Assunto</label>
+                                <select class="form-select" id="assunto" name="assunto" required>
+                                    <option value="" disabled selected>Selecione um tópico...</option>
+                                    <option value="duvida">Dúvida sobre o Simulador</option>
+                                    <option value="comercial">Proposta Comercial</option>
+                                    <option value="feedback">Feedback / Sugestões</option>
+                                    <option value="outro">Outros</option>
+                                </select>
+                            </div>
+
+                            <!-- Mensagem -->
+                            <div class="mb-4">
+                                <label for="mensagem" class="form-label">Sua Mensagem</label>
+                                <textarea class="form-control" id="mensagem" name="mensagem" rows="4" placeholder="Como podemos ajudar a modernizar a sua fábrica?" required></textarea>
+                            </div>
+
+                            <!-- Botão de Enviar -->
+                            <button type="submit" class="btn btn-primary w-100 fs-6 py-3">
+                                Enviar Mensagem
+                            </button>
+                            
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer text-center">
+        <div class="container">
+            <p class="mb-0">© 2026 <strong>NEXUS IOT</strong>. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS (opcional, para a navbar mobile funcionar) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script de Transição Fluida (Revelação ao carregar) -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Um pequeno atraso para garantir que a animação da classe .page termine de carregar o fundo
+            setTimeout(() => {
+                const reveals = document.querySelectorAll('.reveal');
+                reveals.forEach(el => {
+                    el.classList.add('in');
+                });
+            }, 150);
+        });
+    </script>
+</body>
+</html>
