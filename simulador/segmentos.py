@@ -41,6 +41,17 @@ ACOMPANHAMENTO = [
      "e o que falta cobrir."),
 ]
 
+# Quanto tempo as máquinas funcionam por dia: (valor, texto da opção, fator, texto curto).
+# O fator multiplica as horas de parada esperadas por dia. As taxas de falha do catálogo
+# foram calibradas para 2 turnos (16 h por dia), então esse é o fator 1.0 e o padrão do formulário.
+# Só vale para os segmentos do modelo "paradas": nos de "perdas" a pessoa já informa a perda mensal.
+REGIME_PADRAO = "2turnos"
+REGIME_FUNCIONAMENTO = [
+    ("1turno", "1 turno (cerca de 8 horas por dia)", 0.5, "1 turno"),
+    ("2turnos", "2 turnos (cerca de 16 horas por dia)", 1.0, "2 turnos"),
+    ("24h", "24 horas por dia", 1.5, "24 horas por dia"),
+]
+
 CONEXAO_LOCAL = [
     ("nao_sei", "Não sei informar", None),
     ("wifi", "Temos Wi-Fi estável em todo o local",
@@ -431,6 +442,7 @@ def segmentos_para_formulario():
     """Só o que o navegador precisa para trocar as perguntas."""
     return {
         chave: {
+            "modelo": dados["modelo"],
             "intro": dados["intro"],
             "monitorar": dados["monitorar"],
             "campos": dados["campos"],

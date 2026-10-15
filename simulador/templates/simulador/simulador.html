@@ -11,7 +11,9 @@
                 <p class="text-muted mb-3" id="intro-segmento">{{ form.intro }}</p>
                 <p class="bzu-ajuda"><strong class="text-info">Como a Bzu ajuda:</strong> <span id="bzu-monitorar">{{ form.monitorar }}</span></p>
 
-                {% if tem_memoria %}
+                {% if form.errors %}
+                <div class="alert alert-danger py-2 small" role="alert">Confira os campos destacados em vermelho e tente de novo.</div>
+                {% elif tem_memoria %}
                 <p class="small text-info mb-3">Mostrando os dados da sua última simulação.</p>
                 {% endif %}
 
@@ -22,6 +24,9 @@
                     <div class="mb-3" data-campo="{{ campo.name }}"{% if campo.field.disabled %} hidden{% endif %}>
                         <label for="{{ campo.id_for_label }}" class="form-label" data-rotulo="{{ campo.name }}">{{ campo.label }}</label>
                         {{ campo }}
+                        {% for erro in campo.errors %}
+                        <div class="invalid-feedback d-block">{{ erro }}</div>
+                        {% endfor %}
                         {% if campo.help_text %}
                         <div class="form-text text-muted" data-ajuda="{{ campo.name }}">{{ campo.help_text }}</div>
                         {% endif %}
@@ -86,12 +91,16 @@
             if (!seg) return;
             document.getElementById('intro-segmento').textContent = seg.intro;
             document.getElementById('bzu-monitorar').textContent = seg.monitorar;
-            // cada segmento usa só um destes dois campos
-            ['custo_hora_parada', 'perda_mensal'].forEach(function (campo) {
-                var visivel = campo in seg.campos;
+            // cada segmento usa só um destes dois campos; o regime de funcionamento só vale nos de paradas
+            var usados = {
+                custo_hora_parada: 'custo_hora_parada' in seg.campos,
+                perda_mensal: 'perda_mensal' in seg.campos,
+                regime_funcionamento: seg.modelo === 'paradas'
+            };
+            Object.keys(usados).forEach(function (campo) {
                 var bloco = document.querySelector('[data-campo="' + campo + '"]');
-                bloco.hidden = !visivel;
-                bloco.querySelector('input').disabled = !visivel;
+                bloco.hidden = !usados[campo];
+                bloco.querySelector('input, select').disabled = !usados[campo];
             });
             // pergunta-base do estimador "não sei o valor" (só nos segmentos de perda mensal)
             if ('perda_mensal' in seg.campos) {
@@ -120,4 +129,4 @@
         aplicar();
     })();
 </script>
-{% endblock %}
+{% endblock %}
