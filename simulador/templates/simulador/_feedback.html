@@ -1,0 +1,23 @@
+<div class="card shadow-sm border-0 mt-4">
+    <div class="card-body">
+        <h5 class="card-title text-info mb-3">O que isso significa para a sua empresa</h5>
+
+        <p class="{{ feedback.classe }} fw-bold mb-2">{{ feedback.leitura }}</p>
+        <ul class="mb-4">
+            {% if feedback.retorno %}<li>{{ feedback.retorno }}</li>{% endif %}
+            {% if feedback.equilibrio %}<li>{{ feedback.equilibrio }}</li>{% endif %}
+        </ul>
+
+        <h6 class="text-muted text-uppercase small mb-2">Como a Bzu ajudaria</h6>
+        <ul class="mb-3">
+            {% if feedback.prioridade %}<li><strong>Sua prioridade:</strong> {{ feedback.prioridade }}. Comece por {{ feedback.comece_por }}.</li>{% endif %}
+            <li><strong>O que monitorar:</strong> {{ feedback.monitorar }}</li>
+            {% if feedback.acompanhamento %}<li><strong>Como é hoje:</strong> {{ feedback.acompanhamento }}</li>{% endif %}
+            <li><strong>Conexão sugerida:</strong> {{ feedback.conexao }}</li>
+            {% if feedback.caso %}<li><strong>Caso real:</strong> {{ feedback.caso }}</li>{% endif %}
+        </ul>
+
+        <p class="small text-muted mb-3">{{ feedback.premissa }}</p>
+        <a href="{{ feedback.site }}" target="_blank" rel="noopener" class="btn btn-primary">Falar com a Bzu</a>
+    </div>
+</div>

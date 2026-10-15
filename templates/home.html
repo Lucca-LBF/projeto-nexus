@@ -1,116 +1,223 @@
 {% extends 'base.html' %}
-{% block header %}
+
+{% block hero %}
+<section class="hero-bzu">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <span class="pill-eyebrow">Simulador de ROI em IoT</span>
+                <h1 class="fw-bold mb-3">
+                    O futuro da indústria é <span class="nexus-highlight">guiado por dados.</span>
+                </h1>
+                <p class="lead mb-4">
+                    O projeto <strong>NEXUS</strong> foi criado para educar empresas sobre a importância de coletar dados operacionais por meio de Sensores IoT. Deixe o achismo de lado e comece a tomar decisões baseadas em informações reais para reduzir custos e maximizar a eficiência da sua produção.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'formulario_simulador' %}" class="btn btn-white btn-lg px-4 py-3">
+                        Testar Simulador
+                    </a>
+                    <a href="{% url 'contato' %}" class="btn btn-outline-light btn-lg px-4 py-3">
+                        Falar com a Equipe
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-5 d-none d-lg-flex justify-content-center">
+                <!-- do sensor à decisão -->
+                <svg class="fluxo-svg" viewBox="0 0 460 360" role="img" aria-label="Fluxo IoT: sensores, gateway, nuvem e decisão">
+                    <path class="linha" d="M80 70 C 200 70, 200 140, 320 140 S 150 220, 130 250 S 300 300, 360 300"/>
+                    <g>
+                        <circle class="pulso" cx="80" cy="70" r="34"/>
+                        <circle class="no" cx="80" cy="70" r="34"/>
+                        <path class="icone" d="M66 70a14 14 0 0 1 28 0M72 70a8 8 0 0 1 16 0"/><circle cx="80" cy="70" r="2.6" fill="#fff"/>
+                        <text x="80" y="124" text-anchor="middle">Sensores</text>
+                    </g>
+                    <g>
+                        <circle class="pulso" cx="320" cy="140" r="34" style="animation-delay:.7s"/>
+                        <circle class="no" cx="320" cy="140" r="34"/>
+                        <rect class="icone" x="304" y="132" width="32" height="16" rx="4"/><path class="icone" d="M312 132v-8M328 132v-8"/>
+                        <text x="320" y="194" text-anchor="middle">Gateway</text>
+                    </g>
+                    <g>
+                        <circle class="pulso" cx="130" cy="250" r="34" style="animation-delay:1.4s"/>
+                        <circle class="no" cx="130" cy="250" r="34"/>
+                        <path class="icone" d="M114 258a9 9 0 0 1 2-17 12 12 0 0 1 23-2 10 10 0 0 1 3 19z"/>
+                        <text x="130" y="304" text-anchor="middle">Nuvem</text>
+                    </g>
+                    <g>
+                        <circle class="pulso" cx="360" cy="300" r="34" style="animation-delay:2.1s"/>
+                        <circle class="no no-final" cx="360" cy="300" r="34"/>
+                        <path class="icone" d="M346 312v-10M358 312v-18M370 312v-26"/>
+                        <text x="360" y="352" text-anchor="middle">Decisão</text>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}
+
 {% block content %}
-{% load static %}
-<div class="row align-items-center mb-5 py-5 border-bottom" style="border-color: var(--nexus-border) !important;">
-    <div class="col-lg-7">
-        <h1 class="display-4 fw-bold mb-3" style="font-family: 'Orbitron', sans-serif;">
-            O futuro da indústria é <span class="nexus-highlight">guiado por dados.</span>
-        </h1>
-        <p class="lead mb-4 text-muted">
-            O projeto <strong>NEXUS</strong> foi criado para educar empresas sobre a importância de coletar dados operacionais por meio de Sensores IoT. Deixe o achismo de lado e comece a tomar decisões baseadas em informações reais para reduzir custos e maximizar a eficiência da sua produção.
-        </p>
-        <div class="d-flex gap-3 justify-content-lg-start justify-content-center">
-            <a href="{% url 'formulario_simulador' %}" class="btn btn-primary btn-lg px-4 py-3 shadow">
-                 Testar Simulador
-            </a>
-            <a href="{% url 'contato' %}" class="btn btn-outline-info btn-lg px-4 py-3 shadow">
-                 Falar com a Equipe
-            </a>
-        </div>
+<!-- Por que IoT -->
+<section class="mb-5 pt-2">
+    <div class="section-title reveal">
+        <span class="eyebrow">Benefícios</span>
+        <h2 class="fw-bold">Por que implementar <span class="nexus-highlight">IoT Industrial?</span></h2>
     </div>
-    <div class="col-lg-5 text-center d-none d-lg-block">
-        <div style="font-size: 8rem; text-shadow: 0 0 30px var(--nexus-secondary);">NE</div>
-    </div>
-</div>
 
-<div class="row mb-5 text-center">
-    <div class="col-12 mb-4">
-        <h2 class="fw-bold">Por que implementar <span class="text-info">IoT Industrial?</span></h2>
-    </div>
-    
-    <div class="col-md-4 mb-3">
-        <div class="card h-100 p-3 shadow-sm border-0">
-            <div class="card-body">
-                <h3 class="card-title fw-bold text-info">Visibilidade em Tempo Real</h3>
-                <p class="card-text text-muted small">Saiba exatamente o que está acontecendo no chão de fábrica a qualquer momento. Chega de relatórios atrasados em planilhas.</p>
+    <div class="row g-4 text-center">
+        <div class="col-md-4 reveal d1">
+            <div class="card h-100 p-3 border-0">
+                <div class="card-body">
+                    <span class="icon-bubble"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span>
+                    <h3 class="h5 card-title fw-bold text-info">Visibilidade em Tempo Real</h3>
+                    <p class="card-text text-muted small">Saiba exatamente o que está acontecendo no chão de fábrica a qualquer momento. Chega de relatórios atrasados em planilhas.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 reveal d2">
+            <div class="card h-100 p-3 border-0">
+                <div class="card-body">
+                    <span class="icon-bubble"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></span>
+                    <h3 class="h5 card-title fw-bold text-info">Manutenção Preditiva</h3>
+                    <p class="card-text text-muted small">Aja antes que a máquina quebre. Sensores identificam vibrações e temperaturas anormais, evitando paradas catastróficas.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 reveal d3">
+            <div class="card h-100 p-3 border-0">
+                <div class="card-body">
+                    <span class="icon-bubble"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>
+                    <h3 class="h5 card-title fw-bold text-info">Redução de Custos</h3>
+                    <p class="card-text text-muted small">Menos tempo ocioso significa mais produção. O investimento em tecnologia se paga rapidamente com a redução do desperdício.</p>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4 mb-3">
-        <div class="card h-100 p-3 shadow-sm border-0">
-            <div class="card-body">
-                <h3 class="card-title fw-bold text-info">Manutenção Preditiva</h3>
-                <p class="card-text text-muted small">Aja antes que a máquina quebre. Sensores identificam vibrações e temperaturas anormais, evitando paradas catastróficas.</p>
+</section>
+
+<!-- Como funciona o simulador -->
+<section class="mb-5">
+    <div class="section-title reveal">
+        <span class="eyebrow">Passo a passo</span>
+        <h2 class="fw-bold">Como funciona o <span class="nexus-highlight">simulador</span></h2>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4 reveal d1">
+            <div class="card step-card h-100 border-0">
+                <span class="step-num">01</span>
+                <div class="card-body">
+                    <h3 class="h5 fw-bold text-info">Escolha o segmento</h3>
+                    <p class="text-muted small mb-0">Indústria, cadeia fria, saúde, energia, cidades e mais. As perguntas mudam conforme o seu tipo de empresa.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 reveal d2">
+            <div class="card step-card h-100 border-0">
+                <span class="step-num">02</span>
+                <div class="card-body">
+                    <h3 class="h5 fw-bold text-info">Responda poucas perguntas</h3>
+                    <p class="text-muted small mb-0">Quantos pontos monitorar, quanto você perde hoje e quanto custa o sensor. Se não souber o valor, o simulador ajuda a estimar.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 reveal d3">
+            <div class="card step-card h-100 border-0">
+                <span class="step-num">03</span>
+                <div class="card-body">
+                    <h3 class="h5 fw-bold text-info">Veja o seu retorno</h3>
+                    <p class="text-muted small mb-0">Receba o ROI, o gráfico com e sem IoT e um retorno com o que monitorar e por onde começar.</p>
+                </div>
             </div>
         </div>
     </div>
+</section>
 
-    <div class="col-md-4 mb-3">
-        <div class="card h-100 p-3 shadow-sm border-0">
-            <div class="card-body">
-                <h3 class="card-title fw-bold text-info">Redução de Custos</h3>
-                <p class="card-text text-muted small">Menos tempo ocioso significa mais produção. O investimento em tecnologia se paga rapidamente com a redução do desperdício.</p>
+<!-- Chamada final -->
+<section class="mb-5 reveal">
+    <div class="cta-band">
+        <h2 class="fw-bold mb-2">Quanto a sua empresa pode economizar?</h2>
+        <p class="mb-4">Leva menos de um minuto para simular.</p>
+        <a href="{% url 'formulario_simulador' %}" class="btn btn-white btn-lg px-5 py-3">Começar a simulação</a>
+    </div>
+</section>
+
+<!-- Equipe -->
+<section class="mb-5">
+    <div class="section-title reveal pt-4">
+        <span class="eyebrow">Quem faz</span>
+        <h2 class="fw-bold">A Equipe <span class="nexus-highlight">NEXUS</span></h2>
+        <p class="text-muted mb-0">Os desenvolvedores por trás deste projeto de educação tecnológica.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-3 col-md-6 mb-4 reveal">
+            <div class="card team-card h-100 border-0 text-center">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-2">Guilherme Cireno Baltar</h5>
+                    <span class="team-tag">CC-B</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4 reveal d1">
+            <div class="card team-card h-100 border-0 text-center">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-2">Gustavo Rogério Soares Filho</h5>
+                    <span class="team-tag">CC-B</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4 reveal d2">
+            <div class="card team-card h-100 border-0 text-center">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-2">Ivon Buarque da Costa Neto</h5>
+                    <span class="team-tag">CC-B</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4 reveal d3">
+            <div class="card team-card h-100 border-0 text-center">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-2">Lucca Lyra Batista Felix</h5>
+                    <span class="team-tag">CC-B</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4 reveal">
+            <div class="card team-card h-100 border-0 text-center">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-2">Luiz Henrique de Andrade Rodrigues</h5>
+                    <span class="team-tag">CC-B</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4 reveal d1">
+            <div class="card team-card h-100 border-0 text-center">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-2">Niara Rúbia Amorim Araújo</h5>
+                    <span class="team-tag">DESIGN-B</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4 reveal d2">
+            <div class="card team-card h-100 border-0 text-center">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-2">Solon Antonio Coutinho Rosa Neto</h5>
+                    <span class="team-tag">CC-B</span>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-<div class="row mb-5 justify-content-center">
-    <div class="col-12 text-center mb-5">
-        <h2 class="fw-bold border-top pt-5" style="border-color: var(--nexus-border) !important;">
-            A Equipe <span class="text-success">NEXUS</span>
-        </h2>
-        <p class="text-muted">Os desenvolvedores por trás deste projeto de educação tecnológica.</p>
-    </div>
-
-
-    <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-        <img src="{% static 'fotos/foto_de_guilherme.jpg' %}" alt="Foto de Guilherme" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
-        <h5 class="fw-bold mb-1">Guilherme Cireno Baltar</h5>
-        <p class="text-muted small">CC-B</p>
-    </div>
-
-    <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-        <img src="{% static 'fotos/foto_de_gustavo.jpg' %}" alt="Foto de Gustavo" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
-        <h5 class="fw-bold mb-1">Gustavo Rogério Soares Filho</h5>
-        <p class="text-muted small">CC-B</p>
-    </div>
-
-    <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-        <img src="{% static 'fotos/foto_de_ivon.jpg' %}" alt="Foto de Ivon" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
-        <h5 class="fw-bold mb-1">Ivon Buarque da Costa Neto</h5>
-        <p class="text-muted small">CC-B</p>
-
-    </div>
-
-
-    <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-
-        <img src="{%static 'fotos/foto_de_lucca.jpg' %}" alt="Foto de Lucca" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
-        <h5 class="fw-bold mb-1">Lucca Lyra Batista Felix </h5>
-        <p class="text-muted small">CC-B</p>
-    </div>
-
-    <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-        <img src="{% static 'fotos/foto_de_luiz.jpg' %}" alt="Foto de Luiz" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
-        <h5 class="fw-bold mb-1">Luiz Henrique de Andrade Rodrigues</h5>
-        <p class="text-muted small">CC-B</p>
-    </div>
-
-    <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-        <img src="{% static 'fotos/foto_de_niara.jpg' %}" alt="Foto de Niara" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
-        <h5 class="fw-bold mb-1">Niara Rúbia Amorim Araújo</h5>
-        <p class="text-muted small">DESIGN-B</p>
-    </div>
-
-    <div class="col-lg-3 col-md-6 col-sm-6 mb-4 text-center">
-        <img src="{% static 'fotos/foto_de_solon.jpg' %}" alt="Foto de Solon" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
-        <h5 class="fw-bold mb-1">Solon Antonio Coutinho Rosa Neto </h5>
-        <p class="text-muted small">CC-B</p>
-    </div>
-</div>
+</section>
 {% endblock %}
-
