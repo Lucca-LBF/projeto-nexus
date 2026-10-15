@@ -77,7 +77,7 @@ Este documento contém as especificações ágeis e os critérios de aceite para
 > **Eu quero** ter um canal direto e simples para enviar críticas construtivas, relatar a minha experiência ou sugerir novas funcionalidades após usar o simulador,
 > **Para que** eu possa contribuir com a evolução da ferramenta e garantir que cenários específicos da minha indústria sejam considerados em atualizações futuras.
 
-** Critérios de Aceite:**
+**Critérios de Aceite:**
 * O formulário de comunicação deve possuir uma opção de "Assunto" específica e clara para feedback.
 * O formulário deve conter um campo de texto livre e espaçoso para que eu possa detalhar a minha crítica ou ideia de nova funcionalidade.
 * O processo de envio de feedback deve ser rápido e aberto, não exigindo que eu crie uma conta ou faça login complexo no sistema.
