@@ -24,7 +24,8 @@
                 <h4 class="mb-0 text-info" style="font-family: 'Orbitron', sans-serif;">Simule a sua economia</h4>
             </div>
             <div class="card-body">
-                <p class="text-muted mb-4">Informe os dados da sua operação para estimar o retorno de investir em sensores IoT.</p>
+                <p class="text-muted mb-3" id="intro-segmento">{{ form.intro }}</p>
+                <p class="small border border-secondary rounded p-2 mb-4"><strong class="text-info">Como a Bzu ajuda:</strong> <span id="bzu-monitorar">{{ form.monitorar }}</span></p>
 
                 {% if tem_memoria %}
                 <p class="small text-info mb-3">Mostrando os dados da sua última simulação.</p>
@@ -34,11 +35,26 @@
                     {% csrf_token %}
 
                     {% for campo in form %}
-                    <div class="mb-3">
-                        <label for="{{ campo.id_for_label }}" class="form-label">{{ campo.label }}</label>
+                    <div class="mb-3" data-campo="{{ campo.name }}"{% if campo.field.disabled %} hidden{% endif %}>
+                        <label for="{{ campo.id_for_label }}" class="form-label" data-rotulo="{{ campo.name }}">{{ campo.label }}</label>
                         {{ campo }}
                         {% if campo.help_text %}
-                        <div class="form-text text-muted">{{ campo.help_text }}</div>
+                        <div class="form-text text-muted" data-ajuda="{{ campo.name }}">{{ campo.help_text }}</div>
+                        {% endif %}
+                        {% if campo.name == "perda_mensal" %}
+                        <button type="button" class="btn btn-link btn-sm p-0 mt-1" id="abrir-estimativa" aria-expanded="false" aria-controls="painel-estimativa">Não sei o valor, quero estimar</button>
+                        <div id="painel-estimativa" class="border border-secondary rounded p-3 mt-2" hidden>
+                            <label for="estimativa-base" class="form-label small" id="estimativa-pergunta"></label>
+                            <input type="number" min="0" step="0.01" id="estimativa-base" class="form-control mb-3" placeholder="Ex: 50000.00">
+                            <label for="estimativa-pct" class="form-label small">Quanto disso você acha que se perde hoje?</label>
+                            <select id="estimativa-pct" class="form-select mb-3">
+                                {% for valor, texto in percentuais_estimativa %}
+                                <option value="{{ valor }}"{% if valor == 10 %} selected{% endif %}>{{ texto }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" class="btn btn-outline-info btn-sm" id="usar-estimativa">Usar esta estimativa</button>
+                            <div class="form-text text-muted mt-2" id="estimativa-resultado">Os percentuais são uma referência. Se souber o valor real, digite direto no campo acima.</div>
+                        </div>
                         {% endif %}
                     </div>
                     {% endfor %}
@@ -52,4 +68,72 @@
         </div>
     </div>
 </div>
+
+{{ segmentos|json_script:"segmentos-data" }}
+<script>
+    // troca as perguntas quando a pessoa escolhe outro tipo de empresa
+    (function () {
+        var segmentos = JSON.parse(document.getElementById('segmentos-data').textContent);
+        var seletor = document.getElementById('id_tipo_industria');
+
+        var painel = document.getElementById('painel-estimativa');
+        var abrir = document.getElementById('abrir-estimativa');
+        abrir.addEventListener('click', function () {
+            painel.hidden = !painel.hidden;
+            abrir.setAttribute('aria-expanded', String(!painel.hidden));
+        });
+        document.getElementById('usar-estimativa').addEventListener('click', function () {
+            var base = parseFloat(document.getElementById('estimativa-base').value);
+            var aviso = document.getElementById('estimativa-resultado');
+            if (!(base > 0)) {
+                aviso.textContent = 'Informe um valor maior que zero para calcular.';
+                return;
+            }
+            var pct = parseFloat(document.getElementById('estimativa-pct').value);
+            var estimado = Math.round(base * pct) / 100;
+            document.getElementById('id_perda_mensal').value = estimado;
+            aviso.textContent = 'Estimativa: R$ ' + estimado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                + ' por mês (' + pct + '% de R$ ' + base.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                + '). Você pode ajustar o campo acima.';
+        });
+
+        function aplicar() {
+            var seg = segmentos[seletor.value];
+            if (!seg) return;
+            document.getElementById('intro-segmento').textContent = seg.intro;
+            document.getElementById('bzu-monitorar').textContent = seg.monitorar;
+            // cada segmento usa só um destes dois campos
+            ['custo_hora_parada', 'perda_mensal'].forEach(function (campo) {
+                var visivel = campo in seg.campos;
+                var bloco = document.querySelector('[data-campo="' + campo + '"]');
+                bloco.hidden = !visivel;
+                bloco.querySelector('input').disabled = !visivel;
+            });
+            // pergunta-base do estimador "não sei o valor" (só nos segmentos de perda mensal)
+            if ('perda_mensal' in seg.campos) {
+                document.getElementById('estimativa-pergunta').textContent = seg.campos.perda_mensal.estimar || '';
+            }
+            // a prioridade tem opções diferentes em cada segmento
+            var prioridade = document.getElementById('id_prioridade');
+            var atual = prioridade.value;
+            prioridade.innerHTML = '';
+            seg.prioridades.forEach(function (op) {
+                var opcao = document.createElement('option');
+                opcao.value = op.valor;
+                opcao.textContent = op.texto;
+                if (op.valor === atual) opcao.selected = true;
+                prioridade.appendChild(opcao);
+            });
+            Object.keys(seg.campos).forEach(function (campo) {
+                var rotulo = document.querySelector('[data-rotulo="' + campo + '"]');
+                var ajuda = document.querySelector('[data-ajuda="' + campo + '"]');
+                if (rotulo) rotulo.textContent = seg.campos[campo].label;
+                if (ajuda) ajuda.textContent = seg.campos[campo].ajuda;
+            });
+        }
+
+        seletor.addEventListener('change', aplicar);
+        aplicar();
+    })();
+</script>
 {% endblock %}
