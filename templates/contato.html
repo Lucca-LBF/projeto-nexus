@@ -3,7 +3,7 @@
 {% block content %}
     <main class="page container mt-4 mb-5">
         
-        <!-- Cabeçalho da Página -->
+        
         <div class="section-title reveal">
             <span class="eyebrow">Suporte & Vendas</span>
             <h2>Como podemos <span class="nexus-highlight">ajudar?</span></h2>
@@ -12,10 +12,10 @@
             </p>
         </div>
 
-        <!-- Linha centralizada -->
+        
         <div class="row justify-content-center mt-4">
             
-            <!-- Coluna Central: Formulário -->
+           
             <div class="col-lg-7 col-md-9 reveal d2">
                 <div class="card hover-lift">
                     
@@ -25,7 +25,7 @@
                     
                     <div class="card-body p-4 p-md-5">
                         
-                        <!-- Lógica do Django: Se a view enviar sucesso=True, mostra o alerta verde -->
+                        
                         {% if sucesso %}
                             <div class="alert alert-success text-center py-4 border-0 shadow-sm" style="background-color: #E8F5E9;" role="alert">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" fill="currentColor" class="bi bi-check-circle text-success mb-3" viewBox="0 0 16 16">
@@ -39,11 +39,9 @@
                                 </a>
                             </div>
                             
-                        <!-- Se não tiver sucesso (ainda não enviou), mostra o formulário normalmente -->
                         {% else %}
                             <form action="" method="POST">
                                 
-                                <!-- CRACHÁ DE SEGURANÇA (Resolve o Erro 403) -->
                                 {% csrf_token %}
                                 
                                 <div class="mb-3">
