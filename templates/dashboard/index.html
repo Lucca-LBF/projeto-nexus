@@ -2,238 +2,113 @@
 
 {% block content %}
 
-<div class="container-fluid px-3 px-md-4 py-4">
-
-    <!-- Cabeçalho -->
-    <header class="mb-4">
-        <span class="badge bg-primary mb-2">
-            Monitoramento IoT
-        </span>
-
-        <h1 class="fw-bold mb-2">
-            Dashboard de Economia Operacional
-        </h1>
-
-        <p class="text-muted mb-0">
-            Acompanhe os custos operacionais e os benefícios financeiros da manutenção preditiva com IoT.
-        </p>
-    </header>
-
-    <div class="card mb-3">
-        <div class="card-header fw-bold">Premissas da simulação</div>
-            <ul class="list-group list-group-flush">
-                {% for rotulo, valor in entradas %}
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>{{ rotulo }}</span>
-                        <strong>{{ valor }}</strong>
-                    </li>
-                {% endfor %}
-            </ul>
-        <div class="card-footer">
-        <a href="{% url 'formulario_simulador' %}">Editar dados e simular de novo</a>
-        </div>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+      <h1 class="h3 fw-bold mb-1">Dashboard da simulação</h1>
+      <p class="text-muted mb-0">{{ segmento_nome }}, com {{ dias }} dias simulados.</p>
     </div>
-    
-    <!-- Indicadores financeiros -->
-    <section class="mb-4">
+    <div class="d-flex gap-2">
+      <a href="{% url 'formulario_simulador' %}" class="btn btn-outline-info w-100 mt-2 fw-bold">Editar dados e simular de novo</a>
+    </div>
+  </div>
 
-        <h2 class="h5 fw-bold mb-3">
-            Resumo financeiro
-        </h2>
+  {% if sem_perdas %}
+  <div class="alert alert-warning">
+    A simulação não encontrou perdas para comparar, então os gráficos de sensibilidade e de comparação foram omitidos.
+    Confira se a perda mensal ou o custo da hora parada foi preenchido.
+  </div>
+  {% endif %}
 
-        <div class="row g-3">
 
-            <!-- Custo sem IoT -->
-            <div class="col-12 col-md-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body p-4">
-
-                        <p class="text-muted mb-2">
-                            Custo sem IoT
-                        </p>
-
-                        <h3 class="text-danger fw-bold mb-2">
-                            R$ {{ total_sem_iot|floatformat:2 }}
-                        </h3>
-
-                        <small class="text-muted">
-                            Manutenção corretiva
-                        </small>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- Custo com IoT -->
-            <div class="col-12 col-md-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body p-4">
-
-                        <p class="text-muted mb-2">
-                            Custo com IoT
-                        </p>
-
-                        <h3 class="text-success fw-bold mb-2">
-                            R$ {{ total_com_iot|floatformat:2 }}
-                        </h3>
-
-                        <small class="text-muted">
-                            Manutenção preditiva
-                        </small>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- Economia total -->
-            <div class="col-12 col-md-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body p-4">
-
-                        <p class="text-muted mb-2">
-                            Economia total
-                        </p>
-
-                        <h3 class="text-primary fw-bold mb-2">
-                            R$ {{ economia|floatformat:2 }}
-                        </h3>
-
-                        <span class="badge bg-primary-subtle text-primary">
-                            {{ percentual_economia|floatformat:2 }}%
-                        </span>
-
-                        <small class="text-muted d-block mt-2">
-                            Em relação ao custo sem IoT
-                        </small>
-
-                    </div>
-                </div>
-            </div>
-
+  <div class="row g-3 mb-4">
+    {% for k in kpis %}
+    <div class="col-sm-6 col-xl">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="small text-muted fw-semibold">{{ k.titulo }}</div>
+          <div class="fs-4 fw-bold {{ k.classe }}">{{ k.valor }}</div>
+          <div class="small text-muted">{{ k.detalhe }}</div>
         </div>
-    </section>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
 
-    <!-- Economia por categoria -->
-    <section class="card border-0 shadow-sm mb-4">
 
-        <div class="card-body p-4">
+  {% if graficos.linha %}
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">{{ graficos.linha|safe }}</div>
+  </div>
+  {% endif %}
 
-            <h2 class="h5 fw-bold mb-1">
-                Economia por categoria
-            </h2>
-
-            <p class="text-muted small mb-4">
-                Distribuição da economia entre os principais componentes da operação.
-            </p>
-
-            <div class="row g-3">
-
-                <!-- Economia com energia -->
-                <div class="col-12 col-md-4">
-                    <div class="category-card p-3 rounded-3 h-100">
-
-                        <span class="text-muted small">
-                            Energia
-                        </span>
-
-                        <h4 class="fw-bold mt-2 mb-0">
-                            R$ {{ economia_energia|default:0|floatformat:2 }}
-                        </h4>
-
-                        <small class="text-muted">
-                            Custos de consumo energético
-                        </small>
-
-                    </div>
-                </div>
-
-                <!-- Economia com manutenção -->
-                <div class="col-12 col-md-4">
-                    <div class="category-card p-3 rounded-3 h-100">
-
-                        <span class="text-muted small">
-                            Manutenção
-                        </span>
-
-                        <h4 class="fw-bold mt-2 mb-0">
-                            R$ {{ economia_manutencao|default:0|floatformat:2 }}
-                        </h4>
-
-                        <small class="text-muted">
-                            Gastos com reparos e equipamentos
-                        </small>
-
-                    </div>
-                </div>
-
-                <!-- Economia com paradas -->
-                <div class="col-12 col-md-4">
-                    <div class="category-card p-3 rounded-3 h-100">
-
-                        <span class="text-muted small">
-                            Paradas de máquinas
-                        </span>
-
-                        <h4 class="fw-bold mt-2 mb-0">
-                            R$ {{ economia_paradas|default:0|floatformat:2 }}
-                        </h4>
-
-                        <small class="text-muted">
-                            Custos associados à interrupção da produção
-                        </small>
-
-                    </div>
-                </div>
-
-            </div>
+  <div class="row g-4 mb-4">
+    {% if graficos.sensibilidade %}
+    <div class="col-lg-7">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          {{ graficos.sensibilidade|safe }}
+          <p class="small text-muted mb-0">
+            Cada ponto da linha é o resultado líquido se as perdas caíssem naquele percentual.
+            A linha tracejada marca a redução mínima para os sensores se pagarem.
+            O círculo é a sua simulação e o losango é a premissa de referência.
+          </p>
         </div>
-    </section>
+      </div>
+    </div>
+    {% endif %}
 
-    <!-- Análise gráfica -->
-    <section class="card border-0 shadow-sm mb-4">
+    {% if graficos.barras %}
+    <div class="col-lg-5">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">{{ graficos.barras|safe }}</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
 
-        <div class="card-body p-3 p-md-4">
+  
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white fw-bold">Premissas da simulação</div>
+    <div class="card-body">
+      {% if not premissa_confirmada %}
+      <div class="alert alert-warning">
+        A redução de perdas deste segmento é uma premissa de referência ainda não confirmada.
+        Use o gráfico de sensibilidade para ver como o resultado muda com outros percentuais.
+      </div>
+      {% endif %}
 
-            <div class="mb-3">
-                <h2 class="h5 fw-bold mb-1">
-                    Análise de eficiência operacional
-                </h2>
-
-                <p class="text-muted small mb-0">
-                    Compare a evolução dos custos nos cenários com e sem monitoramento IoT.
-                </p>
-            </div>
-
-            {% if grafico_linhas %}
-
-                <div class="grafico-container">
-                    {{ grafico_linhas|safe }}
-                </div>
-
-            {% else %}
-
-                <div class="text-center py-5">
-                    <h3 class="h5 fw-bold">
-                        Nenhuma simulação disponível
-                    </h3>
-
-                    <p class="text-muted mb-0">
-                        Realize uma simulação para visualizar a projeção dos custos operacionais.
-                    </p>
-                </div>
-
-            {% endif %}
-
-            <hr class="my-3">
-
-            <p class="text-muted small mb-0">
-                <strong>Observação:</strong>
-                {{ nota_explicativa }}
-            </p>
-
+      <div class="row g-4">
+        <div class="col-md-6">
+          <h2 class="h6 fw-bold">Dados que você informou</h2>
+          <ul class="list-group list-group-flush">
+            {% for rotulo, valor in entradas %}
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span>{{ rotulo }}</span>
+              <strong>{{ valor }}</strong>
+            </li>
+            {% endfor %}
+          </ul>
         </div>
-    </section>
+
+        <div class="col-md-6">
+          <h2 class="h6 fw-bold">Referências do simulador</h2>
+          <ul class="list-group list-group-flush">
+            {% for rotulo, valor in referencias %}
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span>{{ rotulo }}</span>
+              <strong>{{ valor }}</strong>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer bg-white">
+      <a href="{% url 'formulario_simulador' %}">Editar dados e simular de novo</a>
+    </div>
+  </div>
 
 </div>
+</body>
 
 {% endblock %}

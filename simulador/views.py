@@ -130,14 +130,8 @@ def calcular_simulacao(request):
     total_operacional_novo = df['Custo_Com_IoT'].sum()
     economia_bruta = total_operacional_antigo - total_operacional_novo
 
-    # o dashboard separa a economia em categorias: paradas (ou perdas), manutenção e energia
-    economia_paradas = economia_bruta - economia_conserto
-    # Exemplo (20%, 15%): usado enquanto a pessoa não informa o gasto com conserto de emergência
-    custo_manutencao_periodo = total_operacional_antigo * 0.20
-    custo_energia_periodo = total_operacional_antigo * 0.15
-    # Economia estimada proporcional à redução das falhas
-    economia_manutencao = custo_manutencao_periodo * reducao_iot
-    economia_energia = custo_energia_periodo * reducao_iot
+    economia_paradas = economia_bruta
+
     if conserto_diario > 0:
         # com o valor real informado, a manutenção deixa de ser exemplo
         economia_manutencao = economia_conserto
@@ -152,8 +146,6 @@ def calcular_simulacao(request):
         'total_com_iot': float(total_operacional_novo),
         'economia_bruta': float(economia_bruta),
         'economia_paradas': float(economia_paradas),
-        'economia_manutencao': float(economia_manutencao),
-        'economia_energia': float(economia_energia),
         'investimento_periodo': float(investimento_periodo),
         'resultado_liquido': float(resultado_liquido),
         'dados_grafico_dias': df['Dia'].tolist(),
