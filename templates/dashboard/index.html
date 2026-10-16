@@ -66,47 +66,6 @@
     {% endif %}
   </div>
 
-  
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-white fw-bold">Premissas da simulação</div>
-    <div class="card-body">
-      {% if not premissa_confirmada %}
-      <div class="alert alert-warning">
-        A redução de perdas deste segmento é uma premissa de referência ainda não confirmada.
-        Use o gráfico de sensibilidade para ver como o resultado muda com outros percentuais.
-      </div>
-      {% endif %}
-
-      <div class="row g-4">
-        <div class="col-md-6">
-          <h2 class="h6 fw-bold">Dados que você informou</h2>
-          <ul class="list-group list-group-flush">
-            {% for rotulo, valor in entradas %}
-            <li class="list-group-item d-flex justify-content-between px-0">
-              <span>{{ rotulo }}</span>
-              <strong>{{ valor }}</strong>
-            </li>
-            {% endfor %}
-          </ul>
-        </div>
-
-        <div class="col-md-6">
-          <h2 class="h6 fw-bold">Referências do simulador</h2>
-          <ul class="list-group list-group-flush">
-            {% for rotulo, valor in referencias %}
-            <li class="list-group-item d-flex justify-content-between px-0">
-              <span>{{ rotulo }}</span>
-              <strong>{{ valor }}</strong>
-            </li>
-            {% endfor %}
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="card-footer bg-white">
-      <a href="{% url 'formulario_simulador' %}">Editar dados e simular de novo</a>
-    </div>
-  </div>
 
 </div>
 </body>

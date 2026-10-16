@@ -132,10 +132,6 @@ def calcular_simulacao(request):
 
     economia_paradas = economia_bruta
 
-    if conserto_diario > 0:
-        # com o valor real informado, a manutenção deixa de ser exemplo
-        economia_manutencao = economia_conserto
-
     meses_simulados = dias_simulados / 30
     investimento_periodo = (num_maquinas * custo_sensor_iot) * meses_simulados
 

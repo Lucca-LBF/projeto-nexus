@@ -7,19 +7,19 @@
     <div class="container">
         <div class="row align-items-center g-5">
             <div class="col-lg-7">
-                <span class="pill-eyebrow">Simulador de ROI em IoT</span>
+                <span class="pill-eyebrow">Simulador de economia com IoT</span>
                 <h1 class="fw-bold mb-3">
-                    O futuro da indústria é <span class="nexus-highlight">guiado por dados.</span>
+                    Quanto a sua empresa pode <span class="nexus-highlight">economizar?</span>
                 </h1>
                 <p class="lead mb-4">
-                    O projeto <strong>NEXUS</strong> foi criado para educar empresas sobre a importância de coletar dados operacionais por meio de Sensores IoT. Deixe o achismo de lado e comece a tomar decisões baseadas em informações reais para reduzir custos e maximizar a eficiência da sua produção.
+                    Responda algumas perguntas rápidas e descubra, em menos de um minuto, quanto o monitoramento com sensores IoT da <strong>Bzu</strong> pode evitar em perdas na sua operação. Sem cadastro e sem achismo: o cálculo usa os números da sua empresa.
                 </p>
                 <div class="d-flex flex-wrap gap-3">
                     <a href="{% url 'formulario_simulador' %}" class="btn btn-white btn-lg px-4 py-3">
-                        Testar Simulador
+                        Descobrir minha economia
                     </a>
                     <a href="{% url 'contato' %}" class="btn btn-outline-light btn-lg px-4 py-3">
-                        Falar com a Equipe
+                        Tirar uma dúvida
                     </a>
                 </div>
             </div>
@@ -64,7 +64,7 @@
 <section class="mb-5 pt-2">
     <div class="section-title reveal">
         <span class="eyebrow">Benefícios</span>
-        <h2 class="fw-bold">Por que implementar <span class="nexus-highlight">IoT Industrial?</span></h2>
+        <h2 class="fw-bold">Por que implementar <span class="nexus-highlight">IoT?</span></h2>
     </div>
 
     <div class="row g-4 text-center">
@@ -73,7 +73,7 @@
                 <div class="card-body">
                     <span class="icon-bubble"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span>
                     <h3 class="h5 card-title fw-bold text-info">Visibilidade em Tempo Real</h3>
-                    <p class="card-text text-muted small">Saiba exatamente o que está acontecendo no chão de fábrica a qualquer momento. Chega de relatórios atrasados em planilhas.</p>
+                    <p class="card-text text-muted small">Saiba exatamente o que está acontecendo na sua operação a qualquer momento, seja em máquinas, câmaras frias, estufas ou prédios. Chega de relatórios atrasados em planilhas.</p>
                 </div>
             </div>
         </div>
@@ -82,8 +82,8 @@
             <div class="card h-100 p-3 border-0">
                 <div class="card-body">
                     <span class="icon-bubble"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></span>
-                    <h3 class="h5 card-title fw-bold text-info">Manutenção Preditiva</h3>
-                    <p class="card-text text-muted small">Aja antes que a máquina quebre. Sensores identificam vibrações e temperaturas anormais, evitando paradas catastróficas.</p>
+                    <h3 class="h5 card-title fw-bold text-info">Alertas Antes do Problema</h3>
+                    <p class="card-text text-muted small">Aja antes que algo falhe. Sensores identificam vibrações, temperaturas e variações fora do normal, evitando paradas e perdas.</p>
                 </div>
             </div>
         </div>
@@ -93,7 +93,7 @@
                 <div class="card-body">
                     <span class="icon-bubble"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>
                     <h3 class="h5 card-title fw-bold text-info">Redução de Custos</h3>
-                    <p class="card-text text-muted small">Menos tempo ocioso significa mais produção. O investimento em tecnologia se paga rapidamente com a redução do desperdício.</p>
+                    <p class="card-text text-muted small">Menos paradas, menos perdas e menos improviso. O investimento em sensores se paga com a redução do desperdício.</p>
                 </div>
             </div>
         </div>
@@ -121,7 +121,7 @@
             <div class="card step-card h-100 border-0">
                 <span class="step-num">02</span>
                 <div class="card-body">
-                    <h3 class="h5 fw-bold text-info">Responda poucas perguntas</h3>
+                    <h3 class="h5 fw-bold text-info">Responda uma pergunta por vez</h3>
                     <p class="text-muted small mb-0">Quantos pontos monitorar, quanto você perde hoje e quanto custa o sensor. Se não souber o valor, o simulador ajuda a estimar.</p>
                 </div>
             </div>
@@ -138,86 +138,53 @@
     </div>
 </section>
 
+<!-- Quem entrega -->
+<section class="mb-5">
+    <div class="section-title reveal">
+        <span class="eyebrow">Quem entrega</span>
+        <h2 class="fw-bold">Monitoramento feito pela <span class="nexus-highlight">Bzu</span></h2>
+        <p class="text-muted mb-0">O simulador mostra o potencial. A Bzu cuida do que vem depois.</p>
+    </div>
+
+    <div class="row g-4 text-center">
+        <div class="col-md-4 reveal d1">
+            <div class="card h-100 p-3 border-0">
+                <div class="card-body">
+                    <h3 class="h5 fw-bold text-info">Diagnóstico e mapeamento</h3>
+                    <p class="text-muted small mb-0">Antes de instalar, a Bzu entende a sua operação e define o que vale a pena monitorar.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 reveal d2">
+            <div class="card h-100 p-3 border-0">
+                <div class="card-body">
+                    <h3 class="h5 fw-bold text-info">Dados em uma só plataforma</h3>
+                    <p class="text-muted small mb-0">Os sensores enviam os dados para a plataforma BZU Cloud, com alertas para agir antes da perda.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 reveal d3">
+            <div class="card h-100 p-3 border-0">
+                <div class="card-body">
+                    <h3 class="h5 fw-bold text-info">Assinatura que escala</h3>
+                    <p class="text-muted small mb-0">Comece por poucos pontos e amplie conforme o resultado aparece.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="text-center mt-4 mb-0 reveal">
+        <a href="https://bzutech.com.br" target="_blank" rel="noopener" class="btn btn-outline-info px-4">Conhecer a Bzu</a>
+    </p>
+</section>
+
 <!-- Chamada final -->
 <section class="mb-5 reveal">
     <div class="cta-band">
-        <h2 class="fw-bold mb-2">Quanto a sua empresa pode economizar?</h2>
-        <p class="mb-4">Leva menos de um minuto para simular.</p>
-        <a href="{% url 'formulario_simulador' %}" class="btn btn-white btn-lg px-5 py-3">Começar a simulação</a>
-    </div>
-</section>
-
-<!-- Equipe -->
-<section class="mb-5">
-    <div class="section-title reveal pt-4">
-        <span class="eyebrow">Quem faz</span>
-        <h2 class="fw-bold">A Equipe <span class="nexus-highlight">NEXUS</span></h2>
-        <p class="text-muted mb-0">Os desenvolvedores por trás deste projeto de educação tecnológica.</p>
-    </div>
-
-    <div class="row justify-content-center">
-        <div class="col-lg-3 col-md-6 mb-4 reveal">
-            <div class="card team-card h-100 border-0 text-center">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-2">Guilherme Cireno Baltar</h5>
-                    <span class="team-tag">CC-B</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6 mb-4 reveal d1">
-            <div class="card team-card h-100 border-0 text-center">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-2">Gustavo Rogério Soares Filho</h5>
-                    <span class="team-tag">CC-B</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6 mb-4 reveal d2">
-            <div class="card team-card h-100 border-0 text-center">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-2">Ivon Buarque da Costa Neto</h5>
-                    <span class="team-tag">CC-B</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6 mb-4 reveal d3">
-            <div class="card team-card h-100 border-0 text-center">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-2">Lucca Lyra Batista Felix</h5>
-                    <span class="team-tag">CC-B</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6 mb-4 reveal">
-            <div class="card team-card h-100 border-0 text-center">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-2">Luiz Henrique de Andrade Rodrigues</h5>
-                    <span class="team-tag">CC-B</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6 mb-4 reveal d1">
-            <div class="card team-card h-100 border-0 text-center">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-2">Niara Rúbia Amorim Araújo</h5>
-                    <span class="team-tag">DESIGN-B</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6 mb-4 reveal d2">
-            <div class="card team-card h-100 border-0 text-center">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-2">Solon Antonio Coutinho Rosa Neto</h5>
-                    <span class="team-tag">CC-B</span>
-                </div>
-            </div>
-        </div>
+        <span class="cta-eyebrow">Calcule em menos de 1 minuto</span>
+        <h2 class="cta-titulo fw-bold mb-3">Quanto a sua empresa pode <span class="nexus-highlight">economizar?</span></h2>
+        <p class="cta-texto mb-4">Cada hora de máquina parada e cada falha que o sensor avisa antes viram dinheiro de volta. Responda algumas perguntas e veja o seu número, sem cadastro.</p>
+        <a href="{% url 'formulario_simulador' %}" class="btn btn-white btn-lg px-5 py-3">Descobrir minha economia</a>
     </div>
 </section>
 {% endblock %}

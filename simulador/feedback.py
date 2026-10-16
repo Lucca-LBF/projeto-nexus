@@ -27,7 +27,7 @@ def moeda(valor):
 
 def link_diagnostico(nome_industria, num_pontos, unidade, roi_texto):
     """Link do WhatsApp da Bzu com a mensagem pronta (só segmento, quantidade e ROI, nada pessoal)."""
-    mensagem = (f"Olá! Fiz uma simulação no simulador da Nexus (segmento: {nome_industria}, "
+    mensagem = (f"Olá, Bzu! Fiz uma simulação no simulador de economia com IoT (segmento: {nome_industria}, "
                 f"{num_pontos} {unidade.lower()}, ROI estimado de {roi_texto}) e gostaria de pedir um diagnóstico.")
     return f"https://wa.me/{WHATSAPP_BZU}?text={quote(mensagem)}"
 

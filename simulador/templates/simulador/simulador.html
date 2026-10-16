@@ -1,77 +1,121 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row justify-content-center my-5">
-    <div class="col-md-7 col-lg-6">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="mb-0">Simule a sua economia</h4>
-            </div>
-            <div class="card-body">
-                <p class="text-muted mb-3" id="intro-segmento">{{ form.intro }}</p>
-                <p class="bzu-ajuda"><strong class="text-info">Como a Bzu ajuda:</strong> <span id="bzu-monitorar">{{ form.monitorar }}</span></p>
+<div class="wiz" id="wiz">
 
-                {% if form.errors %}
-                <div class="alert alert-danger py-2 small" role="alert">Confira os campos destacados em vermelho e tente de novo.</div>
-                {% elif tem_memoria %}
-                <p class="small text-info mb-3">Mostrando os dados da sua última simulação.</p>
-                {% endif %}
+    {% if tem_memoria %}
+    <div class="wiz-memoria" id="wiz-memoria">
+        <span>Mostrando os dados da sua última simulação. Ajuste o que quiser.</span>
+        <span class="wiz-memoria-links">
+            <a href="{% url 'resultado_simulacao' %}">Ver o último resultado</a>
+            <a href="{% url 'formulario_simulador' %}?nova=1">Começar do zero</a>
+        </span>
+    </div>
+    {% endif %}
 
-                <form method="post" action="{% url 'resultado_simulacao' %}">
-                    {% csrf_token %}
-
-                    {% for campo in form %}
-                    <div class="mb-3" data-campo="{{ campo.name }}"{% if campo.field.disabled %} hidden{% endif %}>
-                        <label for="{{ campo.id_for_label }}" class="form-label" data-rotulo="{{ campo.name }}">{{ campo.label }}</label>
-                        {{ campo }}
-                        {% for erro in campo.errors %}
-                        <div class="invalid-feedback d-block">{{ erro }}</div>
-                        {% endfor %}
-                        {% if campo.help_text %}
-                        <div class="form-text text-muted" data-ajuda="{{ campo.name }}">{{ campo.help_text }}</div>
-                        {% endif %}
-                        {% if campo.name == "perda_mensal" %}
-                        <button type="button" class="btn btn-link btn-sm p-0 mt-1 text-info" id="abrir-estimativa" aria-expanded="false" aria-controls="painel-estimativa">Não sei o valor, quero estimar</button>
-                        <div id="painel-estimativa" class="painel-estimativa" hidden>
-                            <label for="estimativa-base" class="form-label small" id="estimativa-pergunta"></label>
-                            <input type="number" min="0" step="0.01" id="estimativa-base" class="form-control mb-3" placeholder="Ex: 50000.00">
-                            <label for="estimativa-pct" class="form-label small">Quanto disso você acha que se perde hoje?</label>
-                            <select id="estimativa-pct" class="form-select mb-3">
-                                {% for valor, texto in percentuais_estimativa %}
-                                <option value="{{ valor }}"{% if valor == 10 %} selected{% endif %}>{{ texto }}</option>
-                                {% endfor %}
-                            </select>
-                            <button type="button" class="btn btn-outline-info btn-sm" id="usar-estimativa">Usar esta estimativa</button>
-                            <div class="form-text text-muted mt-2" id="estimativa-resultado">Os percentuais são uma referência. Se souber o valor real, digite direto no campo acima.</div>
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-
-                    <button type="submit" class="btn btn-primary w-100 mt-3 py-2">Calcular ROI</button>
-                    {% if tem_memoria %}
-                    <a href="{% url 'formulario_simulador' %}?nova=1" class="btn btn-outline-info w-100 mt-2">Começar nova simulação</a>
-                    {% endif %}
-                </form>
-            </div>
+    <!-- progresso (só aparece com JavaScript) -->
+    <div class="wiz-topo" id="wiz-topo" hidden>
+        <div class="wiz-barra" role="progressbar" aria-label="Progresso do simulador" aria-valuemin="1" aria-valuemax="10" aria-valuenow="1">
+            <span id="wiz-barra"></span>
         </div>
+        <div class="wiz-contagem">
+            <span id="wiz-contagem">Pergunta 1 de 10</span>
+            <span class="wiz-msg" id="wiz-msg"></span>
+            <button type="button" class="wiz-pill" id="wiz-segmento" hidden title="Trocar o tipo de empresa"></button>
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'resultado_simulacao' %}" id="wiz-form">
+        {% csrf_token %}
+
+        {% for campo in form %}
+        <section class="wiz-passo" data-campo="{{ campo.name }}"{% if campo.field.disabled %} hidden{% endif %}>
+            <label for="{{ campo.id_for_label }}" class="wiz-pergunta" data-rotulo="{{ campo.name }}">{{ campo.label }}</label>
+            {% if campo.help_text %}
+            <p class="wiz-ajuda" data-ajuda="{{ campo.name }}">{{ campo.help_text }}</p>
+            {% endif %}
+
+            <div class="wiz-resposta{% if campo.name == 'custo_hora_parada' or campo.name == 'perda_mensal' or campo.name == 'conserto_mensal' or campo.name == 'custo_sensor_iot' %} wiz-moeda{% endif %}">
+                {{ campo }}
+            </div>
+            <div class="wiz-opcoes" role="radiogroup" aria-labelledby="{{ campo.id_for_label }}" hidden></div>
+
+            {% for erro in campo.errors %}
+            <div class="wiz-erro wiz-erro-servidor" role="alert">{{ erro }}</div>
+            {% endfor %}
+            <div class="wiz-erro" role="alert" hidden></div>
+
+            {% if campo.name == "tipo_industria" %}
+            <p class="bzu-ajuda mt-4"><strong class="text-info">Como a Bzu ajuda:</strong> <span id="bzu-monitorar">{{ form.monitorar }}</span></p>
+            {% endif %}
+
+            {% if campo.name == "perda_mensal" %}
+            <button type="button" class="btn btn-link p-0 mt-3 text-info" id="abrir-estimativa" aria-expanded="false" aria-controls="painel-estimativa">Não sei o valor, quero estimar</button>
+            <div id="painel-estimativa" class="painel-estimativa" hidden>
+                <label for="estimativa-base" class="form-label" id="estimativa-pergunta"></label>
+                <input type="number" min="0" step="0.01" id="estimativa-base" class="form-control mb-3" placeholder="Ex: 50000.00">
+                <label for="estimativa-pct" class="form-label">Quanto disso você acha que se perde hoje?</label>
+                <select id="estimativa-pct" class="form-select mb-3">
+                    {% for valor, texto in percentuais_estimativa %}
+                    <option value="{{ valor }}"{% if valor == 10 %} selected{% endif %}>{{ texto }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="btn btn-outline-info btn-sm" id="usar-estimativa">Usar esta estimativa</button>
+                <div class="form-text text-muted mt-2" id="estimativa-resultado">Os percentuais são uma referência. Se souber o valor real, digite direto no campo acima.</div>
+            </div>
+            {% endif %}
+        </section>
+        {% endfor %}
+
+        <!-- sem JavaScript, o formulário continua funcionando em uma tela só -->
+        <button type="submit" class="btn btn-primary btn-lg w-100 mt-3" id="wiz-enviar-simples">Ver quanto posso economizar</button>
+
+        <div class="wiz-nav" id="wiz-nav" hidden>
+            <button type="button" class="btn btn-link wiz-voltar" id="wiz-voltar">&larr; Voltar</button>
+            <button type="button" class="btn btn-primary btn-lg" id="wiz-continuar">Continuar</button>
+        </div>
+    </form>
+</div>
+
+<!-- tela rápida de carregamento: aparece entre a última pergunta e o resultado -->
+<div class="wiz-carregando" id="wiz-carregando" role="status" aria-live="polite" hidden>
+    <div class="wiz-carregando-miolo">
+        <div class="wiz-anel" aria-hidden="true"></div>
+        <p class="wiz-carregando-frase" id="wiz-frase">Analisando as respostas da sua empresa...</p>
+        <div class="wiz-carregando-barra" aria-hidden="true"><span id="wiz-carregando-prog"></span></div>
     </div>
 </div>
 
 {{ segmentos|json_script:"segmentos-data" }}
 <script>
-    // troca as perguntas quando a pessoa escolhe outro tipo de empresa
+    // formulário em passos: uma pergunta por tela
     (function () {
         var segmentos = JSON.parse(document.getElementById('segmentos-data').textContent);
+        var form = document.getElementById('wiz-form');
         var seletor = document.getElementById('id_tipo_industria');
+        var blocos = Array.prototype.slice.call(form.querySelectorAll('.wiz-passo'));
+        var topo = document.getElementById('wiz-topo');
+        var nav = document.getElementById('wiz-nav');
+        var barra = document.getElementById('wiz-barra');
+        var barraAria = topo.querySelector('[role="progressbar"]');
+        var contagem = document.getElementById('wiz-contagem');
+        var mensagem = document.getElementById('wiz-msg');
+        var pill = document.getElementById('wiz-segmento');
+        var memoria = document.getElementById('wiz-memoria');
+        var btnVoltar = document.getElementById('wiz-voltar');
+        var btnContinuar = document.getElementById('wiz-continuar');
+        var passos = [];
+        var atual = 0;
+        var enviando = false;
+        var avancando = false;
 
+        /* ---------- estimador "não sei o valor" (segmentos de perda mensal) ---------- */
         var painel = document.getElementById('painel-estimativa');
         var abrir = document.getElementById('abrir-estimativa');
-        abrir.addEventListener('click', function () {
-            painel.hidden = !painel.hidden;
-            abrir.setAttribute('aria-expanded', String(!painel.hidden));
-        });
-        document.getElementById('usar-estimativa').addEventListener('click', function () {
+        function formatar(n) {
+            return n.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+        function usarEstimativa() {
             var base = parseFloat(document.getElementById('estimativa-base').value);
             var aviso = document.getElementById('estimativa-resultado');
             if (!(base > 0)) {
@@ -81,15 +125,24 @@
             var pct = parseFloat(document.getElementById('estimativa-pct').value);
             var estimado = Math.round(base * pct) / 100;
             document.getElementById('id_perda_mensal').value = estimado;
-            aviso.textContent = 'Estimativa: R$ ' + estimado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})
-                + ' por mês (' + pct + '% de R$ ' + base.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+            aviso.textContent = 'Estimativa: R$ ' + formatar(estimado) + ' por mês (' + pct + '% de R$ ' + formatar(base)
                 + '). Você pode ajustar o campo acima.';
-        });
+        }
+        if (abrir) {
+            abrir.addEventListener('click', function () {
+                painel.hidden = !painel.hidden;
+                abrir.setAttribute('aria-expanded', String(!painel.hidden));
+            });
+            document.getElementById('usar-estimativa').addEventListener('click', usarEstimativa);
+            document.getElementById('estimativa-base').addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') { e.preventDefault(); usarEstimativa(); }
+            });
+        }
 
+        /* ---------- perguntas e opções de cada tipo de empresa ---------- */
         function aplicar() {
             var seg = segmentos[seletor.value];
             if (!seg) return;
-            document.getElementById('intro-segmento').textContent = seg.intro;
             document.getElementById('bzu-monitorar').textContent = seg.monitorar;
             // cada segmento usa só um destes dois campos; o regime de funcionamento só vale nos de paradas
             var usados = {
@@ -98,35 +151,264 @@
                 regime_funcionamento: seg.modelo === 'paradas'
             };
             Object.keys(usados).forEach(function (campo) {
-                var bloco = document.querySelector('[data-campo="' + campo + '"]');
+                var bloco = form.querySelector('[data-campo="' + campo + '"]');
                 bloco.hidden = !usados[campo];
                 bloco.querySelector('input, select').disabled = !usados[campo];
             });
-            // pergunta-base do estimador "não sei o valor" (só nos segmentos de perda mensal)
+            // pergunta-base do estimador (só nos segmentos de perda mensal)
             if ('perda_mensal' in seg.campos) {
                 document.getElementById('estimativa-pergunta').textContent = seg.campos.perda_mensal.estimar || '';
             }
             // a prioridade tem opções diferentes em cada segmento
             var prioridade = document.getElementById('id_prioridade');
-            var atual = prioridade.value;
+            var escolhida = prioridade.value;
             prioridade.innerHTML = '';
             seg.prioridades.forEach(function (op) {
                 var opcao = document.createElement('option');
                 opcao.value = op.valor;
                 opcao.textContent = op.texto;
-                if (op.valor === atual) opcao.selected = true;
+                if (op.valor === escolhida) opcao.selected = true;
                 prioridade.appendChild(opcao);
             });
             Object.keys(seg.campos).forEach(function (campo) {
-                var rotulo = document.querySelector('[data-rotulo="' + campo + '"]');
-                var ajuda = document.querySelector('[data-ajuda="' + campo + '"]');
+                var rotulo = form.querySelector('[data-rotulo="' + campo + '"]');
+                var ajuda = form.querySelector('[data-ajuda="' + campo + '"]');
                 if (rotulo) rotulo.textContent = seg.campos[campo].label;
                 if (ajuda) ajuda.textContent = seg.campos[campo].ajuda;
             });
         }
 
-        seletor.addEventListener('change', aplicar);
-        aplicar();
+        /* ---------- passo a passo ---------- */
+        function ativos() {
+            return blocos.filter(function (b) { return !b.hidden; });
+        }
+        function ehEscolha(b) { return !!b.querySelector('.wiz-resposta select'); }
+        function campoDe(b) { return b.querySelector('.wiz-resposta input, .wiz-resposta select'); }
+        function caixaErro(b) { return b.querySelector('.wiz-erro:not(.wiz-erro-servidor)'); }
+
+        function marcarOpcao(cont, indice) {
+            Array.prototype.forEach.call(cont.children, function (btn, i) {
+                var sel = i === indice;
+                btn.classList.toggle('sel', sel);
+                btn.setAttribute('aria-checked', String(sel));
+            });
+        }
+
+        function montarOpcoes(b) {
+            var select = b.querySelector('.wiz-resposta select');
+            var cont = b.querySelector('.wiz-opcoes');
+            cont.innerHTML = '';
+            cont.classList.toggle('wiz-opcoes-grande', select.options.length > 6);
+            Array.prototype.forEach.call(select.options, function (op, i) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'wiz-opcao';
+                btn.setAttribute('role', 'radio');
+                btn.textContent = op.textContent;
+                btn.addEventListener('click', function () {
+                    if (avancando) return;
+                    select.value = op.value;
+                    select.dispatchEvent(new Event('change', {bubbles: true}));
+                    marcarOpcao(cont, i);
+                    atualizarTopo();
+                    // responder já leva à próxima pergunta
+                    avancando = true;
+                    setTimeout(function () { avancando = false; avancar(); }, 280);
+                });
+                cont.appendChild(btn);
+            });
+            marcarOpcao(cont, select.selectedIndex);
+            cont.hidden = false;
+        }
+
+        function textoDoBotao(b) {
+            var campo = campoDe(b);
+            if (atual === passos.length - 1) return 'Ver quanto posso economizar';
+            if (campo && campo.tagName === 'INPUT' && !campo.required && campo.value.trim() === '') return 'Pular';
+            return 'Continuar';
+        }
+
+        function atualizarTopo() {
+            passos = ativos();
+            var n = passos.length;
+            contagem.textContent = 'Pergunta ' + (atual + 1) + ' de ' + n;
+            barra.style.width = ((atual + 1) / n * 100) + '%';
+            barraAria.setAttribute('aria-valuemax', n);
+            barraAria.setAttribute('aria-valuenow', atual + 1);
+            var msg = '';
+            if (atual === 0) msg = 'Leva menos de um minuto';
+            else if (atual === n - 1) msg = 'Última pergunta!';
+            else if (atual >= n - 3) msg = 'Falta pouco';
+            else if (atual === Math.floor(n / 2)) msg = 'Metade do caminho';
+            mensagem.textContent = msg;
+            var b = passos[atual];
+            btnContinuar.textContent = textoDoBotao(b);
+            btnVoltar.style.visibility = atual === 0 ? 'hidden' : 'visible';
+            if (memoria) memoria.hidden = atual !== 0;
+            pill.hidden = atual === 0;
+            if (atual > 0) pill.textContent = seletor.options[seletor.selectedIndex].textContent;
+        }
+
+        function mostrar(i, direcao) {
+            passos = ativos();
+            atual = Math.max(0, Math.min(i, passos.length - 1));
+            blocos.forEach(function (b) { b.classList.remove('ativo', 'volta'); });
+            var b = passos[atual];
+            b.classList.add('ativo');
+            if (direcao < 0) b.classList.add('volta');
+            if (ehEscolha(b)) montarOpcoes(b);
+            atualizarTopo();
+            // foco no campo (abre o teclado numérico no celular) ou na opção marcada
+            var alvo = ehEscolha(b) ? (b.querySelector('.wiz-opcao.sel') || b.querySelector('.wiz-opcao')) : campoDe(b);
+            if (alvo) { try { alvo.focus({preventScroll: true}); } catch (e) { alvo.focus(); } }
+        }
+
+        function erro(b, texto) {
+            var caixa = caixaErro(b);
+            var campo = campoDe(b);
+            if (!texto) {
+                caixa.hidden = true;
+                if (campo) campo.classList.remove('is-invalid');
+                return;
+            }
+            caixa.textContent = texto;
+            caixa.hidden = false;
+            if (campo) campo.classList.add('is-invalid');
+        }
+
+        // devolve o texto do erro (ou '' se a resposta está boa)
+        function validar(b) {
+            var campo = campoDe(b);
+            if (!campo || campo.tagName === 'SELECT' || campo.disabled) return '';
+            if (campo.value.trim() === '' && !campo.validity.badInput) {
+                return campo.required ? 'Responda para continuar.' : '';
+            }
+            var v = campo.validity;
+            if (v.badInput) return 'Digite apenas números.';
+            if (v.rangeUnderflow) {
+                var minimo = parseFloat(campo.min);
+                if (minimo >= 1) return 'Informe pelo menos ' + minimo + '.';
+                if (minimo > 0) return 'Informe um valor maior que zero.';
+                return 'O valor não pode ser negativo.';
+            }
+            if (v.rangeOverflow) return 'Esse valor é alto demais. Confira os zeros.';
+            if (v.stepMismatch) {
+                return (campo.step === '' || campo.step === '1') ? 'Use um número inteiro, sem vírgula.' : 'Use no máximo 2 casas depois do ponto.';
+            }
+            return '';
+        }
+
+        function avancar() {
+            var b = passos[atual];
+            var texto = validar(b);
+            erro(b, texto);
+            if (texto) { campoDe(b).focus(); return; }
+            if (atual < passos.length - 1) mostrar(atual + 1, 1);
+            else enviar();
+        }
+
+        function enviar() {
+            // confere todas as respostas antes de enviar
+            for (var i = 0; i < passos.length; i++) {
+                var texto = validar(passos[i]);
+                if (texto) { mostrar(i, -1); erro(passos[i], texto); return; }
+            }
+            if (enviando) return;
+            enviando = true;
+            btnContinuar.disabled = true;
+            btnVoltar.disabled = true;
+            btnContinuar.textContent = 'Calculando a sua economia...';
+            mostrarCarregando(function () { form.submit(); });
+        }
+
+        // tela de carregamento: frases que trocam por alguns segundos, depois envia
+        var FRASES = [
+            'Analisando as respostas da sua empresa...',
+            'Estimando as perdas com paradas e falhas...',
+            'Simulando o efeito do monitoramento com sensores...',
+            'Calculando o seu retorno...',
+            'Preparando o seu resultado...'
+        ];
+        function mostrarCarregando(depois) {
+            var tela = document.getElementById('wiz-carregando');
+            var frase = document.getElementById('wiz-frase');
+            var prog = document.getElementById('wiz-carregando-prog');
+            var reduzido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            var porFrase = reduzido ? 350 : 700;
+            // fora do container da página, para cobrir a tela inteira
+            if (tela.parentNode !== document.body) document.body.appendChild(tela);
+            tela.hidden = false;
+            document.body.classList.add('wiz-sem-rolagem');
+            var i = 0;
+            prog.style.transitionDuration = (porFrase * FRASES.length) + 'ms';
+            // força o navegador a registrar a largura inicial antes de animar
+            void prog.offsetWidth;
+            prog.style.width = '100%';
+            (function proxima() {
+                if (i >= FRASES.length) { depois(); return; }
+                frase.classList.remove('entra');
+                void frase.offsetWidth;
+                frase.textContent = FRASES[i];
+                frase.classList.add('entra');
+                i++;
+                setTimeout(proxima, porFrase);
+            })();
+        }
+        // voltando pelo botão do navegador, a tela não pode ficar presa
+        window.addEventListener('pageshow', function (e) {
+            if (!e.persisted) return;
+            document.getElementById('wiz-carregando').hidden = true;
+            document.body.classList.remove('wiz-sem-rolagem');
+            document.getElementById('wiz-carregando-prog').style.width = '0';
+            enviando = false;
+            btnContinuar.disabled = false;
+            btnVoltar.disabled = false;
+            btnContinuar.textContent = textoDoBotao(passos[atual]);
+        });
+
+        function iniciar() {
+            form.noValidate = true;
+            form.classList.add('wiz-on');
+            topo.hidden = false;
+            nav.hidden = false;
+            document.getElementById('wiz-enviar-simples').hidden = true;
+            aplicar();
+
+            btnContinuar.addEventListener('click', avancar);
+            btnVoltar.addEventListener('click', function () { erro(passos[atual], ''); mostrar(atual - 1, -1); });
+            pill.addEventListener('click', function () { mostrar(0, -1); });
+            seletor.addEventListener('change', function () { aplicar(); atualizarTopo(); });
+
+            form.addEventListener('keydown', function (e) {
+                if (e.key !== 'Enter') return;
+                var alvo = e.target;
+                if (alvo.tagName === 'INPUT' && !alvo.closest('.painel-estimativa')) {
+                    e.preventDefault();
+                    avancar();
+                }
+            });
+            form.addEventListener('input', function (e) {
+                var b = e.target.closest('.wiz-passo');
+                if (!b || b !== passos[atual]) return;
+                erro(b, '');
+                var velho = b.querySelector('.wiz-erro-servidor');
+                if (velho) velho.hidden = true;
+                btnContinuar.textContent = textoDoBotao(b);
+            });
+            form.addEventListener('submit', function (e) {
+                if (!enviando) { e.preventDefault(); avancar(); }
+            });
+
+            // se o servidor devolveu erro, abre direto na pergunta com problema
+            var inicio = 0;
+            var lista = ativos();
+            for (var i = 0; i < lista.length; i++) {
+                if (lista[i].querySelector('.wiz-erro-servidor')) { inicio = i; break; }
+            }
+            mostrar(inicio, 1);
+        }
+
+        iniciar();
     })();
 </script>
 {% endblock %}

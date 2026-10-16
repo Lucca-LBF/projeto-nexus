@@ -161,20 +161,20 @@ class DadosEmpresaForm(forms.Form):
     )
 
     tipo_industria = forms.ChoiceField(
-        label="Tipo da empresa",
+        label="Qual é o tipo da sua empresa?",
         choices=TIPO_EMPRESA_CHOICES,
         initial="padrao",
         widget=forms.Select(attrs={"class": "form-select"}),
-        help_text="Muda as perguntas e o perfil usado na simulação.",
+        help_text="As próximas perguntas se adaptam ao seu setor.",
     )
 
     tempo_amostra = forms.TypedChoiceField(
-        label="Tempo de análise (dias/mês)",
+        label="Por quanto tempo você quer simular?",
         choices=TEMPO_ANALISE_CHOICES,
         coerce=int,
         initial=30,
         widget=forms.Select(attrs={"class": "form-select"}),
-        help_text="Período simulado, enviado em dias.",
+        help_text="Escolha o período da projeção do retorno.",
     )
 
     # as três perguntas abaixo não entram na conta do ROI: servem para personalizar o retorno

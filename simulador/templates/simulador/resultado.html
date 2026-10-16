@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="relatorio-cab">
+    <div class="relatorio-marca"><strong>BZU</strong> &middot; Relatório de economia com IoT</div>
+    <div class="relatorio-data">{{ nome_industria }} &middot; gerado em {% now "d/m/Y" %}</div>
+</div>
+
 <div class="row g-4">
 
     <!-- Resumo da simulação -->
@@ -11,7 +16,7 @@
             </div>
             <div class="card-body">
                 <div class="resumo-item">
-                    <small>Setor Industrial</small>
+                    <small>Segmento</small>
                     <div class="fs-5 fw-bold text-info">{{ nome_industria }}</div>
                 </div>
 
@@ -26,6 +31,11 @@
                     <div class="fs-5">{{ valor }}</div>
                 </div>
                 {% endfor %}
+
+                <button type="button" id="baixar-relatorio" class="btn btn-primary w-100 mt-2 fw-bold">
+                    Baixar relatório (PDF)
+                </button>
+                <p class="small text-muted mt-1 mb-0 relatorio-dica">Na janela que abrir, escolha "Salvar como PDF".</p>
 
                 <a href="{% url 'formulario_simulador' %}?nova=1" class="btn btn-outline-info w-100 mt-2 fw-bold">
                     Nova Simulação
@@ -68,7 +78,7 @@
         <div class="card shadow-sm border-0">
             <div class="card-body">
                 <h5 class="card-title text-secondary mb-1">Projeção de Custos de Falha ({{ dias_simulados }} Dias)</h5>
-                <p class="small text-muted mb-4">Nota: O gráfico reflete o ganho de eficiência no chão de fábrica. O custo de aquisição dos sensores não está na linha, mas é descontado no cálculo do ROI acima.</p>
+                <p class="small text-muted mb-4">Nota: O gráfico reflete o ganho de eficiência na sua operação. O custo de aquisição dos sensores não está na linha, mas é descontado no cálculo do ROI acima.</p>
                 <div id="meu_grafico_iot" style="width: 100%; height: 380px;"></div>
             </div>
         </div>
@@ -131,5 +141,34 @@
     };
 
     Plotly.newPlot('meu_grafico_iot', [trace1, trace2], layout, {responsive: true});
+</script>
+
+<div class="relatorio-rodape">
+    <p class="mb-1"><strong>Quer confirmar esses números no seu cenário?</strong> A Bzu faz um diagnóstico e define o que vale a pena monitorar.</p>
+    <p class="mb-0">{{ feedback.email }} &middot; {{ feedback.site }}</p>
+</div>
+
+<script>
+    // relatório em PDF: usa a impressão do navegador ("Salvar como PDF")
+    (function () {
+        var botao = document.getElementById('baixar-relatorio');
+        var abertos = [];
+        function redimensionar() {
+            try { Plotly.Plots.resize('meu_grafico_iot'); } catch (e) {}
+        }
+        if (botao) botao.addEventListener('click', function () { window.print(); });
+        window.addEventListener('beforeprint', function () {
+            // abre "Como calculamos" para sair no relatório
+            abertos = [];
+            document.querySelectorAll('details').forEach(function (d) {
+                if (!d.open) { d.open = true; abertos.push(d); }
+            });
+            redimensionar();
+        });
+        window.addEventListener('afterprint', function () {
+            abertos.forEach(function (d) { d.open = false; });
+            redimensionar();
+        });
+    })();
 </script>
 {% endblock %}

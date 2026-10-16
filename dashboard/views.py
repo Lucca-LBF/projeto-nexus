@@ -190,13 +190,23 @@ def _indicadores(simulacao, segmento):
 
     kpis = []
 
-    kpis.append({
-        'titulo': f'Resultado líquido ({dias} dias)',
-        'valor': _brl(liquido),
-        'detalhe': (f'ROI de {_pct(liquido / investimento * 100)}'
-                    if investimento > 0 else 'Sem investimento informado'),
-        'classe': 'text-success' if liquido >= 0 else 'text-danger',
-    })
+    if liquido >= 0:
+        kpis.append({
+            'titulo': f'Resultado líquido ({dias} dias)',
+            'valor': _brl(liquido),
+            'detalhe': (f'ROI de {_pct(liquido / investimento * 100)}'
+                        if investimento > 0 else 'Sem investimento informado'),
+            'classe': 'text-success',
+        })
+    else:
+        # sem mostrar valor negativo: explica quanto falta para os sensores se pagarem
+        kpis.append({
+            'titulo': f'Resultado líquido ({dias} dias)',
+            'valor': 'Ainda sem retorno',
+            'detalhe': (f'A economia de {_brl(economia)} ainda não cobre o investimento de {_brl(investimento)}. '
+                        'Teste um período maior ou menos sensores.'),
+            'classe': 'text-danger',
+        })
 
     economia_mensal = economia / meses
     kpis.append({
