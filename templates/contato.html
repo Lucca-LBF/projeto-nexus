@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
     <main class="page container mt-4 mb-5">
@@ -81,6 +82,58 @@
                 </div>
             </div>
 
+        </div>
+
+        <div class="section-title reveal mt-5 pt-5 border-top">
+            <span class="eyebrow">Quem desenvolveu</span>
+            <h2>A equipe do <span class="nexus-highlight">projeto</span></h2>
+            <p class="text-muted mx-auto" style="max-width: 600px;">
+                Os desenvolvedores por trás deste projeto de educação tecnológica.
+            </p>
+        </div>
+
+        <div class="row justify-content-center mt-4 reveal">
+            <div class="col-lg-3 col-md-4 col-6 mb-4 text-center">
+                <img src="{% static 'fotos/foto_de_guilherme.jpg' %}" alt="Foto de Guilherme" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+                <h5 class="fw-bold mb-1 fs-6">Guilherme Cireno Baltar</h5>
+                <p class="text-muted small mb-0">CC-B</p>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-6 mb-4 text-center">
+                <img src="{% static 'fotos/foto_de_gustavo.jpg' %}" alt="Foto de Gustavo" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+                <h5 class="fw-bold mb-1 fs-6">Gustavo Rogério Soares Filho</h5>
+                <p class="text-muted small mb-0">CC-B</p>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-6 mb-4 text-center">
+                <img src="{% static 'fotos/foto_de_ivon.jpg' %}" alt="Foto de Ivon" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+                <h5 class="fw-bold mb-1 fs-6">Ivon Buarque da Costa Neto</h5>
+                <p class="text-muted small mb-0">CC-B</p>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-6 mb-4 text-center">
+                <img src="{% static 'fotos/foto_de_lucca.jpg' %}" alt="Foto de Lucca" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+                <h5 class="fw-bold mb-1 fs-6">Lucca Lyra Batista Felix</h5>
+                <p class="text-muted small mb-0">CC-B</p>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-6 mb-4 text-center">
+                <img src="{% static 'fotos/foto_de_luiz.jpg' %}" alt="Foto de Luiz" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+                <h5 class="fw-bold mb-1 fs-6">Luiz Henrique de Andrade Rodrigues</h5>
+                <p class="text-muted small mb-0">CC-B</p>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-6 mb-4 text-center">
+                <img src="{% static 'fotos/foto_de_niara.jpg' %}" alt="Foto de Niara" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+                <h5 class="fw-bold mb-1 fs-6">Niara Rúbia Amorim Araújo</h5>
+                <p class="text-muted small mb-0">DESIGN-B</p>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-6 mb-4 text-center">
+                <img src="{% static 'fotos/foto_de_solon.jpg' %}" alt="Foto de Solon" class="rounded-circle mb-3 border border-3 border-info shadow" style="width: 120px; height: 120px; object-fit: cover;">
+                <h5 class="fw-bold mb-1 fs-6">Solon Antonio Coutinho Rosa Neto</h5>
+                <p class="text-muted small mb-0">CC-B</p>
+            </div>
         </div>
     </main>
 {% endblock %}
