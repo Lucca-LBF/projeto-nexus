@@ -61,7 +61,7 @@ Este documento contém as especificações ágeis e os critérios de aceite para
 
 ---
 
-### História de Usuário 5: Captação de Dúvidas e Leads Comerciais
+### 5. História de Usuário: Captação de Dúvidas e Leads Comerciais
 > **Como** um Diretor Industrial interessado,
 > **Eu quero** enviar uma mensagem com minhas dúvidas sobre o simulador ou um pedido de proposta comercial através de uma aba de Contato segura,
 > **Para que** a equipe NEXUS possa me retornar com um atendimento personalizado ou uma proposta técnica estruturada.
@@ -74,7 +74,7 @@ Este documento contém as especificações ágeis e os critérios de aceite para
 
 ---
 
-### História de Usuário 6: Compartilhamento de Feedback sobre a Experiência do Simulador
+### 6. História de Usuário: Compartilhamento de Feedback sobre a Experiência do Simulador
 > **Como** um Gestor de Operações (Cliente/Usuário da plataforma),
 > **Eu quero** ter um canal direto e simples para enviar críticas construtivas, relatar a minha experiência ou sugerir novas funcionalidades após usar o simulador,
 > **Para que** eu possa contribuir com a evolução da ferramenta e garantir que cenários específicos da minha indústria sejam considerados em atualizações futuras.
