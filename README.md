@@ -76,7 +76,6 @@ Define o formulário do Django utilizado para coletar os dados operacionais da e
 ---
 
 ##  Conversão, Atendimento e Melhoria Contínua
-![foto da historias do usuario 1](Historias1.png)
 
 ## Dashboard de Custos
 Busca os dados no banco de dados (EconomiaIoT) e gera gráficos comparativos usando a biblioteca Plotly.
