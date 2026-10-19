@@ -74,13 +74,14 @@ Este documento contém as especificações ágeis e os critérios de aceite para
 
 ---
 
-### História de Usuário 6: Compartilhamento de Feedback sobre a Experiência do Simulador
-> **Como** um Gestor de Operações (Cliente/Usuário da plataforma),
-> **Eu quero** ter um canal direto e simples para enviar críticas construtivas, relatar a minha experiência ou sugerir novas funcionalidades após usar o simulador,
-> **Para que** eu possa contribuir com a evolução da ferramenta e garantir que cenários específicos da minha indústria sejam considerados em atualizações futuras.
+### História de Usuário 6: Relatório do Resultado em PDF para Compartilhar
+> **Como** um Gestor de Operações que precisa convencer a diretoria,
+> **Eu quero** baixar o resultado da minha simulação em um relatório em PDF,
+> **Para que** eu possa compartilhar os números com meus superiores e decidir com a equipe, sem depender de prints de tela e sem precisar refazer a simulação.
 
 **Critérios de Aceite:**
-* O formulário de comunicação deve possuir uma opção de "Assunto" específica e clara para feedback.
-* O formulário deve conter um campo de texto livre e espaçoso para que eu possa detalhar a minha crítica ou ideia de nova funcionalidade.
-* O processo de envio de feedback deve ser rápido e aberto, não exigindo que eu crie uma conta ou faça login complexo no sistema.
-* Após clicar em enviar, a plataforma deve exibir uma mensagem visual clara de confirmação, para que eu tenha certeza de que a minha contribuição foi recebida com sucesso.
+* A tela de resultados deve ter um botão "Baixar relatório (PDF)", visível sem login ou cadastro.
+* Ao clicar, o navegador deve abrir a janela de impressão, de onde o usuário salva o arquivo com "Salvar como PDF".
+* O relatório deve conter o cabeçalho com a marca BZU, o segmento e a data de geração, o resumo dos dados informados, o lucro líquido (ou o prejuízo), o ROI, o gráfico de projeção de custos, o "Como calculamos" já aberto e a interpretação do resultado.
+* O relatório não deve exibir menu, rodapé do site nem botões, e deve caber em páginas A4 legíveis.
+* O rodapé do relatório deve trazer o contato da Bzu (e-mail e site) e o aviso de que o valor é uma estimativa feita com premissas de referência.
