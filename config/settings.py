@@ -2,10 +2,6 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,6 +21,9 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
 ]
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
