@@ -22,14 +22,134 @@ Relatório da analise de competidores:
 * Video 1 (Mostrando o Site): https://www.youtube.com/watch?v=VvhxWPgESnw
 * Video 2 (Funcionamento do Codigo): https://www.youtube.com/watch?v=V-c6cvEm9U4
 
+## Como rodar o projeto
+
+```
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+
+No Windows também dá para dar dois cliques no `run.bat`, que atualiza o banco e inicia o servidor. Depois é só abrir http://127.0.0.1:8000/.
+
+Páginas do sistema:
+
+| Endereço | O que é |
+| --- | --- |
+| `/` | Página inicial (home.html) |
+| `/simulador/` | Formulário do simulador, uma pergunta por tela |
+| `/simulador/resultado/` | Resultado da simulação (ROI, lucro ou prejuízo, explicação e feedback) |
+| `/dashboard/` | Dashboard com indicadores e gráficos da última simulação |
+| `/contato/` | Formulário de contato |
+| `/admin/` | Painel administrativo do Django (mensagens recebidas) |
+
+## Estrutura do projeto
+
+| Arquivo ou pasta | Responsabilidade |
+| --- | --- |
+| `config/` | Configurações do Django, rotas principais e as views da home e do contato |
+| `simulador/segmentos.py` | Catálogo dos segmentos: textos, premissas e perguntas de cada ramo de empresa |
+| `simulador/forms.py` | Formulário do simulador e todas as validações |
+| `simulador/views.py` | Motor de cálculo (NumPy e Pandas) e telas do formulário e do resultado |
+| `simulador/feedback.py` | Textos de retorno ao usuário, "Como calculamos" e link do WhatsApp da Bzu |
+| `simulador/models.py` | Modelo `MensagemContato`, que guarda as mensagens do contato |
+| `dashboard/views.py` | Indicadores e gráficos (Plotly) lidos da simulação que está na sessão |
+| `dashboard/models.py` | Modelos `SensorData` e `EconomiaIoT` (esse último vem da primeira versão do dashboard e não é mais usado pelas telas) |
+| `templates/` e `simulador/templates/` | Páginas HTML (base, home, contato, simulador, resultado e dashboard) |
+| `static/CSS/style.css` | Tema visual da Bzu, estilos do formulário passo a passo e da impressão do relatório |
+
 ## Views do Sistema
-Exibe o formulário de contato (contato.html) e renderiza a pagina inical (home.html)
-* Se receber um formulário via POST, salva os campos (nome, email, assunto, mensagem) no banco de dados (MensagemContato)
+Cada tela do sistema é uma view do Django:
+* **Home (`/`)**: renderiza a página inicial (home.html) com a proposta de valor, os benefícios do IoT e os botões para o simulador e para o contato.
+* **Contato (`/contato/`)**: exibe o formulário de contato (contato.html). Se receber um formulário via POST, salva os campos (nome, email, assunto, mensagem) no banco de dados (`MensagemContato`) e recarrega a página com uma mensagem de sucesso. O campo "Assunto" tem as opções: dúvida sobre o simulador, proposta comercial, feedback/sugestões e outros.
+* **Formulário do simulador (`/simulador/`)**: monta o formulário conforme o segmento e, se já houver uma simulação na sessão, preenche os campos com as respostas anteriores. O endereço `/simulador/?nova=1` apaga a simulação guardada e volta ao formulário em branco.
+* **Resultado (`/simulador/resultado/`)**: recebe o formulário, valida de novo no servidor, roda a simulação e mostra o resultado. Sem simulação na sessão, volta para o formulário.
+* **Dashboard (`/dashboard/`)**: usa a simulação guardada na sessão. Sem simulação, volta para o formulário.
+
+## Segmentos
+O arquivo `simulador/segmentos.py` é o catálogo de segmentos. Cada segmento define o nome, as perguntas que aparecem, as premissas do cálculo e os textos de retorno. Para criar um segmento novo, basta copiar um bloco do dicionário `SEGMENTOS` e trocar os textos.
+
+Segmentos disponíveis: Indústria em geral, Indústria têxtil, Indústria pesada, Cadeia fria e refrigeração, Alimentos e bebidas, Saúde e farmacêutica, Água, gás e energia, Edifícios inteligentes, Cidades inteligentes e Agronegócio.
+
+O que cada segmento configura:
+* **modelo**: `paradas` (a pessoa informa o custo de uma hora parada e o sistema calcula as horas perdidas) ou `perdas` (a pessoa informa quanto perde por mês).
+* **taxa_falha_base**: horas de parada por máquina ao dia (só no modelo `paradas`).
+* **reducao_iot**: percentual das perdas que o IoT evita.
+* **rotulo_pontos**: como chamar o que é monitorado (máquinas, câmaras frias, edifícios e assim por diante).
+* **intro, campos, prioridades, monitorar, conexao e caso**: textos do formulário e do retorno.
+
+Premissas de referência (podem ser trocadas pela Bzu quando tiver dados reais):
+
+| Segmento | Modelo | Horas de parada por máquina ao dia | Redução com IoT |
+| --- | --- | --- | --- |
+| Indústria em geral | paradas | 0,04 | 15% |
+| Indústria têxtil | paradas | 0,06 | 12% |
+| Indústria pesada | paradas | 0,03 | 25% |
+| Cadeia fria e refrigeração | paradas | 0,04 | 35% |
+| Demais segmentos | perdas | não se aplica | 15% |
+
+O mesmo arquivo guarda as opções que valem para todos os segmentos: regime de funcionamento (1 turno, 2 turnos ou 24 horas), acompanhamento atual, conexão disponível no local e os percentuais da estimativa "Não sei o valor".
 
 ## Formulario
-Define o formulário do Django utilizado para coletar os dados operacionais da empresa no simulador de ROI de IoT.
-* O Formulário coleta cinco variáveis principais necessárias para realizar o cálculo da economia estimada, sendo elas (num_maquinas): Quantidade total de maquinas que serão monitoradas, (custo_hora_parada): Prejuízo estimado por cada hora em que uma máquina fica inativa, (custo_sensor_iot): Custo de aquisição/instalação de um sensor IoT por máquina, (tipo_empresa): Define o perfil da empresa para ser usado na simulação, (tempo_amostra): Define a quantidade de dias/meses para simular. 
+O arquivo `simulador/forms.py` define o formulário do Django (`DadosEmpresaForm`) que coleta os dados da empresa para o simulador de ROI de IoT. As perguntas mudam conforme o segmento escolhido: os campos que o segmento não usa ficam desligados e escondidos.
 
+Campos do formulário:
+* `tipo_industria`: segmento da empresa. É a primeira pergunta, porque as outras dependem dela.
+* `num_maquinas`: quantidade de máquinas (ou pontos) que serão monitoradas.
+* `regime_funcionamento`: 1 turno, 2 turnos ou 24 horas por dia. Só entra na conta nos segmentos de `paradas`.
+* `custo_hora_parada`: prejuízo de cada hora parada (segmentos de `paradas`).
+* `perda_mensal`: quanto a empresa perde por mês (segmentos de `perdas`).
+* `conserto_mensal`: gasto mensal com conserto de emergência. É opcional e, se informado, entra na economia.
+* `custo_sensor_iot`: custo mensal de cada sensor.
+* `tempo_amostra`: período da análise em dias (30, 60, 90, 120, 180 ou 360).
+* `prioridade`, `acompanhamento_atual` e `conexao_local`: perguntas de contexto. Não entram na conta do ROI, só personalizam o retorno.
+
+Validações (o servidor sempre confere de novo, mesmo que o navegador já tenha conferido):
+* Não aceita valores negativos, e os campos obrigatórios precisam ser maiores que zero.
+* Cada campo tem um limite máximo e aceita no máximo 2 casas decimais.
+* As mensagens de erro estão em português e o campo com erro fica com a borda vermelha.
+
+No navegador, o formulário aparece **uma pergunta por tela**, com barra de progresso, e uma tela de carregamento rápida antes do resultado. Isso é feito em JavaScript em cima do mesmo formulário do Django, então o sistema continua funcionando se o JavaScript falhar. Quem não sabe um valor pode usar "Não sei o valor, quero estimar": informa o gasto mensal e quanto acha que se perde (cerca de 5%, 10% ou 20%) e o formulário preenche o campo.
+
+## Simulador Financeiro
+O motor de cálculo fica em `simulador/views.py`. Ele simula o comportamento financeiro da empresa dia a dia e estima a economia com a instalação de sensores IoT.
+* Usa **NumPy** para gerar as perdas diárias com variação realista (distribuição normal, com semente fixa para o resultado ser sempre o mesmo para os mesmos dados) e organiza a série em uma tabela com o **Pandas**.
+* No modelo `paradas`, as horas perdidas por dia são: máquinas × taxa de falha do segmento × fator do regime (1 turno 0,5; 2 turnos 1,0; 24 horas 1,5). Cada hora parada custa o valor informado.
+* No modelo `perdas`, a perda mensal informada é dividida por dia, com variação.
+* O IoT reduz essas perdas no percentual do segmento (`reducao_iot`). O conserto de emergência, quando informado, é reduzido na mesma proporção.
+* Fórmulas finais:
+  * Economia bruta = custo total sem IoT − custo total com IoT
+  * Investimento = número de sensores × custo mensal do sensor × meses do período
+  * Resultado líquido = economia bruta − investimento
+  * ROI = (resultado líquido ÷ investimento) × 100
+* O resultado aparece como **LUCRO LÍQUIDO** ou **PREJUÍZO**, com o ROI em destaque. O ROI considera só o custo dos sensores, e a página avisa isso (gateways, plataforma e diagnóstico ficam para a proposta da Bzu).
+* Os dados da simulação ficam guardados na **sessão** do usuário, sem exigir cadastro, e é dela que o dashboard lê. O resultado tem um botão para baixar o relatório em PDF, que usa a impressão do navegador ("Salvar como PDF"), sem gerar nem guardar arquivo no servidor.
+
+## Retorno ao usuário (feedback.py)
+O arquivo `simulador/feedback.py` monta tudo o que a empresa lê junto com o número do resultado:
+* **Leitura do resultado**: texto conforme o ROI (investimento não se paga, retorno moderado ou retorno alto), quanto se evita de perda para cada R$ 1,00 investido e a redução mínima de perdas para os sensores se pagarem.
+* **Personalização**: usa as respostas de prioridade, acompanhamento atual e conexão do local para sugerir por onde começar, o que monitorar e qual conexão usar (Wi-Fi, LoRa ou LTE), além de um caso de referência do segmento.
+* **Como calculamos** (`explicar_calculo`): o passo a passo da conta em frases, com os números da própria simulação.
+* **Contato com a Bzu**: link do WhatsApp com a mensagem de diagnóstico já preenchida (só segmento, quantidade e ROI, sem dado pessoal), e-mail e site.
+
+## Dashboard de Custos
+O arquivo `dashboard/views.py` monta o dashboard a partir da simulação guardada na sessão (e não mais do banco de dados) e gera os gráficos com a biblioteca **Plotly**.
+* **Indicadores**: resultado líquido com ROI, economia evitada por mês, horas de parada evitadas (segmentos de `paradas`), economia mensal por sensor e redução efetiva de perdas. Quando o resultado é negativo, o dashboard não mostra valor negativo: mostra "Ainda sem retorno" e explica quanto falta para os sensores se pagarem.
+* **Projeção de custos**: gráfico de linhas "Sem IoT" e "Com IoT". Até 30 dias o eixo é diário, e acima disso é mensal.
+* **Resultado por redução de perdas**: mostra como o resultado líquido muda se a redução real for maior ou menor que a premissa.
+* **Comparativo do período**: barras com o custo sem IoT, o custo com IoT e o investimento em sensores.
+* **Dados informados e premissas de referência** usadas na simulação.
+
+## Tecnologias e Bibliotecas Utilizadas
+- **Django:** Framework web para as views, formulários, sessão e banco de dados (SQLite).
+
+- **Plotly:** Geração de gráficos interativos para renderização direta em HTML.
+
+- **NumPy:** Geração de distribuições normais estocásticas para simulação realista de paradas.
+
+- **Pandas:** Estruturação e manipulação de séries temporais de dados simulados.
+
+- **Bootstrap 5:** Layout e componentes da interface, com o tema visual da Bzu em `static/CSS/style.css`.
 
 #  Histórias de Usuário
 
@@ -127,20 +247,3 @@ As histórias estão divididas em dois grupos: **Simulação e Visualização de
 | 4 - Proposta de valor | Página inicial (home.html) | [Views do Sistema](#views-do-sistema) |
 | 5 - Contato e leads | Formulário de contato (contato.html) | [Views do Sistema](#views-do-sistema) |
 | 6 - Feedback | Formulário de contato (assunto de feedback) | [Views do Sistema](#views-do-sistema) |
-
-## Dashboard de Custos
-Busca os dados no banco de dados (EconomiaIoT) e gera gráficos comparativos usando a biblioteca Plotly.
-* Ela funciona somando os custos operacionais (Energia, Manutenção e Paradas) nos cenários Com IoT e Sem IoT, e apartir disso calcula o valor economizado e a porcentagem total de redução.
-
-## Simulador Financeiro
-Simula o comportamento financeiro da fábrica ao longo de determinados dias para prever a economia com a instalação de sensores IoT.
-* Ela recebe o número de máquinas, o custo por hora parada e o valor do sensor (ou usa valores padrão), ultilizase de Numpy simular horas de paradas diárias com variação realista, também considerando que a tecnologia IoT reduz as paradas inesperadas em 75% e organiza os dados em uma tabela com o Pandas, assim calculando a economia estimada no mês e o Retorno sobre o Investimento (ROI): ROI = (Economia Mensal / Custo Total dos Sensores) * 100
-
-## Tecnologias e Bibliotecas Utilizadas
-- **Django:** Framework web para renderização das views e integração com banco de dados.
-
-- **Plotly:** Geração de gráficos interativos para renderização direta em HTML.
-
-- **NumPy:** Geração de distribuições normais estocásticas para simulação realista de paradas.
-
-- **Pandas:** Estruturação e manipulação de séries temporais de dados simulados.
