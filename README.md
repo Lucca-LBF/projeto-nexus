@@ -31,7 +31,11 @@ Define o formulário do Django utilizado para coletar os dados operacionais da e
 * O Formulário coleta cinco variáveis principais necessárias para realizar o cálculo da economia estimada, sendo elas (num_maquinas): Quantidade total de maquinas que serão monitoradas, (custo_hora_parada): Prejuízo estimado por cada hora em que uma máquina fica inativa, (custo_sensor_iot): Custo de aquisição/instalação de um sensor IoT por máquina, (tipo_empresa): Define o perfil da empresa para ser usado na simulação, (tempo_amostra): Define a quantidade de dias/meses para simular. 
 
 
-#  Histórias de Usuário | 
+#  Histórias de Usuário
+
+As histórias de usuário descrevem o que cada tipo de usuário da plataforma precisa fazer e por quê. Cada uma tem critérios de aceite, que definem quando a funcionalidade pode ser considerada pronta. A especificação completa também está em [user_stories.md](user_stories.md).
+
+As histórias estão divididas em dois grupos: **Simulação e Visualização de Dados** (histórias 1 a 3) e **Conversão, Atendimento e Melhoria Contínua** (histórias 4 a 6).
 
 ##  Simulação e Visualização de Dados
 ![foto da historias do usuario 1](Historias1.png)
@@ -76,6 +80,53 @@ Define o formulário do Django utilizado para coletar os dados operacionais da e
 ---
 
 ##  Conversão, Atendimento e Melhoria Contínua
+
+### História de Usuário 4: Apresentação da Proposta de Valor e Navegação
+> **Como** um Gestor de Indústria visitante,
+> **Eu quero** visualizar uma página inicial clara e objetiva que explique os problemas da manutenção reativa e os benefícios da IoT,
+> **Para que** eu compreenda o valor da plataforma NEXUS e sinta confiança antes de investir meu tempo testando o simulador.
+
+**Critérios de Aceite:**
+* A página inicial (Home) deve conter o texto de "Pitch" principal focando na dor do cliente.
+* A Home deve conter botões de *Call to Action* (Chamada para Ação) claros e visíveis, direcionando o usuário diretamente para o "Simulador" ou para o "Contato".
+* A barra de navegação superior (Header) deve ser omitida na Landing Page para evitar distrações, mas deve reaparecer automaticamente nas páginas internas (Simulador e Contato) para garantir a navegabilidade.
+
+---
+
+### História de Usuário 5: Captação de Dúvidas e Leads Comerciais
+> **Como** um Diretor Industrial interessado,
+> **Eu quero** enviar uma mensagem com minhas dúvidas, críticas ou solicitações comerciais através de uma aba de Contato segura,
+> **Para que** a equipe NEXUS possa me retornar com um atendimento personalizado ou uma proposta técnica estruturada.
+
+**Critérios de Aceite:**
+* O formulário deve conter campos obrigatórios para: Nome, E-mail, Assunto e Mensagem.
+* O campo de "Assunto" deve ser um menu suspenso (dropdown) com categorias pré-definidas (ex: Dúvida sobre IoT, Contato Comercial, Feedback).
+* Após o envio, a página deve recarregar exibindo um alerta visual de sucesso (ex: barra verde) para confirmar ao usuário que a ação foi concluída.
+* Os dados enviados devem ser salvos de forma persistente e segura no banco de dados relacional do sistema.
+
+---
+
+### História de Usuário 6: Compartilhamento de Feedback sobre a Experiência do Simulador
+> **Como** um Gestor de Operações (Cliente/Usuário da plataforma),
+> **Eu quero** ter um canal direto e simples para enviar críticas construtivas, relatar a minha experiência ou sugerir novas funcionalidades após usar o simulador,
+> **Para que** eu possa contribuir com a evolução da ferramenta e garantir que cenários específicos da minha indústria sejam considerados em atualizações futuras.
+
+**Critérios de Aceite:**
+* O formulário de comunicação deve possuir uma opção de "Assunto" específica e clara para feedback.
+* O formulário deve conter um campo de texto livre e espaçoso para que eu possa detalhar a minha crítica ou ideia de nova funcionalidade.
+* O processo de envio de feedback deve ser rápido e aberto, não exigindo que eu crie uma conta ou faça login complexo no sistema.
+* Após clicar em enviar, a plataforma deve exibir uma mensagem visual clara de confirmação, para que eu tenha certeza de que a minha contribuição foi recebida com sucesso.
+
+### Onde cada história aparece no sistema
+
+| História | Parte do sistema | Seção deste README |
+| --- | --- | --- |
+| 1 - Coleta de dados | Formulário do simulador | [Formulario](#formulario) |
+| 2 - Cálculo de ROI | Simulador financeiro | [Simulador Financeiro](#simulador-financeiro) |
+| 3 - Dashboard de falhas | Dashboard de custos | [Dashboard de Custos](#dashboard-de-custos) |
+| 4 - Proposta de valor | Página inicial (home.html) | [Views do Sistema](#views-do-sistema) |
+| 5 - Contato e leads | Formulário de contato (contato.html) | [Views do Sistema](#views-do-sistema) |
+| 6 - Feedback | Formulário de contato (assunto de feedback) | [Views do Sistema](#views-do-sistema) |
 
 ## Dashboard de Custos
 Busca os dados no banco de dados (EconomiaIoT) e gera gráficos comparativos usando a biblioteca Plotly.
