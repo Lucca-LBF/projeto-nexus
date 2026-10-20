@@ -58,20 +58,11 @@ def _tela_formulario(request, form, tem_memoria):
     })
 
 
-def calcular_simulacao(request):
-    if request.method == 'POST':
-        # o servidor valida tudo de novo: o navegador pode ser contornado
-        form = DadosEmpresaForm(request.POST, segmento=request.POST.get('tipo_industria'))
-        if not form.is_valid():
-            return _tela_formulario(request, form, tem_memoria=bool(request.session.get(CHAVE_SESSAO)))
-        salvo = _dados_validados(form)
-        request.session[CHAVE_SESSAO] = salvo
-    else:
-        salvo = request.session.get(CHAVE_SESSAO)
-        # sem simulação guardada não há o que mostrar: volta ao formulário
-        if not salvo or 'num_maquinas' not in salvo:
-            return redirect('formulario_simulador')
+def _calcular(salvo):
+    """Roda a simulação para os dados guardados em `salvo` e devolve o contexto do resultado.
 
+    Também grava em `salvo` os totais e as séries do gráfico (o dashboard e o relatório leem de lá).
+    Quem chama é responsável por guardar `salvo` na sessão."""
     num_maquinas = salvo['num_maquinas']
     custo_hora_parada = salvo.get('custo_hora_parada', 5000)
     custo_sensor_iot = salvo['custo_sensor_iot']
@@ -148,7 +139,6 @@ def calcular_simulacao(request):
         'dados_grafico_sem_iot': df['Custo_Sem_IoT'].tolist(),
         'dados_grafico_com_iot': df['Custo_Com_IoT'].tolist(),
     })
-    request.session[CHAVE_SESSAO] = salvo
 
     if investimento_periodo > 0:
         roi = (resultado_liquido / investimento_periodo) * 100
@@ -205,7 +195,26 @@ def calcular_simulacao(request):
                    'conserto_mensal': conserto_mensal},
         texto_regime, fator_regime, dias_simulados, investimento_periodo, economia_conserto)
     contexto['link_diagnostico'] = link_diagnostico(segmento["rotulo"], num_maquinas, unidade_pontos, contexto['roi'])
+    return contexto
 
+
+def calcular_simulacao(request):
+    if request.method == 'POST':
+        # o servidor valida tudo de novo: o navegador pode ser contornado
+        form = DadosEmpresaForm(request.POST, segmento=request.POST.get('tipo_industria'))
+        if not form.is_valid():
+            return _tela_formulario(request, form, tem_memoria=bool(request.session.get(CHAVE_SESSAO)))
+        salvo = _dados_validados(form)
+        request.session[CHAVE_SESSAO] = salvo
+    else:
+        salvo = request.session.get(CHAVE_SESSAO)
+        # sem simulação guardada não há o que mostrar: volta ao formulário
+        if not salvo or 'num_maquinas' not in salvo:
+            return redirect('formulario_simulador')
+
+    contexto = _calcular(salvo)
+    request.session[CHAVE_SESSAO] = salvo
+    request.session.modified = True
     return render(request, 'simulador/resultado.html', contexto)
 
 

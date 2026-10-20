@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="rel">
+
+    <!-- barra de ações (não sai no PDF) -->
+    <div class="rel-barra no-print">
+        <div>
+            <strong>Relatório completo</strong>
+            <span class="text-muted small d-block">Resultado e dashboard em um só arquivo. Na janela que abrir, escolha "Salvar como PDF".</span>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" id="rel-baixar" class="btn btn-primary fw-bold">Baixar relatório (PDF)</button>
+            <a href="{% url 'resultado_simulacao' %}" class="btn btn-outline-info fw-bold">Voltar ao resultado</a>
+            <a href="{% url 'dashboard_home' %}" class="btn btn-outline-info fw-bold">Ver dashboard</a>
+        </div>
+    </div>
+
+    <!-- página 1: resumo e indicadores -->
+    <section class="rel-pagina">
+        <header class="rel-cab">
+            <div class="rel-marca"><strong>BZU</strong> &middot; Relatório de economia com IoT</div>
+            <div class="rel-data">{{ nome_industria }} &middot; gerado em {% now "d/m/Y" %}</div>
+        </header>
+
+        <div class="rel-destaques">
+            <div class="rel-destaque rel-destaque-1">
+                <small>Resultado líquido ({{ dias }} dias)</small>
+                <strong class="{% if tem_retorno %}text-success{% else %}text-danger{% endif %}">{{ lucro }}</strong>
+            </div>
+            <div class="rel-destaque rel-destaque-2">
+                <small>Retorno sobre investimento (ROI)</small>
+                <strong class="text-info">{{ roi }}</strong>
+            </div>
+        </div>
+        <p class="rel-nota">{{ feedback.escopo }}</p>
+
+        <h2 class="rel-titulo">Dados informados</h2>
+        <div class="rel-dados">
+            <div class="rel-dado"><small>Segmento</small><span>{{ nome_industria }}</span></div>
+            <div class="rel-dado"><small>Período projetado</small><span>{{ dias }} dias</span></div>
+            {% for rotulo, valor in resumo %}
+            <div class="rel-dado"><small>{{ rotulo }}</small><span>{{ valor }}</span></div>
+            {% endfor %}
+        </div>
+
+        <h2 class="rel-titulo">Indicadores</h2>
+        {% if sem_perdas %}
+        <p class="rel-nota">Com os valores informados não há perdas para reduzir. Revise os dados e simule de novo.</p>
+        {% endif %}
+        <div class="rel-kpis">
+            {% for kpi in kpis %}
+            <div class="rel-kpi">
+                <small>{{ kpi.titulo }}</small>
+                <strong class="{{ kpi.classe }}">{{ kpi.valor }}</strong>
+                {% if kpi.detalhe %}<span>{{ kpi.detalhe }}</span>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- página 2: gráficos -->
+    <section class="rel-pagina">
+        <h2 class="rel-titulo">Gráficos da simulação</h2>
+        {% if graficos.linha %}
+        <div class="rel-grafico">{{ graficos.linha|safe }}</div>
+        <p class="rel-nota">O gráfico reflete o ganho de eficiência da operação. O custo dos sensores não está na linha: ele é descontado no cálculo do ROI.</p>
+        {% endif %}
+        {% if graficos.barras %}
+        <div class="rel-grafico">{{ graficos.barras|safe }}</div>
+        {% endif %}
+        {% if graficos.equilibrio %}
+        <div class="rel-grafico">{{ graficos.equilibrio|safe }}</div>
+        <p class="rel-nota">Onde a linha verde cruza a tracejada, a economia cobre o investimento. O círculo é a sua simulação e o losango é a premissa de referência.</p>
+        {% endif %}
+    </section>
+
+    <!-- página 3: como calculamos e interpretação -->
+    <section class="rel-pagina rel-ultima">
+        <h2 class="rel-titulo">Como calculamos</h2>
+        <ol class="rel-passos">
+            {% for passo in como_calculamos %}<li>{{ passo }}</li>{% endfor %}
+        </ol>
+
+        <h2 class="rel-titulo">O que isso significa para a sua empresa</h2>
+        <p class="{{ feedback.classe }} fw-bold mb-2">{{ feedback.leitura }}</p>
+        <ul class="rel-lista">
+            {% if feedback.retorno %}<li>{{ feedback.retorno }}</li>{% endif %}
+            {% if feedback.equilibrio %}<li>{{ feedback.equilibrio }}</li>{% endif %}
+            {% if feedback.prioridade %}<li><strong>Sua prioridade:</strong> {{ feedback.prioridade }}. Comece por {{ feedback.comece_por }}.</li>{% endif %}
+            <li><strong>O que monitorar:</strong> {{ feedback.monitorar }}</li>
+            {% if feedback.acompanhamento %}<li><strong>Como é hoje:</strong> {{ feedback.acompanhamento }}</li>{% endif %}
+            <li><strong>Conexão sugerida:</strong> {{ feedback.conexao }}</li>
+            {% if feedback.caso %}<li><strong>Caso real:</strong> {{ feedback.caso }}</li>{% endif %}
+        </ul>
+        <p class="rel-nota">{{ feedback.premissa }}</p>
+
+        <div class="rel-rodape">
+            <p class="mb-1"><strong>Quer confirmar esses números no seu cenário?</strong> A Bzu faz um diagnóstico e define o que vale a pena monitorar.</p>
+            <p class="mb-0">{{ feedback.email }} &middot; {{ feedback.site }}</p>
+        </div>
+    </section>
+</div>
+
+<script>
+    (function () {
+        var botao = document.getElementById('rel-baixar');
+        function redimensionar() {
+            if (!window.Plotly) return;
+            document.querySelectorAll('.rel-grafico .plotly-graph-div').forEach(function (g) {
+                try { Plotly.Plots.resize(g); } catch (e) {}
+            });
+        }
+        if (botao) botao.addEventListener('click', function () { window.print(); });
+        window.addEventListener('beforeprint', redimensionar);
+        window.addEventListener('afterprint', redimensionar);
+        {% if imprimir %}
+        // veio do botão "Baixar relatório": abre a impressão quando os gráficos terminarem de desenhar
+        window.addEventListener('load', function () { setTimeout(function () { redimensionar(); window.print(); }, 900); });
+        {% endif %}
+    })();
+</script>
+{% endblock %}

@@ -61,26 +61,26 @@ Este documento contém as especificações ágeis e os critérios de aceite para
 
 ---
 
-### História de Usuário 5: Captação de Dúvidas e Leads Comerciais
+### 5. História de Usuário: Captação de Dúvidas e Leads Comerciais
 > **Como** um Diretor Industrial interessado,
-> **Eu quero** enviar uma mensagem com minhas dúvidas, críticas ou solicitações comerciais através de uma aba de Contato segura,
+> **Eu quero** enviar uma mensagem com minhas dúvidas sobre o simulador ou um pedido de proposta comercial através de uma aba de Contato segura,
 > **Para que** a equipe NEXUS possa me retornar com um atendimento personalizado ou uma proposta técnica estruturada.
 
 **Critérios de Aceite:**
 * O formulário deve conter campos obrigatórios para: Nome, E-mail, Assunto e Mensagem.
-* O campo de "Assunto" deve ser um menu suspenso (dropdown) com categorias pré-definidas (ex: Dúvida sobre IoT, Contato Comercial, Feedback).
+* O campo de "Assunto" deve ser um menu suspenso (dropdown) com categorias pré-definidas (ex: Dúvida sobre o Simulador, Proposta Comercial).
 * Após o envio, a página deve recarregar exibindo um alerta visual de sucesso (ex: barra verde) para confirmar ao usuário que a ação foi concluída.
 * Os dados enviados devem ser salvos de forma persistente e segura no banco de dados relacional do sistema.
 
 ---
 
-### História de Usuário 6: Compartilhamento de Feedback sobre a Experiência do Simulador
+### 6. História de Usuário: Compartilhamento de Feedback sobre a Experiência do Simulador
 > **Como** um Gestor de Operações (Cliente/Usuário da plataforma),
 > **Eu quero** ter um canal direto e simples para enviar críticas construtivas, relatar a minha experiência ou sugerir novas funcionalidades após usar o simulador,
 > **Para que** eu possa contribuir com a evolução da ferramenta e garantir que cenários específicos da minha indústria sejam considerados em atualizações futuras.
 
 **Critérios de Aceite:**
-* O formulário de comunicação deve possuir uma opção de "Assunto" específica e clara para feedback.
+* O formulário de comunicação deve possuir a opção "Feedback / Sugestões" no campo "Assunto", separada das opções de dúvida e de proposta comercial.
 * O formulário deve conter um campo de texto livre e espaçoso para que eu possa detalhar a minha crítica ou ideia de nova funcionalidade.
 * O processo de envio de feedback deve ser rápido e aberto, não exigindo que eu crie uma conta ou faça login complexo no sistema.
 * Após clicar em enviar, a plataforma deve exibir uma mensagem visual clara de confirmação, para que eu tenha certeza de que a minha contribuição foi recebida com sucesso.
