@@ -130,7 +130,7 @@ def calcular_simulacao(request):
     total_operacional_novo = df['Custo_Com_IoT'].sum()
     economia_bruta = total_operacional_antigo - total_operacional_novo
 
-    economia_paradas = economia_bruta
+    economia_paradas = economia_bruta - economia_conserto
 
     meses_simulados = dias_simulados / 30
     investimento_periodo = (num_maquinas * custo_sensor_iot) * meses_simulados

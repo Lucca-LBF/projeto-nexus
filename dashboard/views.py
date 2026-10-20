@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 
 from simulador.segmentos import SEGMENTOS
+from simulador.views import _regime
 
 CHAVE_SESSAO = 'simulacao'
 DIAS_POR_MES = 30
@@ -218,9 +219,11 @@ def _indicadores(simulacao, segmento):
 
     custo_hora = simulacao.get('custo_hora_parada', 0)
     if segmento['modelo'] == 'paradas' and custo_hora > 0:
+        # só a parte das paradas: a economia com conserto de emergência fica de fora
+        economia_paradas = simulacao.get('economia_paradas', economia)
         kpis.append({
             'titulo': 'Horas de parada evitadas',
-            'valor': f"{_num(economia / custo_hora, 1)} h",
+            'valor': f"{_num(economia_paradas / custo_hora, 1)} h",
             'detalhe': f'em {dias} dias',
             'classe': '',
         })
@@ -247,6 +250,7 @@ def _indicadores(simulacao, segmento):
 
 def _entradas_e_referencias(simulacao, segmento):
     rotulo_pontos, unidade_pontos = segmento['rotulo_pontos']
+    fator_regime, texto_regime = _regime(simulacao.get('regime_funcionamento'))
 
     entradas = [
         ('Segmento', segmento['nome']),
@@ -255,14 +259,25 @@ def _entradas_e_referencias(simulacao, segmento):
     if segmento['modelo'] == 'perdas':
         entradas.append(('Perda mensal informada', _brl(simulacao.get('perda_mensal', 0), 0)))
     else:
+        # o regime só existe (e só muda a conta) nos segmentos de paradas
+        if texto_regime:
+            entradas.append(('Funcionamento', texto_regime))
         entradas.append(('Custo da hora parada', _brl(simulacao.get('custo_hora_parada', 0), 0)))
+
+    # opcional: só aparece se o usuário preencheu
+    conserto = simulacao.get('conserto_mensal', 0)
+    if conserto > 0:
+        entradas.append(('Conserto de emergência', f"{_brl(conserto, 0)} por mês"))
+
     entradas.append(('Custo mensal do sensor', _brl(simulacao.get('custo_sensor_iot', 0), 0)))
     entradas.append(('Período simulado', f"{simulacao.get('tempo_amostra', 30)} dias"))
 
     referencias = [('Redução de perdas com IoT', _pct(segmento['reducao_iot'] * 100, 0))]
     if segmento['modelo'] == 'paradas':
+        # a taxa base já multiplicada pelo regime de funcionamento, como no cálculo
         referencias.append(
-            ('Horas de parada por máquina ao dia', f"{_num(segmento['taxa_falha_base'], 2)} h"))
+            ('Horas de parada por máquina ao dia',
+             f"{_num(segmento['taxa_falha_base'] * fator_regime, 2)} h"))
 
     return entradas, referencias
 
@@ -276,15 +291,6 @@ def dashboard(request):
     rotulos = ROTULOS[segmento['modelo']]
 
     entradas, referencias = _entradas_e_referencias(simulacao, segmento)
-
-    # manutenção e energia: estimativas complementares, só no modelo "paradas"
-    # e fora do resultado líquido (que considera apenas a redução das perdas)
-    complementares = None
-    if segmento['modelo'] == 'paradas':
-        complementares = [
-            ('Economia estimada em manutenção', _brl(simulacao.get('economia_manutencao', 0))),
-            ('Economia estimada em energia', _brl(simulacao.get('economia_energia', 0))),
-        ]
 
     # a ordem importa: o primeiro gráfico carrega o plotly.js, os outros reaproveitam
     figuras = {
@@ -313,7 +319,6 @@ def dashboard(request):
         'entradas': entradas,
         'referencias': referencias,
         'premissa_confirmada': segmento.get('premissa_confirmada', True),
-        'complementares': complementares,
         'graficos': graficos,
     }
     return render(request, 'dashboard/index.html', contexto)
