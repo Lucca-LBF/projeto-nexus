@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect
 import pandas as pd
 import numpy as np
 from .forms import DadosEmpresaForm
-from .segmentos import (PERCENTUAIS_ESTIMATIVA, REGIME_FUNCIONAMENTO, REGIME_PADRAO,
-                        SEGMENTOS, segmentos_para_formulario)
-from .feedback import explicar_calculo, link_diagnostico, montar_feedback
+from .segmentos import (ACOMPANHAMENTO_RESUMO, COBERTURA_SENSORES, PERCENTUAIS_ESTIMATIVA,
+                        REGIME_FUNCIONAMENTO, REGIME_PADRAO, SEGMENTOS, segmentos_para_formulario)
+from .feedback import explicar_calculo, link_diagnostico, montar_feedback, montar_sensores_atuais
 
 # chave da sessão onde ficam os dados da última simulação
 CHAVE_SESSAO = 'simulacao'
@@ -22,10 +22,10 @@ def _dados_validados(form):
     dados = {
         'num_maquinas': c['num_maquinas'],
         'custo_hora_parada': _limpo(float(c['custo_hora_parada'])),
-        'custo_sensor_iot': _limpo(float(c['custo_sensor_iot'])),
         'tempo_amostra': c['tempo_amostra'],
         'tipo_industria': c['tipo_industria'],
-        # perguntas de contexto: só personalizam o retorno, não entram na conta
+        # prioridade e conexão só personalizam o retorno; o acompanhamento atual também
+        # separa a economia já aproveitada (pontos que já têm sensores) da que ainda dá para ganhar
         'prioridade': c['prioridade'],
         'acompanhamento_atual': c['acompanhamento_atual'],
         'conexao_local': c['conexao_local'],
@@ -65,7 +65,6 @@ def _calcular(salvo):
     Quem chama é responsável por guardar `salvo` na sessão."""
     num_maquinas = salvo['num_maquinas']
     custo_hora_parada = salvo.get('custo_hora_parada', 5000)
-    custo_sensor_iot = salvo['custo_sensor_iot']
     dias_simulados = salvo['tempo_amostra']
     tipo_industria = salvo.get('tipo_industria', 'padrao')
     perda_mensal = salvo.get('perda_mensal', 0)
@@ -110,10 +109,17 @@ def _calcular(salvo):
         custo_diario_com_iot = custo_diario_com_iot + conserto_diario * (1 - reducao_iot)
         economia_conserto = conserto_diario * dias_simulados * reducao_iot
 
+    # sensores que a empresa já tem: essa parte da economia já está sendo aproveitada.
+    # Daqui para a frente, os números valem para a ampliação (os pontos que ainda ficam sem sensor).
+    cobertura = COBERTURA_SENSORES.get(salvo.get('acompanhamento_atual'), 0.0)
+    fator_novo = 1 - cobertura
+    economia_potencial = float(custo_diario_sem_iot.sum() - custo_diario_com_iot.sum())
+    economia_ja_aproveitada = economia_potencial * cobertura
+
     df = pd.DataFrame({
         'Dia': range(1, dias_simulados + 1),
-        'Custo_Sem_IoT': custo_diario_sem_iot,
-        'Custo_Com_IoT': custo_diario_com_iot
+        'Custo_Sem_IoT': custo_diario_sem_iot * fator_novo,
+        'Custo_Com_IoT': custo_diario_com_iot * fator_novo
     })
 
 
@@ -121,10 +127,13 @@ def _calcular(salvo):
     total_operacional_novo = df['Custo_Com_IoT'].sum()
     economia_bruta = total_operacional_antigo - total_operacional_novo
 
-    economia_paradas = economia_bruta - economia_conserto
+    # só a parte das paradas: o conserto de emergência fica de fora (também só na parte ampliada)
+    economia_paradas = economia_bruta - economia_conserto * fator_novo
 
     meses_simulados = dias_simulados / 30
-    investimento_periodo = (num_maquinas * custo_sensor_iot) * meses_simulados
+    # o investimento é estimado pelo tipo de empresa (custo_ponto do catálogo) e não aparece na tela
+    pontos_novos = num_maquinas * fator_novo
+    investimento_periodo = pontos_novos * segmento['custo_ponto'] * meses_simulados
 
     resultado_liquido = economia_bruta - investimento_periodo
 
@@ -135,6 +144,10 @@ def _calcular(salvo):
         'economia_paradas': float(economia_paradas),
         'investimento_periodo': float(investimento_periodo),
         'resultado_liquido': float(resultado_liquido),
+        'cobertura': cobertura,
+        'pontos_novos': float(pontos_novos),
+        'economia_potencial_total': economia_potencial,
+        'economia_ja_aproveitada': float(economia_ja_aproveitada),
         'dados_grafico_dias': df['Dia'].tolist(),
         'dados_grafico_sem_iot': df['Custo_Sem_IoT'].tolist(),
         'dados_grafico_com_iot': df['Custo_Com_IoT'].tolist(),
@@ -157,7 +170,6 @@ def _calcular(salvo):
     contexto = {
         'num_maquinas': num_maquinas,
         'custo_hora_parada': int(custo_hora_parada),
-        'custo_sensor_iot': int(custo_sensor_iot),
         'dias_simulados': dias_simulados,
         'nome_industria': nome_industria,
 
@@ -182,7 +194,7 @@ def _calcular(salvo):
     contexto['resumo'].append(linha_perda)
     if conserto_diario > 0:
         contexto['resumo'].append(('Conserto de Emergência', f"R$ {_limpo(conserto_mensal)} por mês"))
-    contexto['resumo'].append(('Custo Mensal do Sensor', f"R$ {int(custo_sensor_iot)}"))
+    contexto['resumo'].append(('Sensores Atuais', ACOMPANHAMENTO_RESUMO.get(salvo.get('acompanhamento_atual'), 'Não informado')))
 
     contexto['feedback'] = montar_feedback(
         segmento, roi, economia_bruta, investimento_periodo, total_operacional_antigo,
@@ -193,7 +205,10 @@ def _calcular(salvo):
     contexto['como_calculamos'] = explicar_calculo(
         segmento, {**salvo, 'custo_hora_parada': custo_hora_parada, 'perda_mensal': perda_mensal,
                    'conserto_mensal': conserto_mensal},
-        texto_regime, fator_regime, dias_simulados, investimento_periodo, economia_conserto)
+        texto_regime, fator_regime, dias_simulados, economia_conserto,
+        cobertura=cobertura, economia_potencial=economia_potencial, economia_ja_aproveitada=economia_ja_aproveitada)
+    contexto['sensores_atuais'] = montar_sensores_atuais(
+        cobertura, economia_ja_aproveitada, float(economia_bruta), economia_potencial, dias_simulados)
     contexto['link_diagnostico'] = link_diagnostico(segmento["rotulo"], num_maquinas, unidade_pontos, contexto['roi'])
     return contexto
 

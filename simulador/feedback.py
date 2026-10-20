@@ -9,9 +9,10 @@ SITE_BZU = "https://bzutech.com.br"
 WHATSAPP_BZU = "5581992259287"
 EMAIL_BZU = "bzu@bzutech.com"
 
-# o ROI conta só o custo dos sensores: o resto a Bzu define na proposta
-ESCOPO = ("Esta estimativa considera só o custo dos sensores. Gateways, a plataforma (BZU Cloud) "
-          "e o diagnóstico não entram nesta conta: a Bzu define esses itens na proposta.")
+# o investimento é estimado pelo tipo de empresa e conta só os sensores: o resto a Bzu define na proposta
+ESCOPO = ("O investimento é uma estimativa para o seu tipo de empresa e considera só os sensores. "
+          "Gateways, a plataforma (BZU Cloud) e o diagnóstico não entram nesta conta: "
+          "a Bzu define o valor final e esses itens na proposta.")
 
 
 def _num(valor, casas=2):
@@ -32,10 +33,32 @@ def link_diagnostico(nome_industria, num_pontos, unidade, roi_texto):
     return f"https://wa.me/{WHATSAPP_BZU}?text={quote(mensagem)}"
 
 
-def explicar_calculo(segmento, dados, regime_texto, fator_regime, dias, investimento_periodo, economia_conserto):
+def montar_sensores_atuais(cobertura, economia_ja, economia_nova, economia_total, dias):
+    """Resumo para quem já tem sensores: o que já é aproveitado e o que ainda dá para ganhar ampliando.
+
+    Devolve None quando a empresa não tem sensores (nada a mostrar)."""
+    if cobertura <= 0:
+        return None
+    pct = round(cobertura * 100)
+    return {
+        "pct": pct,
+        "pct_restante": 100 - pct,
+        "ja": moeda(economia_ja),
+        "nova": moeda(economia_nova),
+        "total": moeda(economia_total),
+        "dias": dias,
+        "texto": (f"Seus sensores atuais, em cerca de {pct}% dos pontos, já evitam cerca de {moeda(economia_ja)} "
+                  f"em {dias} dias. Ampliar o monitoramento para os outros {100 - pct}% dos pontos pode evitar "
+                  f"mais {moeda(economia_nova)}, chegando a {moeda(economia_total)} no período."),
+        "sugestao": ("Sugestão: ampliar a cobertura para os pontos que ainda ficam sem sensor e revisar, "
+                     "num diagnóstico, a qualidade dos sensores que já existem."),
+    }
+
+
+def explicar_calculo(segmento, dados, regime_texto, fator_regime, dias, economia_conserto,
+                     cobertura=0.0, economia_potencial=0.0, economia_ja_aproveitada=0.0):
     """Passo a passo da conta, em frases, usando os números da própria simulação."""
     reducao = segmento["reducao_iot"]
-    meses = dias // 30
     passos = []
 
     if segmento["modelo"] == "perdas":
@@ -54,8 +77,14 @@ def explicar_calculo(segmento, dados, regime_texto, fator_regime, dias, investim
     if economia_conserto > 0:
         passos.append(f"Conserto de emergência: {moeda(dados['conserto_mensal'])} por mês informados. Com a mesma redução, "
                       f"a economia é de {moeda(economia_conserto)} no período.")
-    passos.append(f"Investimento: {dados['num_maquinas']} sensores × {moeda(dados['custo_sensor_iot'])} por mês × "
-                  f"{meses} {'mês' if meses == 1 else 'meses'} = {moeda(investimento_periodo)}.")
+    if cobertura > 0:
+        pct = round(cobertura * 100)
+        passos.append(f"Sensores que vocês já têm: cerca de {pct}% dos pontos. A economia já aproveitada com eles é de "
+                      f"cerca de {moeda(economia_ja_aproveitada)} no período. O investimento, o lucro e o ROI abaixo "
+                      f"valem só para ampliar o monitoramento aos outros {100 - pct}% dos pontos, com economia "
+                      f"estimada de {moeda(economia_potencial - economia_ja_aproveitada)}.")
+    passos.append("Investimento: estimado pela Bzu para o seu tipo de empresa e a quantidade de pontos a "
+                  "monitorar, só com os sensores. O valor final é definido na proposta.")
     passos.append("Lucro líquido = economia − investimento. ROI = lucro líquido ÷ investimento.")
     passos.append("Os valores de cada dia variam em torno da média (a simulação usa uma variação fixa), "
                   "por isso o total pode diferir um pouco da conta simples acima.")
@@ -76,7 +105,7 @@ def montar_feedback(segmento, roi, economia_bruta, investimento_periodo, perda_t
 
     if roi < 0:
         leitura = ("Com esses números, o investimento não se paga no período. "
-                   "Reveja o custo do sensor ou a quantidade de pontos, ou simule um período maior.")
+                   "Reveja a quantidade de pontos ou simule um período maior.")
         classe = "text-danger"
     elif roi < 100:
         leitura = "O retorno é positivo, mas moderado. Vale começar por um piloto nos pontos mais críticos."
@@ -96,7 +125,7 @@ def montar_feedback(segmento, roi, economia_bruta, investimento_periodo, perda_t
         pct = investimento_periodo / perda_total_sem_iot * 100
         if pct >= 100:
             equilibrio = ("Os sensores custam mais do que toda a perda estimada. "
-                          "Reveja o custo do sensor ou a quantidade de pontos.")
+                          "Reveja a quantidade de pontos a monitorar.")
         else:
             equilibrio = (f"Mesmo que o resultado real fique abaixo do estimado, os sensores se pagam "
                           f"se as perdas caírem pelo menos {_num(pct, 1)}%.")

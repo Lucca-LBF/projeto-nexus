@@ -27,7 +27,7 @@
       <div class="card h-100 shadow-sm border-0">
         <div class="card-body">
           <div class="small text-muted fw-semibold">{{ k.titulo }}</div>
-          <div class="fs-4 fw-bold {{ k.classe }}">{{ k.valor }}</div>
+          <div class="fs-5 fw-bold {{ k.classe }}">{{ k.valor }}</div>
           <div class="small text-muted">{{ k.detalhe }}</div>
         </div>
       </div>
@@ -35,6 +35,8 @@
     {% endfor %}
   </div>
 
+
+  {% include 'simulador/_sensores_atuais.html' %}
 
   {% if graficos.linha %}
   <div class="card shadow-sm border-0 mb-4">
@@ -49,8 +51,8 @@
         <div class="card-body">
           {{ graficos.sensibilidade|safe }}
           <p class="small text-muted mb-0">
-            Cada ponto da linha é o resultado líquido se as perdas caíssem naquele percentual.
-            A linha tracejada marca a redução mínima para os sensores se pagarem.
+            Cada ponto da linha é a economia estimada se as perdas caíssem naquele percentual.
+            A linha vertical tracejada marca a redução mínima para os sensores se pagarem.
             O círculo é a sua simulação e o losango é a premissa de referência.
           </p>
         </div>

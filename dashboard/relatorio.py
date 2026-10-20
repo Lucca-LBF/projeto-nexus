@@ -3,9 +3,6 @@
 Reaproveita os cálculos e os gráficos de dashboard/views.py e a simulação de simulador/views.py.
 O PDF não é gerado no servidor: a página abre a impressão do navegador ("Salvar como PDF")."""
 
-import math
-
-import plotly.graph_objects as go
 import plotly.io as pio
 from django.shortcuts import redirect, render
 
@@ -16,57 +13,6 @@ from . import views as dash
 
 ALTURA_GRAFICO = 300
 CONFIG_RELATORIO = {'responsive': True, 'displayModeBar': False}
-
-
-def _figura_equilibrio(simulacao, segmento):
-    """Economia para diferentes reduções de perdas, contra o investimento em sensores.
-
-    Mostra o mesmo ponto de equilíbrio do gráfico de sensibilidade, mas só com valores positivos."""
-    total_sem = simulacao.get('total_sem_iot', 0)
-    if total_sem <= 0:
-        return None
-
-    investimento = simulacao.get('investimento_periodo', 0)
-    economia = simulacao.get('economia_bruta', 0)
-    efetiva = economia / total_sem * 100
-    referencia = segmento['reducao_iot'] * 100
-    equilibrio = investimento / total_sem * 100
-
-    limite = max(35, math.ceil(referencia), math.ceil(efetiva))
-    if equilibrio < 100:
-        limite = max(limite, math.ceil(equilibrio) + 5)
-    limite = min(math.ceil(limite / 5) * 5, 100)
-
-    xs = list(range(0, limite + 1, 5))
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=xs, y=[total_sem * x / 100 for x in xs], mode='lines', name='Economia estimada',
-        line=dict(color=dash.COR_COM_IOT, width=3),
-        hovertemplate='Redução de %{x}%<br>Economia: R$ %{y:,.2f}<extra></extra>',
-    ))
-    fig.add_trace(go.Scatter(
-        x=[0, limite], y=[investimento, investimento], mode='lines', name='Investimento em sensores',
-        line=dict(color=dash.COR_SENSOR, width=3, dash='dash'), hoverinfo='skip',
-    ))
-    fig.add_trace(go.Scatter(
-        x=[efetiva], y=[economia], mode='markers', name='Sua simulação',
-        marker=dict(size=13, color=dash.COR_COM_IOT, line=dict(width=2, color='white')),
-        hovertemplate=f'Redução efetiva de {dash._pct(efetiva)}<extra></extra>',
-    ))
-    fig.add_trace(go.Scatter(
-        x=[referencia], y=[total_sem * referencia / 100], mode='markers', name='Premissa de referência',
-        marker=dict(size=12, symbol='diamond', color=dash.COR_REFERENCIA, line=dict(width=2, color='white')),
-        hovertemplate=f'Premissa de {dash._pct(referencia, 0)}<extra></extra>',
-    ))
-    if equilibrio <= limite:
-        fig.add_vline(x=equilibrio, line_dash='dot', line_color='#6b7280',
-                      annotation_text=f'Equilíbrio: {dash._pct(equilibrio)}', annotation_position='top left')
-
-    dash._layout(fig, 'Economia x investimento', 'Redução de perdas com IoT', 'Valor no período (R$)',
-                 hovermode='closest')
-    fig.update_xaxes(ticksuffix='%')
-    fig.update_yaxes(rangemode='tozero')
-    return fig
 
 
 def _html_graficos(figuras):
@@ -102,7 +48,7 @@ def relatorio(request):
     figuras = {
         'linha': dash._figura_linha(salvo, rotulos),
         'barras': dash._figura_barras(salvo, rotulos),
-        'equilibrio': _figura_equilibrio(salvo, segmento),
+        'equilibrio': dash._figura_sensibilidade(salvo, segmento),
     }
 
     contexto = {
@@ -112,6 +58,7 @@ def relatorio(request):
         'feedback': resultado['feedback'],
         'como_calculamos': resultado['como_calculamos'],
         'kpis': dash._indicadores(salvo, segmento),
+        'sensores_atuais': resultado['sensores_atuais'],
         'graficos': _html_graficos(figuras),
         'sem_perdas': salvo.get('total_sem_iot', 0) <= 0,
         # sem valor negativo: quando não paga, mostra um texto em vez do número

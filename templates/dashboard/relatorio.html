@@ -34,6 +34,7 @@
             </div>
         </div>
         <p class="rel-nota">{{ feedback.escopo }}</p>
+        {% include 'simulador/_sensores_atuais.html' %}
 
         <h2 class="rel-titulo">Dados informados</h2>
         <div class="rel-dados">
@@ -71,7 +72,7 @@
         {% endif %}
         {% if graficos.equilibrio %}
         <div class="rel-grafico">{{ graficos.equilibrio|safe }}</div>
-        <p class="rel-nota">Onde a linha verde cruza a tracejada, a economia cobre o investimento. O círculo é a sua simulação e o losango é a premissa de referência.</p>
+        <p class="rel-nota">A linha vertical tracejada marca a redução mínima de perdas para os sensores se pagarem. O círculo é a sua simulação e o losango é a premissa de referência.</p>
         {% endif %}
     </section>
 
