@@ -3,14 +3,14 @@ from django.shortcuts import redirect, render
 import plotly.graph_objects as go
 import plotly.io as pio
 
-from simulador.feedback import montar_sensores_atuais
+from simulador.feedback import faixa_investimento, montar_sensores_atuais
 from simulador.segmentos import ACOMPANHAMENTO_RESUMO, SEGMENTOS
 from simulador.views import _regime
 
 CHAVE_SESSAO = 'simulacao'
 DIAS_POR_MES = 30
 
-COR_SEM_IOT = '#dc2626'
+COR_SEM_IOT = '#64748b'
 COR_COM_IOT = '#16a34a'
 COR_SENSOR = '#2563eb'
 COR_REFERENCIA = '#f59e0b'
@@ -195,13 +195,37 @@ def _indicadores(simulacao, segmento):
             'classe': 'text-success',
         })
     else:
-        # sem mostrar valor negativo: explica quanto falta para os sensores se pagarem
+        # sem valor negativo nem vermelho: mostra a economia possível e o que falta para os sensores se pagarem
         kpis.append({
-            'titulo': f'Resultado líquido ({dias} dias)',
-            'valor': 'Ainda sem retorno',
-            'detalhe': (f'A economia de {_brl(economia)} ainda não cobre o investimento estimado. '
-                        'Teste um período maior ou menos pontos.'),
-            'classe': 'text-danger',
+            'titulo': f'Potencial de economia ({dias} dias)',
+            'valor': _brl(economia),
+            'detalhe': 'Estimativa. Pelo valor central do investimento, ainda não cobre os sensores.',
+            'classe': 'text-info',
+        })
+        if total_sem > 0 and investimento > 0:
+            equilibrio = investimento / total_sem * 100
+            kpis.append({
+                'titulo': 'Para os sensores se pagarem',
+                'valor': f'{_pct(equilibrio, 0)} de redução' if equilibrio < 100 else 'Revisar valores',
+                'detalhe': (f"Referência do setor: {_pct(segmento['reducao_iot'] * 100, 0)} de redução de perdas"
+                            if equilibrio < 100 else 'A perda informada é menor que o investimento estimado'),
+                'classe': 'text-info',
+            })
+        investimento_min = simulacao.get('investimento_min', 0)
+        if economia > investimento_min > 0:
+            kpis.append({
+                'titulo': 'Se o investimento ficar no mínimo da faixa',
+                'valor': _brl(economia - investimento_min),
+                'detalhe': 'Lucro estimado no período. Uma cotação real pode mudar o resultado.',
+                'classe': 'text-success',
+            })
+
+    if simulacao.get('investimento_max', 0) > 0:
+        kpis.append({
+            'titulo': 'Investimento estimado',
+            'valor': faixa_investimento(simulacao['investimento_min'], simulacao['investimento_max'], curta=True),
+            'detalhe': 'Só sensores, estimativa de mercado para o seu setor (não é preço da Bzu)',
+            'classe': '',
         })
 
     economia_mensal = economia / meses
@@ -229,7 +253,7 @@ def _indicadores(simulacao, segmento):
             'titulo': 'Economia mensal por ponto',
             'valor': _brl(por_ponto),
             'detalhe': 'Média por ponto que ainda será monitorado',
-            'classe': 'text-success' if por_ponto >= segmento['custo_ponto'] else 'text-danger',
+            'classe': 'text-success' if por_ponto >= segmento['custo_ponto'] else 'text-info',
         })
 
     if simulacao.get('cobertura', 0) > 0:

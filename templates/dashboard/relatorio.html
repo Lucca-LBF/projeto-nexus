@@ -25,14 +25,17 @@
 
         <div class="rel-destaques">
             <div class="rel-destaque rel-destaque-1">
-                <small>Resultado líquido ({{ dias }} dias)</small>
-                <strong class="{% if tem_retorno %}text-success{% else %}text-danger{% endif %}">{{ lucro }}</strong>
+                <small>{{ lucro_titulo }}</small>
+                <strong class="{% if tem_retorno %}text-success{% else %}text-info{% endif %}">{{ lucro }}</strong>
             </div>
             <div class="rel-destaque rel-destaque-2">
-                <small>Retorno sobre investimento (ROI)</small>
+                <small>{{ roi_titulo }}</small>
                 <strong class="text-info">{{ roi }}</strong>
             </div>
         </div>
+        {% if investimento_faixa %}
+        <p class="rel-nota"><strong>Investimento estimado (só sensores): {{ investimento_faixa }}.</strong> Estimativa de mercado para o setor, não é preço da Bzu. O lucro e o ROI usam o valor central da faixa ({{ investimento_central }}).</p>
+        {% endif %}
         <p class="rel-nota">{{ feedback.escopo }}</p>
         {% include 'simulador/_sensores_atuais.html' %}
 

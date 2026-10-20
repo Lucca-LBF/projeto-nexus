@@ -79,7 +79,8 @@ a { text-decoration: none; }
 
 .text-info { color: var(--bzu-purple) !important; }
 .text-success { color: #14916B !important; }
-.text-danger { color: #D63A4A !important; }
+/* sem vermelho: o simulador trabalha com estimativas e sempre mostra um caminho para economizar */
+.text-danger { color: #B45309 !important; }
 .text-muted { color: var(--bzu-muted) !important; }
 .text-secondary { color: var(--bzu-dark) !important; }
 .border-secondary { border-color: var(--bzu-line) !important; }

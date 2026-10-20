@@ -65,12 +65,22 @@
             <div class="col-md-6">
                 <div class="card shadow-sm border-0 card-roi">
                     <div class="card-body">
-                        <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.85rem;">Retorno sobre Investimento (ROI)</h6>
+                        <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.85rem;">{{ roi_titulo }}</h6>
                         <h3 class="text-info mb-0 fw-bold">{{ roi }}</h3>
                     </div>
                 </div>
             </div>
         </div>
+
+        {% if investimento_faixa %}
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.85rem;">Investimento estimado (só sensores)</h6>
+                <h4 class="mb-1 fw-bold">{{ investimento_faixa }}</h4>
+                <p class="small text-muted mb-0">Estimativa de mercado para o seu setor, não é preço da Bzu. O lucro e o ROI usam o valor central da faixa ({{ investimento_central }}).</p>
+            </div>
+        </div>
+        {% endif %}
 
         <p class="small text-muted mb-4">{{ feedback.escopo }}</p>
 
@@ -112,7 +122,7 @@
         y: custosSemIot,
         mode: 'lines+markers',
         name: 'Sem IoT (Corretiva)',
-        line: {color: '#D63A4A', width: 2},
+        line: {color: '#64748b', width: 2},
         marker: {size: 5}
     };
 

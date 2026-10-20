@@ -58,13 +58,19 @@ def relatorio(request):
         'feedback': resultado['feedback'],
         'como_calculamos': resultado['como_calculamos'],
         'kpis': dash._indicadores(salvo, segmento),
+        'investimento_faixa': resultado['investimento_faixa'],
+        'investimento_central': resultado['investimento_central'],
         'sensores_atuais': resultado['sensores_atuais'],
         'graficos': _html_graficos(figuras),
         'sem_perdas': salvo.get('total_sem_iot', 0) <= 0,
         # sem valor negativo: quando não paga, mostra um texto em vez do número
         'tem_retorno': liquido >= 0,
-        'lucro': dash._brl(liquido) if liquido >= 0 else 'Ainda sem retorno',
-        'roi': resultado['roi'] if liquido >= 0 else 'Abaixo do equilíbrio',
+        # sem valor negativo nem vermelho: quando o lucro é negativo, mostra a economia estimada
+        'lucro_titulo': (f"Resultado líquido estimado ({resultado['dias_simulados']} dias)" if liquido >= 0
+                         else f"Economia estimada ({resultado['dias_simulados']} dias)"),
+        'lucro': dash._brl(liquido) if liquido >= 0 else dash._brl(salvo.get('economia_bruta', 0)),
+        'roi_titulo': resultado['roi_titulo'],
+        'roi': resultado['roi'],
         'imprimir': request.GET.get('imprimir') == '1',
     }
     return render(request, 'dashboard/relatorio.html', contexto)

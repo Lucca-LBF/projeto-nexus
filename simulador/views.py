@@ -4,7 +4,8 @@ import numpy as np
 from .forms import DadosEmpresaForm
 from .segmentos import (ACOMPANHAMENTO_RESUMO, COBERTURA_SENSORES, PERCENTUAIS_ESTIMATIVA,
                         REGIME_FUNCIONAMENTO, REGIME_PADRAO, SEGMENTOS, segmentos_para_formulario)
-from .feedback import explicar_calculo, link_diagnostico, montar_feedback, montar_sensores_atuais
+from .feedback import (explicar_calculo, faixa_investimento, link_diagnostico, moeda_inteira, montar_feedback,
+                       montar_sensores_atuais)
 
 # chave da sessão onde ficam os dados da última simulação
 CHAVE_SESSAO = 'simulacao'
@@ -131,9 +132,13 @@ def _calcular(salvo):
     economia_paradas = economia_bruta - economia_conserto * fator_novo
 
     meses_simulados = dias_simulados / 30
-    # o investimento é estimado pelo tipo de empresa (custo_ponto do catálogo) e não aparece na tela
+    # o investimento é estimado pelo tipo de empresa (custo_ponto do catálogo): o valor central entra no
+    # lucro e no ROI, e a faixa (mínimo e máximo) é o que aparece como "investimento estimado"
     pontos_novos = num_maquinas * fator_novo
     investimento_periodo = pontos_novos * segmento['custo_ponto'] * meses_simulados
+    faixa_min, faixa_max = segmento['custo_ponto_faixa']
+    investimento_min = pontos_novos * faixa_min * meses_simulados
+    investimento_max = pontos_novos * faixa_max * meses_simulados
 
     resultado_liquido = economia_bruta - investimento_periodo
 
@@ -143,6 +148,8 @@ def _calcular(salvo):
         'economia_bruta': float(economia_bruta),
         'economia_paradas': float(economia_paradas),
         'investimento_periodo': float(investimento_periodo),
+        'investimento_min': float(investimento_min),
+        'investimento_max': float(investimento_max),
         'resultado_liquido': float(resultado_liquido),
         'cobertura': cobertura,
         'pontos_novos': float(pontos_novos),
@@ -158,14 +165,24 @@ def _calcular(salvo):
     else:
         roi = 0
 
+    # equilíbrio: redução de perdas mínima para os sensores se pagarem (pelo valor central do investimento)
+    equilibrio_pct = investimento_periodo / total_operacional_antigo * 100 if total_operacional_antigo > 0 else 0
+
     if resultado_liquido >= 0:
         texto_economia = f"R$ {resultado_liquido:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
         cor_economia = "text-success"
-        titulo_resultado = f"LUCRO LÍQUIDO ({dias_simulados} DIAS)"
+        titulo_resultado = f"LUCRO LÍQUIDO ESTIMADO ({dias_simulados} DIAS)"
+        roi_titulo = "Retorno sobre Investimento (ROI) estimado"
+        roi_exibicao = f"{roi:.1f}%"
+        resumo_diagnostico = f"ROI estimado de {roi:.1f}%"
     else:
-        texto_economia = f"- R$ {abs(resultado_liquido):,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
-        cor_economia = "text-danger"
-        titulo_resultado = f"PREJUÍZO ({dias_simulados} DIAS)"
+        # sem valor negativo nem vermelho: mostra a economia estimada e o que falta para os sensores se pagarem
+        texto_economia = f"R$ {economia_bruta:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+        cor_economia = "text-info"
+        titulo_resultado = f"ECONOMIA ESTIMADA ({dias_simulados} DIAS)"
+        roi_titulo = "Redução de perdas para os sensores se pagarem"
+        roi_exibicao = f"{equilibrio_pct:.0f}%" if equilibrio_pct < 100 else "Revisar valores"
+        resumo_diagnostico = f"economia estimada de {moeda_inteira(economia_bruta)}"
 
     contexto = {
         'num_maquinas': num_maquinas,
@@ -176,7 +193,10 @@ def _calcular(salvo):
         'titulo_resultado': titulo_resultado,
         'economia_mensal': texto_economia,
         'cor_economia': cor_economia,
-        'roi': f"{roi:.1f}%",
+        'roi': roi_exibicao,
+        'roi_titulo': roi_titulo,
+        'investimento_faixa': faixa_investimento(investimento_min, investimento_max),
+        'investimento_central': moeda_inteira(investimento_periodo),
         'dados_grafico_dias': df['Dia'].tolist(),
         'dados_grafico_sem_iot': df['Custo_Sem_IoT'].tolist(),
         'dados_grafico_com_iot': df['Custo_Com_IoT'].tolist(),
@@ -201,15 +221,17 @@ def _calcular(salvo):
         prioridade=salvo.get('prioridade'),
         acompanhamento=salvo.get('acompanhamento_atual'),
         conexao_local=salvo.get('conexao_local'),
+        investimento_min=investimento_min,
     )
     contexto['como_calculamos'] = explicar_calculo(
         segmento, {**salvo, 'custo_hora_parada': custo_hora_parada, 'perda_mensal': perda_mensal,
                    'conserto_mensal': conserto_mensal},
         texto_regime, fator_regime, dias_simulados, economia_conserto,
-        cobertura=cobertura, economia_potencial=economia_potencial, economia_ja_aproveitada=economia_ja_aproveitada)
+        cobertura=cobertura, economia_potencial=economia_potencial, economia_ja_aproveitada=economia_ja_aproveitada,
+        investimento_min=investimento_min, investimento_max=investimento_max)
     contexto['sensores_atuais'] = montar_sensores_atuais(
         cobertura, economia_ja_aproveitada, float(economia_bruta), economia_potencial, dias_simulados)
-    contexto['link_diagnostico'] = link_diagnostico(segmento["rotulo"], num_maquinas, unidade_pontos, contexto['roi'])
+    contexto['link_diagnostico'] = link_diagnostico(segmento["rotulo"], num_maquinas, unidade_pontos, resumo_diagnostico)
     return contexto
 
 

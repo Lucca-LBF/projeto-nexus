@@ -13,8 +13,11 @@ prioridades: opções da pergunta "Qual é a sua prioridade?" deste segmento.
   aparece no retorno que a empresa recebe junto com o resultado.
 
 custo_ponto: custo mensal estimado por ponto monitorado (R$ por ponto por mês), considerando só os
-  sensores. É um valor provisório do simulador, só para estimar o investimento por tipo de empresa:
-  não é preço da Bzu e não aparece na tela. Troque quando a Bzu informar uma faixa real.
+  sensores: o sensor e a instalação diluídos em 36 meses, mais assinatura e conectividade.
+  É o valor central, usado no lucro e no ROI. custo_ponto_faixa é o intervalo (mínimo, máximo) mostrado
+  como "investimento estimado". Medir temperatura sai mais barato que medir vibração.
+  São estimativas de mercado a partir de preços públicos de fornecedores de IoT (US$ 1 = R$ 5,50),
+  não são preço da Bzu, que não publica valores. Troque quando a Bzu informar uma faixa real.
 
 taxa_falha_base e reducao_iot são premissas de referência do simulador.
 Os quatro primeiros segmentos mantêm os valores que o grupo já usava; os demais
@@ -83,6 +86,7 @@ SEGMENTOS = {
     "padrao": {
         "rotulo": "Indústria em geral",
         "custo_ponto": 150,
+        "custo_ponto_faixa": (90, 220),
         "nome": "Simulação Padrão",
         "modelo": "paradas",
         "taxa_falha_base": 0.04,
@@ -116,6 +120,7 @@ SEGMENTOS = {
     "textil": {
         "rotulo": "Indústria têxtil",
         "custo_ponto": 150,
+        "custo_ponto_faixa": (90, 220),
         "nome": "Indústria Têxtil",
         "modelo": "paradas",
         "taxa_falha_base": 0.06,
@@ -149,6 +154,7 @@ SEGMENTOS = {
     "pesada": {
         "rotulo": "Indústria pesada",
         "custo_ponto": 200,
+        "custo_ponto_faixa": (130, 320),
         "nome": "Manufatura Pesada",
         "modelo": "paradas",
         "taxa_falha_base": 0.03,
@@ -181,7 +187,8 @@ SEGMENTOS = {
     },
     "refrigeracao": {
         "rotulo": "Cadeia fria e refrigeração",
-        "custo_ponto": 120,
+        "custo_ponto": 90,
+        "custo_ponto_faixa": (60, 140),
         "nome": "Frio Industrial e Refrigeração",
         "modelo": "paradas",
         "taxa_falha_base": 0.04,
@@ -214,7 +221,8 @@ SEGMENTOS = {
     },
     "alimentos": {
         "rotulo": "Alimentos e bebidas",
-        "custo_ponto": 150,
+        "custo_ponto": 100,
+        "custo_ponto_faixa": (60, 140),
         "nome": "Alimentos e Bebidas",
         "modelo": "perdas",
         "taxa_falha_base": None,
@@ -248,7 +256,8 @@ SEGMENTOS = {
     },
     "saude": {
         "rotulo": "Saúde e farmacêutica",
-        "custo_ponto": 180,
+        "custo_ponto": 110,
+        "custo_ponto_faixa": (70, 160),
         "nome": "Saúde e Farmacêutica",
         "modelo": "perdas",
         "taxa_falha_base": None,
@@ -282,7 +291,8 @@ SEGMENTOS = {
     },
     "utilities": {
         "rotulo": "Água, gás e energia",
-        "custo_ponto": 120,
+        "custo_ponto": 110,
+        "custo_ponto_faixa": (80, 150),
         "nome": "Água, Gás e Energia",
         "modelo": "perdas",
         "taxa_falha_base": None,
@@ -316,7 +326,8 @@ SEGMENTOS = {
     },
     "edificios": {
         "rotulo": "Edifícios inteligentes",
-        "custo_ponto": 100,
+        "custo_ponto": 90,
+        "custo_ponto_faixa": (60, 130),
         "nome": "Edifícios Inteligentes",
         "modelo": "perdas",
         "taxa_falha_base": None,
@@ -350,7 +361,8 @@ SEGMENTOS = {
     },
     "cidades": {
         "rotulo": "Cidades inteligentes",
-        "custo_ponto": 130,
+        "custo_ponto": 100,
+        "custo_ponto_faixa": (60, 140),
         "nome": "Cidades Inteligentes",
         "modelo": "perdas",
         "taxa_falha_base": None,
@@ -384,7 +396,8 @@ SEGMENTOS = {
     },
     "agro": {
         "rotulo": "Agronegócio",
-        "custo_ponto": 110,
+        "custo_ponto": 65,
+        "custo_ponto_faixa": (40, 100),
         "nome": "Agronegócio",
         "modelo": "perdas",
         "taxa_falha_base": None,

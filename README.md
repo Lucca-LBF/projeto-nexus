@@ -75,7 +75,7 @@ O que cada segmento configura:
 * **modelo**: `paradas` (a pessoa informa o custo de uma hora parada e o sistema calcula as horas perdidas) ou `perdas` (a pessoa informa quanto perde por mês).
 * **taxa_falha_base**: horas de parada por máquina ao dia (só no modelo `paradas`).
 * **reducao_iot**: percentual das perdas que o IoT evita.
-* **custo_ponto**: custo mensal estimado por ponto monitorado, só com os sensores. É um valor provisório e interno, usado apenas para estimar o investimento por tipo de empresa. Não é preço da Bzu e não aparece na tela.
+* **custo_ponto** e **custo_ponto_faixa**: custo mensal estimado por ponto monitorado (R$ por ponto por mês), só com os sensores: sensor e instalação diluídos em 36 meses, mais assinatura e conectividade. O valor central entra no lucro e no ROI, e a faixa (mínimo e máximo) aparece como "investimento estimado". São estimativas de mercado a partir de preços públicos de fornecedores de IoT, não são preço da Bzu. Medir temperatura (refrigeração, agro) sai mais barato que medir vibração (indústria pesada).
 * **rotulo_pontos**: como chamar o que é monitorado (máquinas, câmaras frias, edifícios e assim por diante).
 * **intro, campos, prioridades, monitorar, conexao e caso**: textos do formulário e do retorno.
 
@@ -105,7 +105,7 @@ Campos do formulário:
 * `acompanhamento_atual`: se a empresa já tem sensores (nenhum, acompanhamento manual, sensores em alguns pontos ou na maior parte dos pontos). Define quanto da economia já está sendo aproveitado.
 * `prioridade` e `conexao_local`: perguntas de contexto. Não entram na conta, só personalizam o retorno.
 
-O formulário **não pergunta o custo do sensor**: o investimento é estimado pelo tipo de empresa (veja `custo_ponto` em Segmentos).
+O formulário **não pergunta o custo do sensor**: o investimento é estimado pelo tipo de empresa, em faixa (veja `custo_ponto_faixa` em Segmentos).
 
 Validações (o servidor sempre confere de novo, mesmo que o navegador já tenha conferido):
 * Não aceita valores negativos, e os campos obrigatórios precisam ser maiores que zero.
@@ -126,13 +126,14 @@ O motor de cálculo fica em `simulador/views.py`. Ele simula o comportamento fin
   * Investimento = pontos a monitorar × custo estimado por ponto do tipo de empresa × meses do período
   * Resultado líquido = economia bruta − investimento
   * ROI = (resultado líquido ÷ investimento) × 100
-* O preço do sensor **não é perguntado nem mostrado**: o custo por ponto de cada segmento fica no `segmentos.py` como estimativa interna, e a tela diz que o valor final é definido pela Bzu na proposta.
-* O resultado aparece como **LUCRO LÍQUIDO** ou **PREJUÍZO**, com o ROI em destaque. O investimento considera só os sensores, e a página avisa isso (gateways, plataforma e diagnóstico ficam para a proposta da Bzu).
+* O preço do sensor **não é perguntado**: o custo por ponto de cada segmento fica no `segmentos.py` como estimativa de mercado (faixa mínima e máxima). A tela mostra só a faixa do investimento total, nunca o preço por ponto, e diz que o valor final é definido pela Bzu na proposta.
+* O resultado aparece como **LUCRO LÍQUIDO ESTIMADO** com o ROI estimado em destaque. Quando o lucro seria negativo, a tela não mostra valor negativo nem vermelho: mostra a **ECONOMIA ESTIMADA** e a redução de perdas necessária para os sensores se pagarem. Tudo é tratado como estimativa, e sempre há um caminho sugerido para economizar. O investimento aparece como faixa estimada ("entre R$ X e R$ Y"), considera só os sensores, e a página avisa que não é preço da Bzu (gateways, plataforma e diagnóstico ficam para a proposta da Bzu). Lucro e ROI usam o valor central da faixa.
 * Os dados da simulação ficam guardados na **sessão** do usuário, sem exigir cadastro, e é dela que o dashboard lê. O resultado tem um botão para baixar o relatório em PDF, que usa a impressão do navegador ("Salvar como PDF"), sem gerar nem guardar arquivo no servidor.
 
 ## Retorno ao usuário (feedback.py)
 O arquivo `simulador/feedback.py` monta tudo o que a empresa lê junto com o número do resultado:
-* **Leitura do resultado**: texto conforme o ROI (investimento não se paga, retorno moderado ou retorno alto), quanto se evita de perda para cada R$ 1,00 investido e a redução mínima de perdas para os sensores se pagarem.
+* **Leitura do resultado**: texto conforme o ROI estimado (potencial de economia com caminhos para chegar ao retorno, retorno moderado ou retorno alto), quanto se evita de perda para cada R$ 1,00 investido, a redução mínima de perdas para os sensores se pagarem e, quando o resultado é negativo, o lucro estimado no extremo mais econômico da faixa de investimento.
+* **Monitoramento em tempo real**: bloco antes do fechamento sobre medir 24 horas por dia e depender menos de rondas e anotações (menor dependência do fator humano).
 * **Seus sensores atuais** (`montar_sensores_atuais`): para quem já tem sensores, mostra quanto já está sendo evitado, quanto ainda dá para ganhar ampliando e sugere ampliar a cobertura.
 * **Personalização**: usa as respostas de prioridade, acompanhamento atual e conexão do local para sugerir por onde começar, o que monitorar e qual conexão usar (Wi-Fi, LoRa ou LTE), além de um caso de referência do segmento.
 * **Como calculamos** (`explicar_calculo`): o passo a passo da conta em frases, com os números da própria simulação.
@@ -140,9 +141,9 @@ O arquivo `simulador/feedback.py` monta tudo o que a empresa lê junto com o nú
 
 ## Dashboard de Custos
 O arquivo `dashboard/views.py` monta o dashboard a partir da simulação guardada na sessão (e não mais do banco de dados) e gera os gráficos com a biblioteca **Plotly**.
-* **Indicadores**: resultado líquido com ROI, economia evitada por mês, horas de parada evitadas (segmentos de `paradas`), economia mensal por ponto, quanto já é evitado com os sensores atuais (quando existem) e redução efetiva de perdas. Quando o resultado é negativo, o dashboard não mostra valor negativo: mostra "Ainda sem retorno" e explica quanto falta para os sensores se pagarem.
+* **Indicadores**: resultado líquido com ROI, economia evitada por mês, horas de parada evitadas (segmentos de `paradas`), economia mensal por ponto, quanto já é evitado com os sensores atuais (quando existem) e redução efetiva de perdas. Quando o resultado é negativo, o dashboard não mostra valor negativo nem vermelho: mostra o "Potencial de economia", a redução necessária para os sensores se pagarem e o lucro estimado no mínimo da faixa de investimento. Também mostra o "Investimento estimado" em faixa.
 * **Projeção de custos**: gráfico de linhas "Sem IoT" e "Com IoT". Até 30 dias o eixo é diário, e acima disso é mensal.
-* **Economia por redução de perdas**: mostra como a economia muda se a redução real for maior ou menor que a premissa, com uma marca no ponto de equilíbrio (a redução mínima para os sensores se pagarem). O valor do investimento não é desenhado.
+* **Economia por redução de perdas**: mostra como a economia muda se a redução real for maior ou menor que a premissa, com uma marca no ponto de equilíbrio (a redução mínima para os sensores se pagarem). A linha do investimento não é desenhada.
 * **Comparativo do período**: barras com o custo sem IoT e o custo com IoT.
 * **Dados informados e premissas de referência** usadas na simulação.
 
