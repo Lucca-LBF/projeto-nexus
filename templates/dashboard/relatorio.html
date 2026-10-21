@@ -31,6 +31,7 @@
             <div class="rel-destaque rel-destaque-2">
                 <small>{{ roi_titulo }}</small>
                 <strong class="text-info">{{ roi }}</strong>
+                {% if roi_nota %}<span class="rel-nota">{{ roi_nota }}</span>{% endif %}
             </div>
         </div>
         {% if investimento_faixa %}

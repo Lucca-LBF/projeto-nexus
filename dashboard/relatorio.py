@@ -71,6 +71,7 @@ def relatorio(request):
         'lucro': dash._brl(liquido) if liquido >= 0 else dash._brl(salvo.get('economia_bruta', 0)),
         'roi_titulo': resultado['roi_titulo'],
         'roi': resultado['roi'],
+        'roi_nota': resultado['roi_nota'],
         'imprimir': request.GET.get('imprimir') == '1',
     }
     return render(request, 'dashboard/relatorio.html', contexto)

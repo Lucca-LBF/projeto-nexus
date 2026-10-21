@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render
 import plotly.graph_objects as go
 import plotly.io as pio
 
-from simulador.feedback import faixa_investimento, montar_sensores_atuais
+from simulador.feedback import faixa_investimento, faixa_roi, moeda_inteira, montar_sensores_atuais
 from simulador.segmentos import ACOMPANHAMENTO_RESUMO, SEGMENTOS
 from simulador.views import _regime
 
@@ -190,7 +190,7 @@ def _indicadores(simulacao, segmento):
         kpis.append({
             'titulo': f'Resultado líquido ({dias} dias)',
             'valor': _brl(liquido),
-            'detalhe': (f'ROI de {_pct(liquido / investimento * 100)}'
+            'detalhe': (f'ROI estimado de {_pct(liquido / investimento * 100)}'
                         if investimento > 0 else 'Sem investimento informado'),
             'classe': 'text-success',
         })
@@ -204,14 +204,35 @@ def _indicadores(simulacao, segmento):
         })
         if total_sem > 0 and investimento > 0:
             equilibrio = investimento / total_sem * 100
+            if equilibrio < 100:
+                valor_eq = f'{_pct(equilibrio, 0)} de redução'
+                detalhe_eq = f"Referência do setor: {_pct(segmento['reducao_iot'] * 100, 0)} de redução de perdas"
+            else:
+                # nem 100% de redução pagaria: mostra quanto a hora parada (ou a perda mensal) teria que valer
+                alvo = simulacao.get('valor_equilibrio', 0)
+                informado = simulacao.get('valor_informado', 0)
+                if segmento['modelo'] == 'paradas':
+                    rotulo_eq, sufixo_eq = 'Hora parada de', ''
+                else:
+                    rotulo_eq, sufixo_eq = 'Perda de', ' por mês'
+                valor_eq = f'{rotulo_eq} {moeda_inteira(alvo)}{sufixo_eq}' if alvo > 0 else 'Começar por poucos pontos'
+                detalhe_eq = (f'Você informou {moeda_inteira(informado)}{sufixo_eq}. '
+                              'Vale começar pelos pontos críticos.' if alvo > 0 else 'Onde a perda é maior')
             kpis.append({
                 'titulo': 'Para os sensores se pagarem',
-                'valor': f'{_pct(equilibrio, 0)} de redução' if equilibrio < 100 else 'Revisar valores',
-                'detalhe': (f"Referência do setor: {_pct(segmento['reducao_iot'] * 100, 0)} de redução de perdas"
-                            if equilibrio < 100 else 'A perda informada é menor que o investimento estimado'),
+                'valor': valor_eq,
+                'detalhe': detalhe_eq,
                 'classe': 'text-info',
             })
         investimento_min = simulacao.get('investimento_min', 0)
+        roi_faixa = faixa_roi(economia, investimento_min, simulacao.get('investimento_max', 0))
+        if roi_faixa:
+            kpis.append({
+                'titulo': 'ROI estimado',
+                'valor': roi_faixa,
+                'detalhe': 'Nos dois extremos da faixa de investimento',
+                'classe': 'text-info',
+            })
         if economia > investimento_min > 0:
             kpis.append({
                 'titulo': 'Se o investimento ficar no mínimo da faixa',

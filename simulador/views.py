@@ -4,8 +4,8 @@ import numpy as np
 from .forms import DadosEmpresaForm
 from .segmentos import (ACOMPANHAMENTO_RESUMO, COBERTURA_SENSORES, PERCENTUAIS_ESTIMATIVA,
                         REGIME_FUNCIONAMENTO, REGIME_PADRAO, SEGMENTOS, segmentos_para_formulario)
-from .feedback import (explicar_calculo, faixa_investimento, link_diagnostico, moeda_inteira, montar_feedback,
-                       montar_sensores_atuais)
+from .feedback import (explicar_calculo, faixa_investimento, faixa_roi, link_diagnostico, moeda_inteira,
+                       montar_feedback, montar_sensores_atuais)
 
 # chave da sessão onde ficam os dados da última simulação
 CHAVE_SESSAO = 'simulacao'
@@ -168,20 +168,56 @@ def _calcular(salvo):
     # equilíbrio: redução de perdas mínima para os sensores se pagarem (pelo valor central do investimento)
     equilibrio_pct = investimento_periodo / total_operacional_antigo * 100 if total_operacional_antigo > 0 else 0
 
+    # o que falta para os sensores se pagarem: a redução de perdas necessária ou, se nem 100% bastaria,
+    # o valor que a hora parada (ou a perda mensal) teria que ter. Sempre é um caminho, nunca "revise os dados".
+    valor_equilibrio = 0.0
+    if equilibrio_pct < 100:
+        falta_curto = f"Os sensores se pagam se evitarem pelo menos {equilibrio_pct:.0f}% das perdas."
+        falta_pagar = (f"Pela estimativa, os sensores se pagam se as perdas caírem pelo menos {equilibrio_pct:.1f}%. "
+                       f"A referência do seu setor é {round(segmento['reducao_iot'] * 100)}%.".replace('.', ',', 1))
+    else:
+        # a economia principal (sem o conserto de emergência) cresce na mesma proporção do valor informado
+        economia_principal = economia_bruta - economia_conserto * fator_novo
+        informado = custo_hora_parada if segmento['modelo'] == 'paradas' else perda_mensal
+        if economia_principal > 0 and informado > 0:
+            faltante = max(investimento_periodo - economia_conserto * fator_novo, 0)
+            valor_equilibrio = float(informado * faltante / economia_principal)
+        if segmento['modelo'] == 'paradas':
+            grandeza, unidade_grandeza = "cada hora parada custasse", "a hora"
+        else:
+            grandeza, unidade_grandeza = "a perda mensal fosse de", "por mês"
+        if valor_equilibrio > 0:
+            falta_curto = f"Os sensores se pagam se {grandeza} cerca de {moeda_inteira(valor_equilibrio)}."
+            falta_pagar = (f"Com os valores informados, a economia fica abaixo do investimento estimado, e nem evitar "
+                           f"todas as perdas pagaria os sensores. Eles se pagariam se {grandeza} cerca de "
+                           f"{moeda_inteira(valor_equilibrio)} (você informou {moeda_inteira(informado)}). "
+                           "Vale começar por poucos pontos críticos, onde a perda é maior.")
+        else:
+            falta_curto = "Vale começar por poucos pontos críticos, onde a perda é maior."
+            falta_pagar = falta_curto
+
+    # o dashboard lê estes valores da sessão
+    salvo.update({
+        'equilibrio_pct': float(equilibrio_pct),
+        'valor_equilibrio': float(valor_equilibrio),
+        'valor_informado': float(custo_hora_parada if segmento['modelo'] == 'paradas' else perda_mensal),
+    })
+    roi_faixa = faixa_roi(economia_bruta, investimento_min, investimento_max)
+    roi_titulo = "Retorno sobre Investimento (ROI) estimado"
     if resultado_liquido >= 0:
         texto_economia = f"R$ {resultado_liquido:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
         cor_economia = "text-success"
         titulo_resultado = f"LUCRO LÍQUIDO ESTIMADO ({dias_simulados} DIAS)"
-        roi_titulo = "Retorno sobre Investimento (ROI) estimado"
         roi_exibicao = f"{roi:.1f}%"
+        roi_nota = f"Pela faixa de investimento: {roi_faixa}" if roi_faixa else ""
         resumo_diagnostico = f"ROI estimado de {roi:.1f}%"
     else:
-        # sem valor negativo nem vermelho: mostra a economia estimada e o que falta para os sensores se pagarem
+        # sem vermelho: mostra a economia estimada, o ROI em faixa e o que falta para os sensores se pagarem
         texto_economia = f"R$ {economia_bruta:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
         cor_economia = "text-info"
         titulo_resultado = f"ECONOMIA ESTIMADA ({dias_simulados} DIAS)"
-        roi_titulo = "Redução de perdas para os sensores se pagarem"
-        roi_exibicao = f"{equilibrio_pct:.0f}%" if equilibrio_pct < 100 else "Revisar valores"
+        roi_exibicao = roi_faixa or "—"
+        roi_nota = falta_curto
         resumo_diagnostico = f"economia estimada de {moeda_inteira(economia_bruta)}"
 
     contexto = {
@@ -195,6 +231,7 @@ def _calcular(salvo):
         'cor_economia': cor_economia,
         'roi': roi_exibicao,
         'roi_titulo': roi_titulo,
+        'roi_nota': roi_nota,
         'investimento_faixa': faixa_investimento(investimento_min, investimento_max),
         'investimento_central': moeda_inteira(investimento_periodo),
         'dados_grafico_dias': df['Dia'].tolist(),
@@ -222,6 +259,7 @@ def _calcular(salvo):
         acompanhamento=salvo.get('acompanhamento_atual'),
         conexao_local=salvo.get('conexao_local'),
         investimento_min=investimento_min,
+        falta_pagar=falta_pagar,
     )
     contexto['como_calculamos'] = explicar_calculo(
         segmento, {**salvo, 'custo_hora_parada': custo_hora_parada, 'perda_mensal': perda_mensal,

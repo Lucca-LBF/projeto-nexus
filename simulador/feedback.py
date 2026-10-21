@@ -51,6 +51,15 @@ def faixa_investimento(minimo, maximo, curta=False):
     return f"entre {moeda_inteira(minimo)} e {moeda_inteira(maximo)}"
 
 
+def faixa_roi(economia, investimento_min, investimento_max):
+    """ROI nos dois extremos da faixa de investimento: 'de -35% a 12%' (ou None sem investimento)."""
+    if investimento_min <= 0 or investimento_max <= 0:
+        return None
+    pior = (economia - investimento_max) / investimento_max * 100
+    melhor = (economia - investimento_min) / investimento_min * 100
+    return f"de {pior:.0f}% a {melhor:.0f}%"
+
+
 def link_diagnostico(nome_industria, num_pontos, unidade, resumo_texto):
     """Link do WhatsApp da Bzu com a mensagem pronta (só segmento, quantidade e estimativa, nada pessoal)."""
     mensagem = (f"Olá, Bzu! Fiz uma simulação no simulador de economia com IoT (segmento: {nome_industria}, "
@@ -134,7 +143,8 @@ def _achar(lista, valor, posicao):
 
 
 def montar_feedback(segmento, roi, economia_bruta, investimento_periodo, perda_total_sem_iot,
-                    prioridade=None, acompanhamento=None, conexao_local=None, investimento_min=None):
+                    prioridade=None, acompanhamento=None, conexao_local=None, investimento_min=None,
+                    falta_pagar=None):
     reducao = segmento["reducao_iot"]
 
     if roi < 0:
@@ -163,7 +173,9 @@ def montar_feedback(segmento, roi, economia_bruta, investimento_periodo, perda_t
                    f"R$ {_num(economia_bruta / investimento_periodo)} em perdas.")
 
     equilibrio = ""
-    if investimento_periodo > 0 and perda_total_sem_iot > 0:
+    if falta_pagar and roi < 0:
+        equilibrio = falta_pagar
+    elif investimento_periodo > 0 and perda_total_sem_iot > 0:
         pct = investimento_periodo / perda_total_sem_iot * 100
         if pct >= 100:
             equilibrio = ("Com os valores informados, a perda estimada ainda é menor que o investimento estimado. "
