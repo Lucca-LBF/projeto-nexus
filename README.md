@@ -15,7 +15,57 @@ Relatório da analise de competidores:
 
 ## Terceira Entrega
 
-![foto da sprint3](Sprint03_FDS.png)
+![escopo da entrega 03](Sprint03_FDS.png)
+
+### Histórias de usuário
+
+As 7 histórias do projeto, com critérios de aceite e cenários BDD, estão em [user_stories.md](user_stories.md) e na seção [Histórias de Usuário](#histórias-de-usuário) deste README.
+
+### Histórias implementadas nesta entrega
+
+> **POST-IT · História 1: Coleta de dados do cenário operacional**
+> **Como** gestor de operações, **quero** preencher um formulário com as características da minha empresa, **para** a simulação refletir o meu negócio.
+> **Pronto quando:** o formulário pergunta tipo de empresa, pontos, funcionamento, custo da hora parada, período e se já há sensores; não pergunta o preço do sensor; recusa valores inválidos.
+> **Onde está:** `/simulador/`
+
+> **POST-IT · História 2: Cálculo de ROI e viabilidade de IoT**
+> **Como** diretor industrial, **quero** ver o ROI e o resultado estimados, **para** decidir se o monitoramento vale a pena.
+> **Pronto quando:** a tela mostra o lucro estimado, o ROI estimado, o investimento em faixa de mercado e o que falta para os sensores se pagarem; quem já tem sensores vê o que já evita e o que ainda dá para ganhar.
+> **Onde está:** `/simulador/resultado/`
+
+> **POST-IT · História 3: Dashboard visual de projeção de falhas**
+> **Como** gestor de operações, **quero** ver os dados da simulação em gráficos, **para** comparar a operação com e sem IoT.
+> **Pronto quando:** o dashboard tem o gráfico "Sem IoT" e "Com IoT", os indicadores, o gráfico de sensibilidade com o ponto de equilíbrio e o comparativo do período.
+> **Onde está:** `/dashboard/`
+
+> **POST-IT · História 7: Relatório do resultado em PDF**
+> **Como** gestor que precisa convencer a diretoria, **quero** baixar o resultado em PDF, **para** compartilhar os números sem refazer a simulação.
+> **Pronto quando:** o botão "Baixar relatório completo (PDF)" abre a impressão do navegador com o resultado, o dashboard e o "Como calculamos" em páginas A4.
+> **Onde está:** `/dashboard/relatorio/`
+
+### Backlog do Jira
+
+Jira: https://cesar-team-wuiwsqgi.atlassian.net/jira/software/projects/KAN/list?jql=project%20%3D%20KAN%20ORDER%20BY%20cf%5B10019%5D%20ASC
+
+<!-- Para publicar o print, salve o arquivo Backlog_Entrega03.png na pasta do projeto e troque este comentário por: ![Backlog do Jira](Backlog_Entrega03.png) -->
+
+### Quadro da Sprint 03
+
+<!-- Para publicar o print, salve o arquivo Quadro_Sprint03.png na pasta do projeto e troque este comentário por: ![Quadro da Sprint 03](Quadro_Sprint03.png) -->
+
+### Issue e bug tracker (GitHub)
+
+<!-- Para publicar o print, salve o arquivo BugTracker_Entrega03.png na pasta do projeto e troque este comentário por: ![Bug tracker do GitHub](BugTracker_Entrega03.png) -->
+
+### Screencasts
+
+* Deployment das histórias (a URL aparece no vídeo): link a ser adicionado.
+* Explicação do código Django, de cada história até a view, o template e o model: link a ser adicionado.
+<!-- Troque "link a ser adicionado" pelo link do YouTube de cada vídeo. -->
+
+### Versionamento
+
+Os commits são frequentes e ficam em https://github.com/Lucca-LBF/projeto-nexus/commits/main
 
 ## Videos
 
@@ -160,90 +210,226 @@ O arquivo `dashboard/views.py` monta o dashboard a partir da simulação guardad
 
 #  Histórias de Usuário
 
-As histórias de usuário descrevem o que cada tipo de usuário da plataforma precisa fazer e por quê. Cada uma tem critérios de aceite, que definem quando a funcionalidade pode ser considerada pronta. A especificação completa também está em [user_stories.md](user_stories.md).
+As histórias de usuário descrevem o que cada tipo de usuário da plataforma precisa fazer e por quê. Cada uma tem critérios de aceite, que definem quando a funcionalidade pode ser considerada pronta, e cenários de validação escritos em BDD (Dado, Quando, Então). A especificação completa também está em [user_stories.md](user_stories.md).
 
-As histórias estão divididas em dois grupos: **Simulação e Visualização de Dados** (histórias 1 a 3) e **Conversão, Atendimento e Melhoria Contínua** (histórias 4 a 6).
+As histórias estão divididas em dois grupos: **Simulação e Visualização de Dados** (histórias 1 a 3) e **Conversão, Atendimento e Melhoria Contínua** (histórias 4 a 7).
 
 ##  Simulação e Visualização de Dados
-![foto da historias do usuario 1](Historias1.png)
+![foto das historias do usuario 1](Historias1.png)
 
 ### História de Usuário 1: Coleta de Dados do Cenário Operacional
 > **Como** um Gestor de Operações,
-> **Eu quero** preencher um formulário com as características específicas da minha fábrica,
-> **Para que** a simulação reflita a realidade financeira exata do meu negócio, e não um cenário genérico.
+> **Eu quero** preencher um formulário com as características específicas da minha empresa,
+> **Para que** a simulação reflita a realidade financeira do meu negócio, e não um cenário genérico.
 
 **Critérios de Aceite:**
-* O formulário deve conter campos para: Tipo de Fábrica, Número de Máquinas, Custo da Hora Parada e Custo do Sensor.
-* O formulário deve ter um campo de seleção (dropdown) para o "Período de Análise" (ex: 30 dias, 3 meses, 6 meses, 1 ano).
-* O sistema não deve permitir a inserção de valores negativos (validação de dados).
-* Ao clicar em "Gerar Simulação", os dados devem ser enviados para o motor de cálculo do simulador.
+* O formulário, com uma pergunta por tela, pergunta o tipo de empresa, o número de máquinas (ou pontos de medição), o regime de funcionamento, o custo da hora parada (ou a perda mensal, conforme o tipo de empresa), o conserto de emergência (opcional), o período de análise, a prioridade, se a empresa já tem sensores e a conexão do local.
+* O formulário **não pergunta o custo do sensor**: o investimento é estimado pelo tipo de empresa, em faixa.
+* O período de análise é um campo de seleção (dropdown) com 30, 60, 90, 120, 180 ou 360 dias.
+* O sistema não aceita valores negativos nem zero nos campos obrigatórios, e mostra mensagens de erro em português.
+* Ao concluir, o botão "Ver quanto posso economizar" envia os dados para o motor de cálculo do simulador.
+
+**Cenários (BDD):**
+```gherkin
+Funcionalidade: Coleta de dados do cenário operacional
+
+  Cenário: Preencher o formulário e ver o resultado
+    Dado que estou na página do simulador
+    Quando escolho o tipo de empresa e informo 100 máquinas, custo da hora parada de R$ 2.000 e período de 90 dias
+    E respondo as demais perguntas
+    Então o simulador calcula a simulação e abre a tela de resultado
+
+  Cenário: Valor inválido não avança
+    Dado que estou na pergunta "Número de máquinas"
+    Quando informo 0 e clico em "Continuar"
+    Então vejo a mensagem "Informe pelo menos 1."
+    E continuo na mesma pergunta
+
+  Cenário: O custo do sensor não é perguntado
+    Dado que respondo o formulário até o fim
+    Então em nenhuma tela sou perguntado sobre o preço do sensor
+```
 
 ---
 
 ### História de Usuário 2: Cálculo de ROI e Viabilidade de IoT
 > **Como** um Diretor Industrial,
-> **Eu quero** visualizar o cálculo automático de Retorno sobre Investimento e o impacto financeiro líquido com base nos dados que inseri,
-> **Para que** eu possa decidir com segurança matemática se a compra dos sensores IoT vale a pena para a minha empresa.
+> **Eu quero** visualizar o cálculo automático do retorno sobre o investimento e do impacto financeiro estimado com base nos dados que inseri,
+> **Para que** eu possa decidir com segurança se o monitoramento com sensores IoT vale a pena para a minha empresa.
 
 **Critérios de Aceite:**
-* O sistema deve calcular a "Economia Bruta" comparando o tempo de parada sem IoT vs. com IoT.
-* O sistema deve calcular o "Investimento Total" multiplicando o custo do sensor pelo número de máquinas e pelo período de análise.
-* O sistema deve exibir claramente uma tag de "LUCRO LÍQUIDO" ou "PREJUÍZO".
-* O percentual de ROI deve ser exibido em destaque na tela de resultados.
+* O sistema calcula a "Economia Bruta" comparando o custo de paradas e perdas sem IoT e com IoT, usando a redução de referência do tipo de empresa.
+* O investimento é uma **estimativa de mercado em faixa** ("entre R$ X e R$ Y"), calculada pelos pontos a monitorar, pelo custo por ponto do tipo de empresa e pelos meses do período. A tela avisa que não é preço da Bzu.
+* O lucro líquido estimado e o **ROI estimado** aparecem sempre na tela de resultado e usam o valor central da faixa.
+* Quando o lucro seria negativo, a tela não usa vermelho nem mostra valor negativo como destaque: mostra a economia estimada, o ROI em faixa e o que falta para os sensores se pagarem.
+* Se a empresa já tem sensores, o sistema mostra quanto já é evitado e quanto ainda dá para ganhar ampliando, e o investimento vale só para os pontos que ainda não têm sensor.
+
+**Cenários (BDD):**
+```gherkin
+Funcionalidade: Cálculo de ROI e viabilidade de IoT
+
+  Cenário: Resultado positivo
+    Dado que informei 60 máquinas, custo da hora parada de R$ 2.000 e período de 90 dias
+    Quando vejo a tela de resultado
+    Então vejo o "LUCRO LÍQUIDO ESTIMADO" e o "ROI estimado" em destaque
+    E vejo o investimento estimado como uma faixa, marcada como estimativa de mercado
+
+  Cenário: Resultado que ainda não paga os sensores
+    Dado que informei 60 máquinas, custo da hora parada de R$ 500 e período de 90 dias
+    Quando vejo a tela de resultado
+    Então vejo a "ECONOMIA ESTIMADA" em vez de um prejuízo
+    E vejo o ROI estimado em faixa, sem vermelho
+    E vejo quanto a redução de perdas precisa ser para os sensores se pagarem
+
+  Cenário: Empresa que já tem sensores
+    Dado que respondi que já temos sensores em alguns pontos
+    Quando vejo a tela de resultado
+    Então vejo quanto já é evitado com os sensores atuais
+    E vejo quanto ainda dá para ganhar ampliando o monitoramento
+```
 
 ---
 
 ### História de Usuário 3: Dashboard Visual de Projeção de Falhas
 > **Como** um Gestor de Operações,
-> **Eu quero** visualizar os dados da simulação projetados em um Dashboard interativo com gráficos de linhas,
-> **Para que** eu possa comparar visualmente a eficiência da fábrica com e sem a tecnologia, sem precisar analisar linhas de planilhas manuais.
+> **Eu quero** visualizar os dados da simulação projetados em um Dashboard interativo com gráficos,
+> **Para que** eu possa comparar visualmente a eficiência da empresa com e sem a tecnologia, sem precisar analisar planilhas.
 
 **Critérios de Aceite:**
-* O Dashboard deve renderizar um gráfico de linhas mostrando a projeção diária (ou mensal, dependendo do período escolhido) dos custos de falha.
-* O gráfico deve conter duas linhas distintas para fácil comparação: "Operação Sem IoT" (Corretiva) e "Operação Com IoT" (Preditiva).
-* O eixo X do gráfico deve se adaptar automaticamente ao período de análise selecionado no formulário (ex: ir de 1 a 30 dias, ou de 1 a 4 meses).
-* O Dashboard deve incluir uma nota explicativa indicando que o gráfico reflete a eficiência operacional, enquanto os painéis superiores refletem o resultado financeiro.
+* O Dashboard renderiza um gráfico de linhas com a projeção dos custos de falha, diária (até 30 dias) ou mensal (períodos maiores).
+* O gráfico tem duas linhas distintas para comparação: "Operação Sem IoT" (Corretiva) e "Operação Com IoT" (Preditiva).
+* O eixo X se adapta automaticamente ao período escolhido no formulário.
+* O Dashboard mostra indicadores (resultado ou potencial de economia, investimento estimado, economia por mês e redução efetiva de perdas), o gráfico de sensibilidade com o ponto de equilíbrio e o comparativo do período.
+* O Dashboard inclui uma nota explicando que o gráfico reflete a eficiência operacional, enquanto os indicadores no topo refletem o resultado financeiro.
+
+**Cenários (BDD):**
+```gherkin
+Funcionalidade: Dashboard visual de projeção de falhas
+
+  Cenário: Ver o dashboard depois de simular
+    Dado que fiz uma simulação de 90 dias
+    Quando abro o Dashboard
+    Então vejo o gráfico de linhas "Sem IoT" e "Com IoT" com o eixo em meses
+    E vejo os indicadores da simulação
+
+  Cenário: Abrir o dashboard sem simulação
+    Dado que ainda não fiz nenhuma simulação
+    Quando abro o Dashboard
+    Então sou levado ao formulário do simulador
+```
 
 ---
 
 ##  Conversão, Atendimento e Melhoria Contínua
+![foto das historias do usuario 2](Historias2.png)
 
 ### História de Usuário 4: Apresentação da Proposta de Valor e Navegação
 > **Como** um Gestor de Indústria visitante,
 > **Eu quero** visualizar uma página inicial clara e objetiva que explique os problemas da manutenção reativa e os benefícios da IoT,
-> **Para que** eu compreenda o valor da plataforma NEXUS e sinta confiança antes de investir meu tempo testando o simulador.
+> **Para que** eu compreenda o valor da plataforma e sinta confiança antes de investir meu tempo testando o simulador.
 
 **Critérios de Aceite:**
-* A página inicial (Home) deve conter o texto de "Pitch" principal focando na dor do cliente.
-* A Home deve conter botões de *Call to Action* (Chamada para Ação) claros e visíveis, direcionando o usuário diretamente para o "Simulador" ou para o "Contato".
-* A barra de navegação superior (Header) deve ser omitida na Landing Page para evitar distrações, mas deve reaparecer automaticamente nas páginas internas (Simulador e Contato) para garantir a navegabilidade.
+* A página inicial (Home) contém o texto principal focado na dor do cliente.
+* A Home tem botões de chamada para ação claros, que levam direto ao "Simulador" ou ao "Contato".
+* A barra de navegação superior (Início, Simulador e Contato) aparece em todas as páginas, para o usuário navegar a qualquer momento.
+
+**Cenários (BDD):**
+```gherkin
+Funcionalidade: Apresentação da proposta de valor e navegação
+
+  Cenário: Ir da página inicial ao simulador
+    Dado que estou na página inicial
+    Quando clico em "Descobrir minha economia"
+    Então abro o formulário do simulador
+
+  Cenário: Ir da página inicial ao contato
+    Dado que estou na página inicial
+    Quando clico em "Tirar uma dúvida"
+    Então abro a página de contato
+```
 
 ---
 
 ### História de Usuário 5: Captação de Dúvidas e Leads Comerciais
 > **Como** um Diretor Industrial interessado,
-> **Eu quero** enviar uma mensagem com minhas dúvidas sobre o simulador ou um pedido de proposta comercial através de uma aba de Contato segura,
-> **Para que** a equipe NEXUS possa me retornar com um atendimento personalizado ou uma proposta técnica estruturada.
+> **Eu quero** enviar uma mensagem com minhas dúvidas sobre o simulador ou um pedido de proposta comercial através de uma aba de Contato,
+> **Para que** a equipe possa me retornar com um atendimento personalizado ou uma proposta técnica estruturada.
 
 **Critérios de Aceite:**
-* O formulário deve conter campos obrigatórios para: Nome, E-mail, Assunto e Mensagem.
-* O campo de "Assunto" deve ser um menu suspenso (dropdown) com categorias pré-definidas (ex: Dúvida sobre o Simulador, Proposta Comercial).
-* Após o envio, a página deve recarregar exibindo um alerta visual de sucesso (ex: barra verde) para confirmar ao usuário que a ação foi concluída.
-* Os dados enviados devem ser salvos de forma persistente e segura no banco de dados relacional do sistema.
+* O formulário tem campos obrigatórios para Nome, E-mail, Assunto e Mensagem.
+* O campo "Assunto" é um menu suspenso com categorias pré-definidas (Dúvida sobre o Simulador, Proposta Comercial, Feedback / Sugestões e Outros).
+* Depois do envio, a página mostra um alerta visual de sucesso ("Mensagem Enviada!").
+* Os dados enviados são salvos no banco de dados e ficam disponíveis no painel administrativo.
+
+**Cenários (BDD):**
+```gherkin
+Funcionalidade: Captação de dúvidas e leads comerciais
+
+  Cenário: Enviar uma mensagem de contato
+    Dado que estou na página de contato
+    Quando preencho nome, e-mail, assunto "Proposta Comercial" e mensagem e clico em enviar
+    Então vejo o alerta "Mensagem Enviada!"
+    E a mensagem fica salva no painel administrativo
+
+  Cenário: Campo obrigatório vazio
+    Dado que estou na página de contato
+    Quando tento enviar sem preencher o e-mail
+    Então o navegador pede o preenchimento do campo e a mensagem não é enviada
+```
 
 ---
 
-### História de Usuário 6: Relatório do Resultado em PDF para Compartilhar
+### História de Usuário 6: Compartilhamento de Feedback sobre a Experiência do Simulador
+> **Como** um Gestor de Operações (cliente e usuário da plataforma),
+> **Eu quero** ter um canal direto e simples para enviar críticas construtivas, relatar a minha experiência ou sugerir novas funcionalidades após usar o simulador,
+> **Para que** eu possa contribuir com a evolução da ferramenta e garantir que cenários específicos da minha indústria sejam considerados em atualizações futuras.
+
+**Critérios de Aceite:**
+* O formulário de contato tem a opção "Feedback / Sugestões" no campo "Assunto", separada das opções de dúvida e de proposta comercial.
+* O formulário tem um campo de texto livre e espaçoso para detalhar a crítica ou a ideia.
+* O envio é rápido e aberto, sem exigir conta ou login.
+* Depois de enviar, a plataforma mostra uma mensagem visual de confirmação.
+
+**Cenários (BDD):**
+```gherkin
+Funcionalidade: Compartilhamento de feedback sobre a experiência do simulador
+
+  Cenário: Enviar uma sugestão
+    Dado que estou na página de contato
+    Quando escolho o assunto "Feedback / Sugestões", escrevo minha ideia e clico em enviar
+    Então vejo a confirmação "Mensagem Enviada!"
+    E não precisei criar conta nem fazer login
+```
+
+---
+
+### História de Usuário 7: Relatório do Resultado em PDF para Compartilhar
 > **Como** um Gestor de Operações que precisa convencer a diretoria,
 > **Eu quero** baixar o resultado da minha simulação em um relatório em PDF,
 > **Para que** eu possa compartilhar os números com meus superiores e decidir com a equipe, sem depender de prints de tela e sem precisar refazer a simulação.
 
 **Critérios de Aceite:**
-* A tela de resultados deve ter um botão "Baixar relatório (PDF)", visível sem login ou cadastro.
-* Ao clicar, o navegador deve abrir a janela de impressão, de onde o usuário salva o arquivo com "Salvar como PDF".
-* O relatório deve conter o cabeçalho com a marca BZU, o segmento e a data de geração, o resumo dos dados informados, o lucro líquido (ou o prejuízo), o ROI, o gráfico de projeção de custos, o "Como calculamos" já aberto e a interpretação do resultado.
-* O relatório não deve exibir menu, rodapé do site nem botões, e deve caber em páginas A4 legíveis.
-* O rodapé do relatório deve trazer o contato da Bzu (e-mail e site) e o aviso de que o valor é uma estimativa feita com premissas de referência.
+* A tela de resultados tem um botão "Baixar relatório completo (PDF)", visível sem login ou cadastro.
+* Ao clicar, o navegador abre a janela de impressão, de onde o usuário salva o arquivo com "Salvar como PDF".
+* O relatório contém o cabeçalho com a marca BZU, o segmento e a data de geração, o resumo dos dados informados, o resultado e o ROI estimados, o investimento estimado em faixa, o gráfico de projeção de custos, o "Como calculamos" já aberto e a interpretação do resultado.
+* O relatório não exibe menu, rodapé do site nem botões, e cabe em páginas A4 legíveis.
+* O rodapé do relatório traz o contato da Bzu (e-mail e site) e o aviso de que os valores são estimativas feitas com premissas de referência.
+
+**Cenários (BDD):**
+```gherkin
+Funcionalidade: Relatório do resultado em PDF
+
+  Cenário: Baixar o relatório
+    Dado que estou na tela de resultado de uma simulação
+    Quando clico em "Baixar relatório completo (PDF)"
+    Então o navegador abre a janela de impressão
+    E posso escolher "Salvar como PDF"
+
+  Cenário: Conteúdo do relatório
+    Dado que abri o relatório
+    Então vejo a marca BZU, o segmento, a data, os dados informados, o resultado e o ROI estimados e o gráfico
+    E não vejo menu nem botões
+```
 
 ### Onde cada história aparece no sistema
 
@@ -254,4 +440,5 @@ As histórias estão divididas em dois grupos: **Simulação e Visualização de
 | 3 - Dashboard de falhas | Dashboard de custos | [Dashboard de Custos](#dashboard-de-custos) |
 | 4 - Proposta de valor | Página inicial (home.html) | [Views do Sistema](#views-do-sistema) |
 | 5 - Contato e leads | Formulário de contato (contato.html) | [Views do Sistema](#views-do-sistema) |
-| 6 - Relatório em PDF | Tela de resultado (botão "Baixar relatório") | [Simulador Financeiro](#simulador-financeiro) |
+| 6 - Feedback e sugestões | Formulário de contato, assunto "Feedback / Sugestões" | [Views do Sistema](#views-do-sistema) |
+| 7 - Relatório em PDF | Tela de resultado (botão "Baixar relatório") | [Simulador Financeiro](#simulador-financeiro) |
