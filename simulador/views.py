@@ -1,3 +1,4 @@
+import math
 from django.shortcuts import render, redirect
 import pandas as pd
 import numpy as np
@@ -9,12 +10,37 @@ from .feedback import (explicar_calculo, faixa_investimento, link_diagnostico, m
 
 # chave da sessão onde ficam os dados da última simulação
 CHAVE_SESSAO = 'simulacao'
+DIAS_POR_MES = 30
+
+# nomes das duas séries conforme o modelo do segmento (usados no gráfico de comparação)
+ROTULOS = {
+    'paradas': {'sem_iot': 'Sem IoT (corretiva)', 'com_iot': 'Com IoT (preditiva)'},
+    'perdas': {'sem_iot': 'Sem monitoramento', 'com_iot': 'Com monitoramento IoT'},
+}
+
+
+# ---------- formatação (padrão brasileiro) ----------
+
+def _num(valor, casas=2):
+    texto = f"{valor:,.{casas}f}"
+    return texto.replace(',', 'X').replace('.', ',').replace('X', '.')
+
+
+def _brl(valor, casas=2):
+    sinal = '- ' if valor < 0 else ''
+    return f"{sinal}R$ {_num(abs(valor), casas)}"
+
+
+def _pct(valor, casas=1):
+    return f"{_num(valor, casas)}%"
 
 
 def _limpo(valor):
     # 2000.0 vira 2000, para o formulário não mostrar casa decimal à toa
     return int(valor) if float(valor).is_integer() else valor
 
+
+# ---------- formulário e sessão ----------
 
 def _dados_validados(form):
     """Transforma os dados já validados do formulário no dicionário guardado na sessão."""
@@ -47,7 +73,11 @@ def _regime(chave):
     for valor, _, fator, texto in REGIME_FUNCIONAMENTO:
         if valor == (chave or REGIME_PADRAO):
             return fator, texto
-    return _regime(REGIME_PADRAO)
+    # valor desconhecido: tenta o padrão; se o padrão também não existir na lista,
+    # usa um fator neutro em vez de chamar a si mesma para sempre
+    if chave != REGIME_PADRAO:
+        return _regime(REGIME_PADRAO)
+    return 1.0, ''
 
 
 def _tela_formulario(request, form, tem_memoria):
@@ -59,10 +89,185 @@ def _tela_formulario(request, form, tem_memoria):
     })
 
 
+# ---------- (o que era o dashboard) ----------
+
+def _indicadores(simulacao, segmento):
+    """Cards do topo do painel: lista de dicts com titulo, valor, detalhe e classe."""
+    total_sem = simulacao.get('total_sem_iot', 0)
+    economia = simulacao.get('economia_bruta', 0)
+    investimento = simulacao.get('investimento_periodo', 0)
+    dias = simulacao.get('tempo_amostra', 30)
+    # só os pontos que ainda não têm sensor entram no investimento
+    pontos = simulacao.get('pontos_novos', simulacao.get('num_maquinas', 0))
+    meses = dias / DIAS_POR_MES
+
+    kpis = []
+
+    if total_sem > 0 and investimento > 0:
+        equilibrio = investimento / total_sem * 100
+        kpis.append({
+            'titulo': 'Para os sensores se pagarem',
+            'valor': f'{_pct(equilibrio, 0)} de redução' if equilibrio < 100 else 'Revisar valores',
+            'detalhe': (f"Referência do setor: {_pct(segmento['reducao_iot'] * 100, 0)} de redução de perdas"
+                        if equilibrio < 100 else 'A perda informada é menor que o investimento estimado'),
+            'classe': 'text-info',
+        })
+        
+    investimento_min = simulacao.get('investimento_min', 0)
+    if economia > investimento_min > 0:
+        kpis.append({
+            'titulo': 'Se o investimento ficar no mínimo da faixa',
+            'valor': _brl(economia - investimento_min),
+            'detalhe': 'Lucro estimado no período. Uma cotação real pode mudar o resultado.',
+            'classe': 'text-success',
+        })
+
+    if simulacao.get('investimento_max', 0) > 0:
+        kpis.append({
+            'titulo': 'Investimento estimado',
+            'valor': faixa_investimento(simulacao['investimento_min'], simulacao['investimento_max'], curta=True),
+            'detalhe': 'Só sensores, estimativa de mercado para o seu setor (não é preço da Bzu)',
+            'classe': '',
+        })
+
+    economia_mensal = economia / meses
+    kpis.append({
+        'titulo': 'Economia evitada por mês',
+        'valor': _brl(economia_mensal),
+        'detalhe': f'{_brl(economia)} no período',
+        'classe': '',
+    })
+
+    custo_hora = simulacao.get('custo_hora_parada', 0)
+    if segmento['modelo'] == 'paradas' and custo_hora > 0:
+        # só a parte das paradas: a economia com conserto de emergência fica de fora
+        economia_paradas = simulacao.get('economia_paradas', economia)
+        kpis.append({
+            'titulo': 'Horas de parada evitadas',
+            'valor': f"{_num(economia_paradas / custo_hora, 1)} h",
+            'detalhe': f'em {dias} dias',
+            'classe': '',
+        })
+
+    if pontos > 0:
+        por_ponto = economia_mensal / pontos
+        kpis.append({
+            'titulo': 'Economia mensal por ponto',
+            'valor': _brl(por_ponto),
+            'detalhe': 'Média por ponto que ainda será monitorado',
+            'classe': 'text-success' if por_ponto >= segmento['custo_ponto'] else 'text-info',
+        })
+
+    if simulacao.get('cobertura', 0) > 0:
+        kpis.append({
+            'titulo': 'Já evitado com seus sensores',
+            'valor': _brl(simulacao.get('economia_ja_aproveitada', 0)),
+            'detalhe': f"em {dias} dias, com sensores em cerca de {round(simulacao['cobertura'] * 100)}% dos pontos",
+            'classe': 'text-success',
+        })
+
+    if total_sem > 0:
+        kpis.append({
+            'titulo': 'Redução efetiva de perdas',
+            'valor': _pct(economia / total_sem * 100),
+            'detalhe': f"Premissa de referência: {_pct(segmento['reducao_iot'] * 100, 0)}",
+            'classe': '',
+        })
+
+    return kpis
+
+
+def _entradas_e_referencias(simulacao, segmento):
+    """Duas listas de pares (rótulo, valor): o que a pessoa informou e as referências do simulador."""
+    rotulo_pontos, unidade_pontos = segmento['rotulo_pontos']
+    fator_regime, texto_regime = _regime(simulacao.get('regime_funcionamento'))
+
+    entradas = [
+        ('Segmento', segmento['nome']),
+        (rotulo_pontos, f"{simulacao.get('num_maquinas', 0)} {unidade_pontos}"),
+    ]
+    if segmento['modelo'] == 'perdas':
+        entradas.append(('Perda mensal informada', _brl(simulacao.get('perda_mensal', 0), 0)))
+    else:
+        # o regime só existe (e só muda a conta) nos segmentos de paradas
+        if texto_regime:
+            entradas.append(('Funcionamento', texto_regime))
+        entradas.append(('Custo da hora parada', _brl(simulacao.get('custo_hora_parada', 0), 0)))
+    entradas.append(('Sensores atuais', ACOMPANHAMENTO_RESUMO.get(simulacao.get('acompanhamento_atual'), 'Não informado')))
+
+    # opcional: só aparece se o usuário preencheu
+    conserto = simulacao.get('conserto_mensal', 0)
+    if conserto > 0:
+        entradas.append(('Conserto de emergência', f"{_brl(conserto, 0)} por mês"))
+
+    entradas.append(('Período simulado', f"{simulacao.get('tempo_amostra', 30)} dias"))
+
+    referencias = [('Redução de perdas com IoT', _pct(segmento['reducao_iot'] * 100, 0))]
+    if segmento['modelo'] == 'paradas':
+        # a taxa base já multiplicada pelo regime de funcionamento, como no cálculo
+        referencias.append(
+            ('Horas de parada por máquina ao dia',
+             f"{_num(segmento['taxa_falha_base'] * fator_regime, 2)} h"))
+
+    return entradas, referencias
+
+
+def _dados_graficos(simulacao, segmento):
+    """Só números e textos prontos para o HTML desenhar os gráficos com o Plotly.
+
+    economia: economia estimada para cada redução de perdas (a linha é exata:
+    economia = total_sem_iot * redução), com a sua simulação, a premissa de referência e o ponto de equilíbrio.
+    comparativo: total do período sem e com IoT."""
+    total_sem = simulacao.get('total_sem_iot', 0)
+    if total_sem <= 0:
+        return {'economia': None, 'comparativo': None}
+
+    economia = simulacao.get('economia_bruta', 0)
+    investimento = simulacao.get('investimento_periodo', 0)
+
+    efetiva = economia / total_sem * 100
+    referencia = segmento['reducao_iot'] * 100
+    equilibrio = investimento / total_sem * 100
+
+    # eixo x de 0% até um limite múltiplo de 5 que mostre o ponto de equilíbrio
+    limite = max(35, math.ceil(referencia), math.ceil(efetiva))
+    if equilibrio < 100:
+        limite = max(limite, math.ceil(equilibrio) + 5)
+    limite = min(math.ceil(limite / 5) * 5, 100)
+    xs = list(range(0, limite + 1, 5))
+
+    rotulos = ROTULOS[segmento['modelo']]
+    valores = [total_sem, simulacao.get('total_com_iot', 0)]
+
+    return {
+        'economia': {
+            'x': xs,
+            'y': [round(total_sem * x / 100, 2) for x in xs],
+            'efetiva': round(efetiva, 2),
+            'efetiva_texto': _pct(efetiva),
+            'economia': round(economia, 2),
+            'economia_texto': _brl(economia),
+            'referencia': round(referencia, 2),
+            'referencia_texto': _pct(referencia, 0),
+            'economia_referencia': round(total_sem * referencia / 100, 2),
+            # None quando o equilíbrio fica fora do eixo (a marca não aparece)
+            'equilibrio': round(equilibrio, 2) if equilibrio <= limite else None,
+            'equilibrio_texto': _pct(equilibrio),
+        },
+        'comparativo': {
+            'nomes': [rotulos['sem_iot'], rotulos['com_iot']],
+            'valores': [round(v, 2) for v in valores],
+            'textos': [_brl(v, 0) for v in valores],
+        },
+    }
+
+
+# ---------- cálculo da simulação ----------
+
 def _calcular(salvo):
     """Roda a simulação para os dados guardados em `salvo` e devolve o contexto do resultado.
 
-    Também grava em `salvo` os totais e as séries do gráfico (o dashboard e o relatório leem de lá).
+    Também grava em `salvo` os totais e as séries do gráfico.
     Quem chama é responsável por guardar `salvo` na sessão."""
     num_maquinas = salvo['num_maquinas']
     custo_hora_parada = salvo.get('custo_hora_parada', 5000)
@@ -118,11 +323,10 @@ def _calcular(salvo):
     economia_ja_aproveitada = economia_potencial * cobertura
 
     df = pd.DataFrame({
-        'Dia': range(1, dias_simulados + 1),
-        'Custo_Sem_IoT': custo_diario_sem_iot * fator_novo,
-        'Custo_Com_IoT': custo_diario_com_iot * fator_novo
+    'Dia': range(1, dias_simulados + 1),
+    'Custo_Sem_IoT': custo_diario_sem_iot * fator_novo,
+    'Custo_Com_IoT': custo_diario_com_iot * fator_novo
     })
-
 
     total_operacional_antigo = df['Custo_Sem_IoT'].sum()
     total_operacional_novo = df['Custo_Com_IoT'].sum()
@@ -232,8 +436,17 @@ def _calcular(salvo):
     contexto['sensores_atuais'] = montar_sensores_atuais(
         cobertura, economia_ja_aproveitada, float(economia_bruta), economia_potencial, dias_simulados)
     contexto['link_diagnostico'] = link_diagnostico(segmento["rotulo"], num_maquinas, unidade_pontos, resumo_diagnostico)
+
+    # painel de resultados (o que era o dashboard): indicadores, premissas e dados dos gráficos
+    contexto['kpis'] = _indicadores(salvo, segmento)
+    contexto['entradas'], contexto['referencias'] = _entradas_e_referencias(salvo, segmento)
+    contexto['premissa_confirmada'] = segmento.get('premissa_confirmada', True)
+    contexto['sem_perdas'] = total_operacional_antigo <= 0
+    contexto['graficos'] = _dados_graficos(salvo, segmento)
     return contexto
 
+
+# ---------- views ----------
 
 def calcular_simulacao(request):
     if request.method == 'POST':
@@ -253,6 +466,34 @@ def calcular_simulacao(request):
     request.session[CHAVE_SESSAO] = salvo
     request.session.modified = True
     return render(request, 'simulador/resultado.html', contexto)
+
+def relatorio(request):
+    """Relatório completo para salvar em PDF: resultado e painel na mesma página.
+ 
+    O PDF não é gerado no servidor: a página abre a impressão do navegador ("Salvar como PDF")."""
+    salvo = request.session.get(CHAVE_SESSAO)
+    # sem simulação guardada não há o que mostrar: volta ao formulário
+    if not salvo or 'num_maquinas' not in salvo:
+        return redirect('formulario_simulador')
+ 
+    # roda de novo a simulação (mesma semente): garante totais e séries atualizados
+    contexto = _calcular(salvo)
+    request.session[CHAVE_SESSAO] = salvo
+    request.session.modified = True
+ 
+    liquido = salvo.get('resultado_liquido', 0)
+    dias = contexto['dias_simulados']
+    contexto.update({
+        'dias': dias,
+        # sem valor negativo: quando não paga, o destaque deixa de ser verde
+        'tem_retorno': liquido >= 0,
+        # sem valor negativo nem vermelho: quando o lucro é negativo, mostra a economia estimada
+        'lucro_titulo': (f"Resultado líquido estimado ({dias} dias)" if liquido >= 0
+                         else f"Economia estimada ({dias} dias)"),
+        'lucro': _brl(liquido) if liquido >= 0 else _brl(salvo.get('economia_bruta', 0)),
+        'imprimir': request.GET.get('imprimir') == '1',
+    })
+    return render(request, 'simulador/relatorio.html', contexto)
 
 
 def formulario_simulador(request):

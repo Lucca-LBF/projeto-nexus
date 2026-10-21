@@ -1,6 +1,20 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    /* rótulo pequeno dos cards (antes era um style="font-size: 0.85rem" repetido em cada card) */
+    .rotulo-card { font-size: 0.85rem; }
+
+    /* altura única para os gráficos: é a mesma que o script do Plotly usa (380) */
+    .grafico { width: 100%; height: 380px; }
+
+    @media print {
+        .no-print { display: none !important; }
+        /* não deixa um card ser cortado no meio entre duas páginas do PDF */
+        .card, details { break-inside: avoid; page-break-inside: avoid; }
+    }
+</style>
+
 <div class="relatorio-cab">
     <div class="relatorio-marca"><strong>BZU</strong> &middot; Relatório de economia com IoT</div>
     <div class="relatorio-data">{{ nome_industria }} &middot; gerado em {% now "d/m/Y" %}</div>
@@ -9,7 +23,7 @@
 <div class="row g-4">
 
     <!-- Resumo da simulação -->
-    <div class="col-lg-4">
+    <div class="col-12">
         <div class="card">
             <div class="card-header">
                 <h5>Resumo da simulação</h5>
@@ -32,50 +46,60 @@
                 </div>
                 {% endfor %}
 
-                <a href="{% url 'relatorio' %}?imprimir=1" id="baixar-relatorio" class="btn btn-primary w-100 mt-2 fw-bold">
+                <a href="{% url 'relatorio' %}?imprimir=1" id="baixar-relatorio" class="btn btn-primary w-100 mt-2 fw-bold no-print">
                     Baixar relatório completo (PDF)
                 </a>
-                <p class="small text-muted mt-1 mb-0 relatorio-dica">Inclui resultado e dashboard. Na janela que abrir, escolha "Salvar como PDF".</p>
+                <p class="small text-muted mt-1 mb-0 relatorio-dica no-print">Inclui resultado e dashboard. Na janela que abrir, escolha "Salvar como PDF".</p>
 
-                <a href="{% url 'formulario_simulador' %}?nova=1" class="btn btn-outline-info w-100 mt-2 fw-bold">
+                <a href="{% url 'formulario_simulador' %}?nova=1" class="btn btn-outline-info w-100 mt-2 fw-bold no-print">
                     Nova Simulação
-                </a>
-
-                <a href="{% url 'dashboard_home' %}" class="btn btn-outline-info w-100 mt-2 fw-bold">
-                    Ir para o Dashboard
                 </a>
             </div>
         </div>
     </div>
 
-    <div class="col-lg-8">
-        
+    <!-- Resultados: tudo dentro de uma coluna, para as bordas ficarem alinhadas com o resumo -->
+    <div class="col-12">
 
-        <div class="row mb-4">
+        <!-- Destaques -->
+        <div class="row g-3 mb-3">
             <div class="col-md-6">
-                <div class="card shadow-sm border-0 card-economia mb-3 mb-md-0">
+                <div class="card h-100 shadow-sm border-0 card-economia">
                     <div class="card-body">
-                        <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.85rem;">
-                        {{ titulo_resultado }}
-                        </h6>
+                        <h6 class="text-muted text-uppercase mb-1 rotulo-card">{{ titulo_resultado }}</h6>
                         <h3 class="{{ cor_economia }} mb-0 fw-bold">{{ economia_mensal }}</h3>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="card shadow-sm border-0 card-roi">
+                <div class="card h-100 shadow-sm border-0 card-roi">
                     <div class="card-body">
-                        <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.85rem;">{{ roi_titulo }}</h6>
+                        <h6 class="text-muted text-uppercase mb-1 rotulo-card">{{ roi_titulo }}</h6>
                         <h3 class="text-info mb-0 fw-bold">{{ roi }}</h3>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Indicadores -->
+        <div class="row g-3 mb-3">
+            {% for k in kpis %}
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0 card-economia">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase mb-1 rotulo-card">{{ k.titulo }}</h6>
+                        <h3 class="text-info mb-0 fw-bold">{{ k.valor }}</h3>
+                        <p class="small text-muted mt-2 mb-0">{{ k.detalhe }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
         {% if investimento_faixa %}
         <div class="card shadow-sm border-0 mb-3">
             <div class="card-body">
-                <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.85rem;">Investimento estimado (só sensores)</h6>
+                <h6 class="text-muted text-uppercase mb-1 rotulo-card">Investimento estimado (só sensores)</h6>
                 <h4 class="mb-1 fw-bold">{{ investimento_faixa }}</h4>
                 <p class="small text-muted mb-0">Estimativa de mercado para o seu setor, não é preço da Bzu. O lucro e o ROI usam o valor central da faixa ({{ investimento_central }}).</p>
             </div>
@@ -86,16 +110,40 @@
 
         {% include 'simulador/_sensores_atuais.html' %}
 
-        <!-- Gráfico -->
-        <div class="card shadow-sm border-0">
+        <!-- Gráfico de custos -->
+        <div class="card shadow-sm border-0 mb-4">
             <div class="card-body">
                 <h5 class="card-title text-secondary mb-1">Projeção de Custos de Falha ({{ dias_simulados }} Dias)</h5>
                 <p class="small text-muted mb-4">Nota: O gráfico reflete o ganho de eficiência na sua operação. O custo de aquisição dos sensores não está na linha, mas é descontado no cálculo do ROI acima.</p>
-                <div id="meu_grafico_iot" style="width: 100%; height: 380px;"></div>
+                <div id="meu_grafico_iot" class="grafico"></div>
             </div>
         </div>
 
-        <details class="card shadow-sm border-0 mt-4">
+        <!-- Economia por redução de perdas e comparativo, lado a lado -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-secondary mb-1">Economia estimada por redução de perdas</h5>
+                        <p class="small text-muted mb-4">Nota: Cada ponto da linha é a economia estimada se as perdas caíssem naquele percentual.
+                                                        A linha tracejada marca a redução mínima para os sensores se pagarem.
+                                                        O círculo é a sua simulação e o losango é a premissa de referência.</p>
+                        <div id="grafico_economia" class="grafico"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-secondary mb-1">Comparativo do período</h5>
+                        <div id="grafico_comparativo" class="grafico"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <details class="card shadow-sm border-0 mb-4">
             <summary class="card-body fw-bold text-info" style="cursor: pointer;">Como calculamos</summary>
             <div class="card-body pt-0">
                 <ol class="mb-0">
@@ -112,7 +160,27 @@
 
 <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 
+{{ graficos|json_script:"dados-graficos" }}
+
 <script>
+(function () {
+    // Configuração geral
+    const config = { responsive: true };
+
+    const base = {
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        font: {
+            color: '#2F2E2E',
+            family: 'Raleway, Segoe UI, sans-serif'
+        },
+        separators: ',.'
+    };
+
+    // ==================================================
+    // 1. GRÁFICO: CUSTOS COM E SEM IoT
+    // ==================================================
+
     const dias = {{ dados_grafico_dias|safe }};
     const custosSemIot = {{ dados_grafico_sem_iot|safe }};
     const custosComIot = {{ dados_grafico_com_iot|safe }};
@@ -122,8 +190,8 @@
         y: custosSemIot,
         mode: 'lines+markers',
         name: 'Sem IoT (Corretiva)',
-        line: {color: '#64748b', width: 2},
-        marker: {size: 5}
+        line: { color: '#64748b', width: 2 },
+        marker: { size: 5 }
     };
 
     const trace2 = {
@@ -131,28 +199,191 @@
         y: custosComIot,
         mode: 'lines+markers',
         name: 'Com IoT (Preditiva)',
-        line: {color: '#81358D', width: 3},
-        marker: {size: 5}
+        line: { color: '#81358D', width: 3 },
+        marker: { size: 5 }
     };
 
-    const layout = {
-        paper_bgcolor: 'transparent',
-        plot_bgcolor: 'transparent',
-        font: { color: '#2F2E2E', family: 'Raleway, Segoe UI, sans-serif' },
-        margin: { l: 50, r: 20, t: 10, b: 40 },
+    const layoutCustos = Object.assign({}, base, {
+        height: 380,
+        margin: { l: 50, r: 20, t: 10, b: 70 },
         legend: { orientation: 'h', y: -0.25, x: 0.1 },
-        xaxis: { 
+        xaxis: {
             title: 'Dias de Operação',
             gridcolor: '#EFE4F3'
         },
-        yaxis: { 
-            title: 'Custo Diário (R$)', 
+        yaxis: {
+            title: 'Custo Diário (R$)',
             rangemode: 'tozero',
             gridcolor: '#EFE4F3'
         }
-    };
+    });
 
-    Plotly.newPlot('meu_grafico_iot', [trace1, trace2], layout, {responsive: true});
+    if (document.getElementById('meu_grafico_iot')) {
+        Plotly.newPlot(
+            'meu_grafico_iot',
+            [trace1, trace2],
+            layoutCustos,
+            config
+        );
+    }
+
+    // ==================================================
+    // 2. GRÁFICO: ECONOMIA ESTIMADA POR REDUÇÃO DE PERDAS
+    // ==================================================
+
+    const elementoDados = document.getElementById('dados-graficos');
+    const dados = elementoDados
+        ? JSON.parse(elementoDados.textContent)
+        : {};
+
+    const eco = dados.economia;
+
+    if (eco && document.getElementById('grafico_economia')) {
+        const shapes = [];
+        const annotations = [];
+
+        if (eco.equilibrio !== null && eco.equilibrio !== undefined) {
+            shapes.push({
+                type: 'line',
+                x0: eco.equilibrio,
+                x1: eco.equilibrio,
+                y0: 0,
+                y1: 1,
+                yref: 'paper',
+                line: {
+                    color: '#6b7280',
+                    dash: 'dash',
+                    width: 1.5
+                }
+            });
+
+            annotations.push({
+                x: eco.equilibrio,
+                y: 1,
+                yref: 'paper',
+                xanchor: 'right',
+                yanchor: 'bottom',
+                text: 'Equilíbrio: ' + eco.equilibrio_texto,
+                showarrow: false
+            });
+        }
+
+        Plotly.newPlot('grafico_economia', [
+            {
+                x: eco.x,
+                y: eco.y,
+                mode: 'lines',
+                name: 'Economia estimada',
+                line: { color: '#81358D', width: 3 },
+                hovertemplate:
+                    'Redução de %{x}%<br>' +
+                    'Economia: R$ %{y:,.2f}<extra></extra>'
+            },
+            {
+                x: [eco.efetiva],
+                y: [eco.economia],
+                mode: 'markers',
+                name: 'Sua simulação',
+                marker: {
+                    size: 13,
+                    color: '#81358D',
+                    line: { width: 2, color: 'white' }
+                },
+                hovertemplate:
+                    'Redução efetiva de ' + eco.efetiva_texto +
+                    '<br>Economia: ' + eco.economia_texto +
+                    '<extra></extra>'
+            },
+            {
+                x: [eco.referencia],
+                y: [eco.economia_referencia],
+                mode: 'markers',
+                name: 'Premissa de referência',
+                marker: {
+                    size: 12,
+                    symbol: 'diamond',
+                    color: '#f59e0b',
+                    line: { width: 2, color: 'white' }
+                },
+                hovertemplate:
+                    'Premissa de ' + eco.referencia_texto +
+                    '<extra></extra>'
+            }
+        ], Object.assign({}, base, {
+            height: 380,
+            margin: { l: 60, r: 20, t: 30, b: 90 },
+            legend: { orientation: 'h', y: -0.35, x: 0.1 },
+            xaxis: {
+                title: 'Redução de perdas com IoT',
+                ticksuffix: '%',
+                gridcolor: '#EFE4F3'
+            },
+            yaxis: {
+                title: 'Economia no período (R$)',
+                tickprefix: 'R$ ',
+                tickformat: '~s',
+                rangemode: 'tozero',
+                gridcolor: '#EFE4F3'
+            },
+            shapes: shapes,
+            annotations: annotations
+        }), config);
+    }
+
+    // ==================================================
+    // 3. GRÁFICO: COMPARATIVO DO PERÍODO
+    // ==================================================
+
+    const comp = dados.comparativo;
+
+    if (comp && document.getElementById('grafico_comparativo')) {
+        Plotly.newPlot('grafico_comparativo', [{
+            type: 'bar',
+            x: comp.nomes,
+            y: comp.valores,
+            text: comp.textos,
+            textposition: 'outside',
+            cliponaxis: false,
+            marker: { color: ['#64748b', '#81358D'] },
+            hovertemplate:
+                '%{x}<br>R$ %{y:,.2f}<extra></extra>'
+        }], Object.assign({}, base, {
+            height: 380,
+            margin: { l: 60, r: 20, t: 30, b: 50 },
+            showlegend: false,
+            yaxis: {
+                title: 'Valor no período (R$)',
+                tickprefix: 'R$ ',
+                tickformat: '~s',
+                rangemode: 'tozero',
+                gridcolor: '#EFE4F3'
+            }
+        }), config);
+    }
+
+    // ==================================================
+    // 4. AJUSTE DE TAMANHO DOS GRÁFICOS
+    // ==================================================
+
+    function redimensionarGraficos() {
+        [
+            'grafico_economia',
+            'grafico_comparativo'
+        ].forEach(function (id) {
+            const elemento = document.getElementById(id);
+
+            if (elemento && elemento.data) {
+                Plotly.Plots.resize(elemento);
+            }
+        });
+    }
+
+    window.addEventListener('resize', redimensionarGraficos);
+    window.addEventListener('beforeprint', redimensionarGraficos);
+    window.addEventListener('afterprint', redimensionarGraficos);
+
+
+})();
 </script>
 
 <div class="relatorio-rodape">

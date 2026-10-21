@@ -12,7 +12,6 @@
         <div class="d-flex flex-wrap gap-2">
             <button type="button" id="rel-baixar" class="btn btn-primary fw-bold">Baixar relatório (PDF)</button>
             <a href="{% url 'resultado_simulacao' %}" class="btn btn-outline-info fw-bold">Voltar ao resultado</a>
-            <a href="{% url 'dashboard_home' %}" class="btn btn-outline-info fw-bold">Ver dashboard</a>
         </div>
     </div>
 
@@ -63,18 +62,18 @@
         </div>
     </section>
 
-    <!-- página 2: gráficos -->
+    <!-- página 2: gráficos (desenhados no navegador pelo script no final da página) -->
     <section class="rel-pagina">
         <h2 class="rel-titulo">Gráficos da simulação</h2>
-        {% if graficos.linha %}
-        <div class="rel-grafico">{{ graficos.linha|safe }}</div>
+        {% if dados_grafico_dias %}
+        <div class="rel-grafico" id="rel_grafico_linha"></div>
         <p class="rel-nota">O gráfico reflete o ganho de eficiência da operação. O custo dos sensores não está na linha: ele é descontado no cálculo do ROI.</p>
         {% endif %}
-        {% if graficos.barras %}
-        <div class="rel-grafico">{{ graficos.barras|safe }}</div>
+        {% if graficos.comparativo %}
+        <div class="rel-grafico" id="rel_grafico_barras"></div>
         {% endif %}
-        {% if graficos.equilibrio %}
-        <div class="rel-grafico">{{ graficos.equilibrio|safe }}</div>
+        {% if graficos.economia %}
+        <div class="rel-grafico" id="rel_grafico_economia"></div>
         <p class="rel-nota">A linha vertical tracejada marca a redução mínima de perdas para os sensores se pagarem. O círculo é a sua simulação e o losango é a premissa de referência.</p>
         {% endif %}
     </section>
@@ -106,12 +105,104 @@
     </section>
 </div>
 
+{# Remova a linha abaixo se o base.html já carrega o Plotly. #}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+{# os dados dos gráficos vão para o navegador como JSON seguro #}
+{{ graficos|json_script:"dados-graficos" }}
+
+<script>
+    // gráficos do relatório (mesmo visual do resultado)
+    (function () {
+        const dados = JSON.parse(document.getElementById('dados-graficos').textContent);
+        const comp = dados.comparativo;
+        const eco = dados.economia;
+        const nomes = comp ? comp.nomes : ['Sem IoT (corretiva)', 'Com IoT (preditiva)'];
+        const CINZA = '#64748b', ROXO = '#81358D', GRADE = '#EFE4F3';
+        const config = { responsive: true, displayModeBar: false };
+
+        function layout(titulo, extra) {
+            return Object.assign({
+                title: { text: titulo, font: { size: 14 } },
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#2F2E2E', family: 'Raleway, Segoe UI, sans-serif' },
+                separators: ',.',
+                height: 300
+            }, extra);
+        }
+        function eixoReais(titulo) {
+            return { title: titulo, tickprefix: 'R$ ', tickformat: ',.0f', rangemode: 'tozero', gridcolor: GRADE };
+        }
+
+        // custo diário sem e com IoT
+        if (document.getElementById('rel_grafico_linha')) {
+            const dias = {{ dados_grafico_dias|safe }};
+            Plotly.newPlot('rel_grafico_linha', [
+                { x: dias, y: {{ dados_grafico_sem_iot|safe }}, mode: 'lines+markers', name: nomes[0],
+                  line: { color: CINZA, width: 2 }, marker: { size: 5 } },
+                { x: dias, y: {{ dados_grafico_com_iot|safe }}, mode: 'lines+markers', name: nomes[1],
+                  line: { color: ROXO, width: 3 }, marker: { size: 5 } }
+            ], layout('Projeção diária dos custos', {
+                margin: { l: 60, r: 20, t: 40, b: 70 },
+                legend: { orientation: 'h', y: -0.3, x: 0.1 },
+                xaxis: { title: 'Dias de operação', gridcolor: GRADE },
+                yaxis: eixoReais('Custo diário (R$)')
+            }), config);
+        }
+
+        // comparativo do período
+        if (comp && document.getElementById('rel_grafico_barras')) {
+            Plotly.newPlot('rel_grafico_barras', [{
+                type: 'bar', x: comp.nomes, y: comp.valores,
+                text: comp.textos, textposition: 'outside', cliponaxis: false,
+                marker: { color: [CINZA, ROXO] },
+                hovertemplate: '%{x}<br>R$ %{y:,.2f}<extra></extra>'
+            }], layout('Comparativo do período', {
+                margin: { l: 60, r: 20, t: 40, b: 50 },
+                showlegend: false,
+                yaxis: eixoReais('Valor no período (R$)')
+            }), config);
+        }
+
+        // economia estimada por redução de perdas
+        if (eco && document.getElementById('rel_grafico_economia')) {
+            const shapes = [];
+            const annotations = [];
+            if (eco.equilibrio !== null) {
+                shapes.push({ type: 'line', x0: eco.equilibrio, x1: eco.equilibrio, y0: 0, y1: 1, yref: 'paper',
+                              line: { color: '#6b7280', dash: 'dash', width: 1.5 } });
+                annotations.push({ x: eco.equilibrio, y: 1, yref: 'paper', xanchor: 'right', yanchor: 'bottom',
+                                   text: 'Equilíbrio: ' + eco.equilibrio_texto, showarrow: false });
+            }
+            Plotly.newPlot('rel_grafico_economia', [
+                { x: eco.x, y: eco.y, mode: 'lines', name: 'Economia estimada',
+                  line: { color: ROXO, width: 3 },
+                  hovertemplate: 'Redução de %{x}%<br>Economia: R$ %{y:,.2f}<extra></extra>' },
+                { x: [eco.efetiva], y: [eco.economia], mode: 'markers', name: 'Sua simulação',
+                  marker: { size: 13, color: ROXO, line: { width: 2, color: 'white' } },
+                  hovertemplate: 'Redução efetiva de ' + eco.efetiva_texto + '<br>Economia: ' + eco.economia_texto + '<extra></extra>' },
+                { x: [eco.referencia], y: [eco.economia_referencia], mode: 'markers', name: 'Premissa de referência',
+                  marker: { size: 12, symbol: 'diamond', color: '#f59e0b', line: { width: 2, color: 'white' } },
+                  hovertemplate: 'Premissa de ' + eco.referencia_texto + '<extra></extra>' }
+            ], layout('Economia estimada por redução de perdas', {
+                margin: { l: 60, r: 20, t: 40, b: 70 },
+                legend: { orientation: 'h', y: -0.3, x: 0.1 },
+                xaxis: { title: 'Redução de perdas com IoT', ticksuffix: '%', gridcolor: GRADE },
+                yaxis: eixoReais('Economia no período (R$)'),
+                shapes: shapes,
+                annotations: annotations
+            }), config);
+        }
+    })();
+</script>
+
 <script>
     (function () {
         var botao = document.getElementById('rel-baixar');
         function redimensionar() {
             if (!window.Plotly) return;
-            document.querySelectorAll('.rel-grafico .plotly-graph-div').forEach(function (g) {
+            document.querySelectorAll('.rel-grafico').forEach(function (g) {
                 try { Plotly.Plots.resize(g); } catch (e) {}
             });
         }
