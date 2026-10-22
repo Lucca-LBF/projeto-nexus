@@ -1,6 +1,8 @@
 # Projeto Nexus
 Repositório destinado ao projetos 2
 
+[Acessar o Deploy do Simulador Bzu](https://lucca.pythonanywhere.com)
+
 ## Primeira Entrega
 
 Relatório da analise de competidores:  https://github.com/Lucca-LBF/projeto-nexus/blob/main/Competitors.md
