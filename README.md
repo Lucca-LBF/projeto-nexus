@@ -11,7 +11,7 @@ Relatório da analise de competidores:
 
 ## Segunda Entrega
 
-![foto da sprint2](Sprint02_FDS.jpg)
+![foto da sprint2]()
 
 ## Terceira Entrega
 
