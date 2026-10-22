@@ -3,7 +3,7 @@ Repositório destinado ao projetos 2
 
 ## Primeira Entrega
 
-[Relatório da analise de competidores]:(https://github.com/Lucca-LBF/projeto-nexus/blob/main/Competitors.md)
+[Relatório da analise de competidores]:  (https://github.com/Lucca-LBF/projeto-nexus/blob/main/Competitors.md)
 
 ![foto da entrega](entregavel1fds.png)
 
