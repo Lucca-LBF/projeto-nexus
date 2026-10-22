@@ -79,7 +79,6 @@ a { text-decoration: none; }
 
 .text-info { color: var(--bzu-purple) !important; }
 .text-success { color: #14916B !important; }
-/* sem vermelho: o simulador trabalha com estimativas e sempre mostra um caminho para economizar */
 .text-danger { color: #B45309 !important; }
 .text-muted { color: var(--bzu-muted) !important; }
 .text-secondary { color: var(--bzu-dark) !important; }
@@ -325,7 +324,20 @@ a { text-decoration: none; }
 }
 .btn-white:hover { color: var(--bzu-deep); transform: translateY(-2px); box-shadow: 0 14px 30px rgba(0, 0, 0, .3); }
 
-.btn-outline-light { border-width: 2px; }
+.btn-outline-light { 
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    background: transparent;
+}
+
+.btn-outline-light:hover,
+.btn-outline-light:focus { 
+    background-color: var(--bzu-purple) !important; 
+    border-color: var(--bzu-purple) !important;
+    color: #fff !important; 
+    transform: translateY(-2px); 
+    box-shadow: 0 10px 24px rgba(129, 53, 141, 0.35); 
+}
 
 /* ---------- página inicial ---------- */
 .hero-bzu {
