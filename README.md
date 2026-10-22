@@ -1,11 +1,9 @@
 # Projeto Nexus
 Repositório destinado ao projetos 2
 
-
-Jira:https://cesar-team-wuiwsqgi.atlassian.net/jira/software/projects/KAN/list?jql=project%20%3D%20KAN%20ORDER%20BY%20cf%5B10019%5D%20ASC
 ## Primeira Entrega
 
-Relatório da analise de competidores:
+[Relatório da analise de competidores]:(https://github.com/Lucca-LBF/projeto-nexus/blob/main/Competitors.md)
 
 ![foto da entrega](entregavel1fds.png)
 
