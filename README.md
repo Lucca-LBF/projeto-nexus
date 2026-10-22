@@ -15,7 +15,7 @@ Relatório da analise de competidores:
 
 ## Terceira Entrega
 
-![escopo da entrega 03](Sprint03_FDS.png)
+![escopo da entrega 03](entravel3fds.png)
 
 ### Histórias de usuário
 
