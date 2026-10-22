@@ -7,7 +7,7 @@ Jira:https://cesar-team-wuiwsqgi.atlassian.net/jira/software/projects/KAN/list?j
 
 Relatório da analise de competidores:
 
-![foto da entrega](Sprint01_FDS.jpg)
+![foto da entrega](entregavel1fds.png)
 
 ## Segunda Entrega
 
