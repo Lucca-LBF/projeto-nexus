@@ -11,9 +11,17 @@ Relatório da analise de competidores:  https://github.com/Lucca-LBF/projeto-nex
 
 ![foto da sprint2](entregavel2fds.png)
 
+## Issue/Bug Tracker 1
+
+![bugtracker1](Issuebugtracker1.png)
+
 ## Terceira Entrega
 
 ![escopo da entrega 03](entravel3fds.png)
+
+## Issue/Bug Tracker 2
+
+![bugtracker2](Issuebugtracker2.png)
 
 ## Print da Sprint 
 ![Foto da Sprint 03](Sprintentrega3fds.png)
