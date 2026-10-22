@@ -329,16 +329,41 @@ a { text-decoration: none; }
     border: 2px solid rgba(255, 255, 255, 0.7);
     background: transparent;
 }
+/* =========================================
+   Botão 1: Descobrir minha economia 
+   (Nasce Branco -> Vira Transparente)
+   ========================================= */
+.btn-white {
+    background-color: #ffffff !important;
+    color: var(--bzu-dark) !important;
+    border: 2px solid #ffffff !important;
+}
+
+.btn-white:hover,
+.btn-white:focus {
+    background-color: transparent !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: none !important; 
+}
+
+/* =========================================
+   Botão 2: Tirar uma dúvida 
+   (Nasce Transparente -> Vira Branco)
+   ========================================= */
+.btn-outline-light { 
+    background-color: transparent !important;
+    color: #ffffff !important;
+    border: 2px solid #ffffff !important;
+}
 
 .btn-outline-light:hover,
 .btn-outline-light:focus { 
-    background-color: var(--bzu-purple) !important; 
-    border-color: var(--bzu-purple) !important;
-    color: #fff !important; 
+    background-color: #ffffff !important; 
+    color: var(--bzu-dark) !important;
     transform: translateY(-2px); 
-    box-shadow: 0 10px 24px rgba(129, 53, 141, 0.35); 
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2) !important; 
 }
-
 /* ---------- página inicial ---------- */
 .hero-bzu {
     position: relative;
