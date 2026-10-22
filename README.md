@@ -17,6 +17,8 @@ Relatório da analise de competidores:
 
 ![escopo da entrega 03](entravel3fds.png)
 
+![Foto da Sprint 03](Sprintentrega3fds.png)
+
 ### Histórias de usuário
 
 As 7 histórias do projeto, com critérios de aceite e cenários BDD, estão em [user_stories.md](user_stories.md) e na seção [Histórias de Usuário](#histórias-de-usuário) deste README.
