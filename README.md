@@ -70,8 +70,8 @@ Jira: https://cesar-team-wuiwsqgi.atlassian.net/jira/software/projects/KAN/list?
 
 ### Screencasts
 
-* Deployment das histórias (a URL aparece no vídeo): [link](https://youtu.be/dmjxWsUrp20?si=QtJPG9ZcHkYxGNvY)
-* Explicação do código Django, de cada história até a view, o template e o model: link a ser adicionado.
+* Deployment das histórias (a URL aparece no vídeo): https://youtu.be/dmjxWsUrp20?si=QtJPG9ZcHkYxGNvY
+* Explicação do código Django, de cada história até a view, o template e o model: https://www.youtube.com/watch?v=vIdkuO2PEOo
 <!-- Troque "link a ser adicionado" pelo link do YouTube de cada vídeo. -->
 
 ### Versionamento
