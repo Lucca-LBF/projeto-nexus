@@ -91,9 +91,20 @@ def _calcular(salvo):
         custo_diario_com_iot = custo_diario_sem_iot * (1 - reducao_iot) + ruido_iot
         custo_diario_com_iot = np.clip(custo_diario_com_iot, perda_diaria * 0.1, None)
     else:
-        # o regime de funcionamento (1 turno, 2 turnos, 24 h) muda as horas de parada esperadas
-        media_horas_perdidas_dia = num_maquinas * taxa_falha_base * fator_regime
+       # 1. FATOR DE ESCALA: Evita que muitas máquinas multipliquem o tempo de parada de forma irreal
+        fator_escala_maquinas = math.sqrt(num_maquinas)
+        
+        # 2. CALCULA A MÉDIA DE HORAS PERDIDAS POR DIA USANDO A ESCALA
+        media_horas_perdidas_dia = fator_escala_maquinas * taxa_falha_base * fator_regime
+        
+        # 3. TETO DE 10%: A fábrica inteira não pode parar mais do que 10% do seu tempo diário.
+        # (Se fator_regime for em horas ex: 16, teto é 1.6 horas/dia. Se for um multiplicador 1, 2, 3, estimamos em 8h por turno)
+        horas_trabalhadas_dia = fator_regime if fator_regime >= 8 else fator_regime * 8
+        teto_diario = horas_trabalhadas_dia * 0.10
+        if media_horas_perdidas_dia > teto_diario:
+            media_horas_perdidas_dia = teto_diario
 
+        # 4. GERAÇÃO DOS DIAS COM NUMPY USANDO A MÉDIA CORRIGIDA
         horas_paradas_sem_iot = np.random.normal(loc=media_horas_perdidas_dia, scale=media_horas_perdidas_dia * 0.3, size=dias_simulados)
         horas_paradas_sem_iot = np.clip(horas_paradas_sem_iot, media_horas_perdidas_dia * 0.2, None)
         custo_diario_sem_iot = horas_paradas_sem_iot * custo_hora_parada
