@@ -32,10 +32,10 @@
                 </div>
                 {% endfor %}
 
-                <button type="button" id="baixar-relatorio" class="btn btn-primary w-100 mt-2 fw-bold">
-                    Baixar relatório (PDF)
-                </button>
-                <p class="small text-muted mt-1 mb-0 relatorio-dica">Na janela que abrir, escolha "Salvar como PDF".</p>
+                <a href="{% url 'relatorio' %}?imprimir=1" id="baixar-relatorio" class="btn btn-primary w-100 mt-2 fw-bold">
+                    Baixar relatório completo (PDF)
+                </a>
+                <p class="small text-muted mt-1 mb-0 relatorio-dica">Inclui resultado e dashboard. Na janela que abrir, escolha "Salvar como PDF".</p>
 
                 <a href="{% url 'formulario_simulador' %}?nova=1" class="btn btn-outline-info w-100 mt-2 fw-bold">
                     Nova Simulação
@@ -65,14 +65,27 @@
             <div class="col-md-6">
                 <div class="card shadow-sm border-0 card-roi">
                     <div class="card-body">
-                        <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.85rem;">Retorno sobre Investimento (ROI)</h6>
+                        <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.85rem;">{{ roi_titulo }}</h6>
                         <h3 class="text-info mb-0 fw-bold">{{ roi }}</h3>
+                        {% if roi_nota %}<p class="small text-muted mt-2 mb-0">{{ roi_nota }}</p>{% endif %}
                     </div>
                 </div>
             </div>
         </div>
 
+        {% if investimento_faixa %}
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.85rem;">Investimento estimado (só sensores)</h6>
+                <h4 class="mb-1 fw-bold">{{ investimento_faixa }}</h4>
+                <p class="small text-muted mb-0">Estimativa de mercado para o seu setor, não é preço da Bzu. O lucro e o ROI usam o valor central da faixa ({{ investimento_central }}).</p>
+            </div>
+        </div>
+        {% endif %}
+
         <p class="small text-muted mb-4">{{ feedback.escopo }}</p>
+
+        {% include 'simulador/_sensores_atuais.html' %}
 
         <!-- Gráfico -->
         <div class="card shadow-sm border-0">
@@ -110,7 +123,7 @@
         y: custosSemIot,
         mode: 'lines+markers',
         name: 'Sem IoT (Corretiva)',
-        line: {color: '#D63A4A', width: 2},
+        line: {color: '#64748b', width: 2},
         marker: {size: 5}
     };
 
@@ -151,12 +164,10 @@
 <script>
     // relatório em PDF: usa a impressão do navegador ("Salvar como PDF")
     (function () {
-        var botao = document.getElementById('baixar-relatorio');
         var abertos = [];
         function redimensionar() {
             try { Plotly.Plots.resize('meu_grafico_iot'); } catch (e) {}
         }
-        if (botao) botao.addEventListener('click', function () { window.print(); });
         window.addEventListener('beforeprint', function () {
             // abre "Como calculamos" para sair no relatório
             abertos = [];

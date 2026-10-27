@@ -1,0 +1,23 @@
+{% if sensores_atuais %}
+<div class="card shadow-sm border-0 mb-4 card-sensores">
+    <div class="card-body">
+        <h5 class="card-title text-info mb-2">Seus sensores atuais</h5>
+        <p class="mb-3">{{ sensores_atuais.texto }}</p>
+        <div class="row g-3 mb-3">
+            <div class="col-sm-4">
+                <small class="text-muted text-uppercase d-block">Já evitado com seus sensores</small>
+                <strong class="text-success fs-5">{{ sensores_atuais.ja }}</strong>
+            </div>
+            <div class="col-sm-4">
+                <small class="text-muted text-uppercase d-block">Ainda disponível ao ampliar</small>
+                <strong class="text-info fs-5">{{ sensores_atuais.nova }}</strong>
+            </div>
+            <div class="col-sm-4">
+                <small class="text-muted text-uppercase d-block">Potencial total no período</small>
+                <strong class="fs-5">{{ sensores_atuais.total }}</strong>
+            </div>
+        </div>
+        <p class="small text-muted mb-0">{{ sensores_atuais.sugestao }} O lucro líquido e o ROI desta página valem para a ampliação, ou seja, para os {{ sensores_atuais.pct_restante }}% dos pontos que ainda não têm sensor.</p>
+    </div>
+</div>
+{% endif %}

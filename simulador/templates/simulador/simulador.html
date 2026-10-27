@@ -35,7 +35,7 @@
             <p class="wiz-ajuda" data-ajuda="{{ campo.name }}">{{ campo.help_text }}</p>
             {% endif %}
 
-            <div class="wiz-resposta{% if campo.name == 'custo_hora_parada' or campo.name == 'perda_mensal' or campo.name == 'conserto_mensal' or campo.name == 'custo_sensor_iot' %} wiz-moeda{% endif %}">
+            <div class="wiz-resposta{% if campo.name == 'custo_hora_parada' or campo.name == 'perda_mensal' or campo.name == 'conserto_mensal' %} wiz-moeda{% endif %}">
                 {{ campo }}
             </div>
             <div class="wiz-opcoes" role="radiogroup" aria-labelledby="{{ campo.id_for_label }}" hidden></div>

@@ -12,12 +12,17 @@ prioridades: opções da pergunta "Qual é a sua prioridade?" deste segmento.
   Cada item é (valor, texto da opção, "comece por ..."). A opção escolhida
   aparece no retorno que a empresa recebe junto com o resultado.
 
+custo_ponto: custo mensal estimado por ponto monitorado (R$ por ponto por mês), considerando só os
+  sensores: o sensor e a instalação diluídos em 36 meses, mais assinatura e conectividade.
+  É o valor central, usado no lucro e no ROI. custo_ponto_faixa é o intervalo (mínimo, máximo) mostrado
+  como "investimento estimado". Medir temperatura sai mais barato que medir vibração.
+  São estimativas de mercado a partir de preços públicos de fornecedores de IoT (US$ 1 = R$ 5,50),
+  não são preço da Bzu, que não publica valores. Troque quando a Bzu informar uma faixa real.
+
 taxa_falha_base e reducao_iot são premissas de referência do simulador.
 Os quatro primeiros segmentos mantêm os valores que o grupo já usava; os demais
 começam com a premissa do padrão (15%) até a Bzu confirmar valores reais.
 """
-
-AJUDA_SENSOR = " Se ainda não tiver orçamento, mantenha o valor sugerido."
 
 # "Não sei o valor": a pessoa informa o gasto mensal e quanto acha que se perde;
 # o formulário multiplica e preenche o campo. Percentuais são premissas de referência.
@@ -28,7 +33,8 @@ PERCENTUAIS_ESTIMATIVA = [
 ]
 
 # perguntas iguais para todos os segmentos: (valor, texto da opção, comentário no retorno)
-# Elas não entram na conta do ROI, só personalizam o retorno.
+# As de prioridade e conexão só personalizam o retorno. A de acompanhamento também separa
+# a economia já aproveitada (pontos que já têm sensores) da que ainda dá para ganhar.
 ACOMPANHAMENTO = [
     ("nao", "Não acompanhamos hoje",
      "Hoje vocês não acompanham esses pontos, então qualquer dado em tempo real já é um ganho: "
@@ -36,10 +42,24 @@ ACOMPANHAMENTO = [
     ("manual", "Manualmente (rondas, anotações, planilhas)",
      "O acompanhamento manual deixa lacunas entre uma ronda e outra. "
      "Sensores com alerta automático cobrem esse intervalo, inclusive à noite e nos fins de semana."),
-    ("sistema", "Já temos algum sistema ou sensores",
-     "Como já existe algum acompanhamento, o caminho é um diagnóstico para ver o que aproveitar "
-     "e o que falta cobrir."),
+    ("alguns", "Já temos sensores em alguns pontos",
+     "Como já existem sensores em parte dos pontos, uma parte da economia já está sendo aproveitada. "
+     "O caminho é ampliar o monitoramento para os pontos que ainda ficam sem sensor."),
+    ("maioria", "Já temos sensores na maior parte dos pontos",
+     "Como a maior parte dos pontos já tem sensores, grande parte da economia já está sendo aproveitada. "
+     "Um diagnóstico mostra o que falta cobrir e o que dá para melhorar no que já existe."),
 ]
+
+# Parte dos pontos que já tem sensores em cada resposta. É uma hipótese do simulador:
+# serve para separar a economia "já aproveitada" da que ainda dá para ganhar ampliando.
+# Respostas antigas guardadas na sessão ("sistema") contam como "alguns".
+COBERTURA_SENSORES = {"nao": 0.0, "manual": 0.0, "alguns": 0.3, "sistema": 0.3, "maioria": 0.7}
+# texto curto para o resumo dos dados informados
+ACOMPANHAMENTO_RESUMO = {
+    "nao": "Nenhum sensor", "manual": "Nenhum sensor (acompanhamento manual)",
+    "alguns": "Sensores em alguns pontos", "sistema": "Sensores em alguns pontos",
+    "maioria": "Sensores na maior parte dos pontos",
+}
 
 # Quanto tempo as máquinas funcionam por dia: (valor, texto da opção, fator, texto curto).
 # O fator multiplica as horas de parada esperadas por dia. As taxas de falha do catálogo
@@ -65,6 +85,8 @@ CONEXAO_LOCAL = [
 SEGMENTOS = {
     "padrao": {
         "rotulo": "Indústria em geral",
+        "custo_ponto": 150,
+        "custo_ponto_faixa": (90, 220),
         "nome": "Simulação Padrão",
         "modelo": "paradas",
         "taxa_falha_base": 0.04,
@@ -79,10 +101,6 @@ SEGMENTOS = {
             "custo_hora_parada": {
                 "label": "Quanto custa uma hora de máquina parada? (R$)",
                 "ajuda": "Prejuízo estimado por hora de máquina parada.",
-            },
-            "custo_sensor_iot": {
-                "label": "Quanto custa por mês o sensor de cada máquina? (R$)",
-                "ajuda": "Custo mensal de um sensor IoT por máquina." + AJUDA_SENSOR,
             },
         },
         "monitorar": "Temperatura, vibração e funcionamento das máquinas mais críticas, com alertas automáticos.",
@@ -101,6 +119,8 @@ SEGMENTOS = {
     },
     "textil": {
         "rotulo": "Indústria têxtil",
+        "custo_ponto": 150,
+        "custo_ponto_faixa": (90, 220),
         "nome": "Indústria Têxtil",
         "modelo": "paradas",
         "taxa_falha_base": 0.06,
@@ -115,10 +135,6 @@ SEGMENTOS = {
             "custo_hora_parada": {
                 "label": "Quanto você perde por hora com um tear ou uma linha parada? (R$)",
                 "ajuda": "Considere a produção perdida, o desperdício de fio e tecido e os atrasos de entrega.",
-            },
-            "custo_sensor_iot": {
-                "label": "Quanto custa por mês o sensor de cada tear ou máquina? (R$)",
-                "ajuda": "Custo mensal de um sensor IoT por máquina monitorada." + AJUDA_SENSOR,
             },
         },
         "monitorar": "Vibração, temperatura e tempo de funcionamento de teares e máquinas de produção, com alerta antes da parada.",
@@ -137,6 +153,8 @@ SEGMENTOS = {
     },
     "pesada": {
         "rotulo": "Indústria pesada",
+        "custo_ponto": 200,
+        "custo_ponto_faixa": (130, 320),
         "nome": "Manufatura Pesada",
         "modelo": "paradas",
         "taxa_falha_base": 0.03,
@@ -151,10 +169,6 @@ SEGMENTOS = {
             "custo_hora_parada": {
                 "label": "Quanto custa uma hora de linha pesada parada? (R$)",
                 "ajuda": "Considere a produção perdida, a equipe ociosa e o custo de reiniciar o equipamento.",
-            },
-            "custo_sensor_iot": {
-                "label": "Quanto custa por mês o sensor de cada equipamento? (R$)",
-                "ajuda": "Custo mensal de um sensor IoT por equipamento monitorado." + AJUDA_SENSOR,
             },
         },
         "monitorar": "Temperatura, vibração e carga dos equipamentos críticos, para antecipar falhas antes que a linha pare.",
@@ -173,6 +187,8 @@ SEGMENTOS = {
     },
     "refrigeracao": {
         "rotulo": "Cadeia fria e refrigeração",
+        "custo_ponto": 90,
+        "custo_ponto_faixa": (60, 140),
         "nome": "Frio Industrial e Refrigeração",
         "modelo": "paradas",
         "taxa_falha_base": 0.04,
@@ -187,10 +203,6 @@ SEGMENTOS = {
             "custo_hora_parada": {
                 "label": "Quanto custa uma hora de refrigeração fora de operação? (R$)",
                 "ajuda": "Considere a perda de produtos refrigerados e o risco de quebrar a cadeia do frio.",
-            },
-            "custo_sensor_iot": {
-                "label": "Quanto custa por mês o sensor de cada equipamento? (R$)",
-                "ajuda": "Custo mensal de um sensor IoT por equipamento monitorado." + AJUDA_SENSOR,
             },
         },
         "monitorar": "Temperatura e umidade de câmaras frias, freezers e áreas de armazenamento, com alerta imediato de desvio.",
@@ -209,6 +221,8 @@ SEGMENTOS = {
     },
     "alimentos": {
         "rotulo": "Alimentos e bebidas",
+        "custo_ponto": 100,
+        "custo_ponto_faixa": (60, 140),
         "nome": "Alimentos e Bebidas",
         "modelo": "perdas",
         "taxa_falha_base": None,
@@ -224,10 +238,6 @@ SEGMENTOS = {
                 "label": "Quanto você perde por mês com lotes descartados ou fora do padrão? (R$)",
                 "ajuda": "Considere matéria-prima, energia e retrabalho dos lotes perdidos.",
                 "estimar": "Quanto vale, por mês, a produção que passa por esses pontos? (R$)",
-            },
-            "custo_sensor_iot": {
-                "label": "Quanto custa por mês o sensor de cada ponto? (R$)",
-                "ajuda": "Custo mensal de um sensor IoT por ponto monitorado." + AJUDA_SENSOR,
             },
         },
         "monitorar": "Temperatura, umidade e outras variáveis do processo (como a fermentação), para manter a consistência do produto.",
@@ -246,6 +256,8 @@ SEGMENTOS = {
     },
     "saude": {
         "rotulo": "Saúde e farmacêutica",
+        "custo_ponto": 110,
+        "custo_ponto_faixa": (70, 160),
         "nome": "Saúde e Farmacêutica",
         "modelo": "perdas",
         "taxa_falha_base": None,
@@ -261,10 +273,6 @@ SEGMENTOS = {
                 "label": "Quanto você perde por mês com medicamentos, vacinas ou insumos descartados? (R$)",
                 "ajuda": "Considere os itens descartados por desvio de temperatura e o custo de reposição.",
                 "estimar": "Quanto você gasta por mês com os medicamentos e insumos guardados nesses locais? (R$)",
-            },
-            "custo_sensor_iot": {
-                "label": "Quanto custa por mês o sensor de cada câmara ou área? (R$)",
-                "ajuda": "Custo mensal de um sensor IoT por equipamento monitorado." + AJUDA_SENSOR,
             },
         },
         "monitorar": "Temperatura e umidade de câmaras e áreas de armazenamento, com histórico para rastreabilidade e auditoria.",
@@ -283,6 +291,8 @@ SEGMENTOS = {
     },
     "utilities": {
         "rotulo": "Água, gás e energia",
+        "custo_ponto": 110,
+        "custo_ponto_faixa": (80, 150),
         "nome": "Água, Gás e Energia",
         "modelo": "perdas",
         "taxa_falha_base": None,
@@ -298,10 +308,6 @@ SEGMENTOS = {
                 "label": "Quanto você estima perder por mês com vazamentos e desperdício? (R$)",
                 "ajuda": "Some o que se perde em água, gás ou energia por vazamento, falha ou consumo fora do normal.",
                 "estimar": "Quanto você gasta por mês com água, gás ou energia nesses pontos? (R$)",
-            },
-            "custo_sensor_iot": {
-                "label": "Quanto custa por mês o sensor de cada ponto? (R$)",
-                "ajuda": "Custo mensal de um sensor IoT por ponto monitorado." + AJUDA_SENSOR,
             },
         },
         "monitorar": "Consumo de água, gás e energia em tempo real, para achar vazamentos e desperdícios.",
@@ -320,6 +326,8 @@ SEGMENTOS = {
     },
     "edificios": {
         "rotulo": "Edifícios inteligentes",
+        "custo_ponto": 90,
+        "custo_ponto_faixa": (60, 130),
         "nome": "Edifícios Inteligentes",
         "modelo": "perdas",
         "taxa_falha_base": None,
@@ -335,10 +343,6 @@ SEGMENTOS = {
                 "label": "Quanto você estima desperdiçar por mês com energia e climatização? (R$)",
                 "ajuda": "Considere ar-condicionado e iluminação ligados sem necessidade e equipamentos fora de ajuste.",
                 "estimar": "Quanto você paga por mês de energia e climatização do edifício? (R$)",
-            },
-            "custo_sensor_iot": {
-                "label": "Quanto custa por mês o sensor de cada ambiente? (R$)",
-                "ajuda": "Custo mensal de um sensor IoT por ambiente monitorado." + AJUDA_SENSOR,
             },
         },
         "monitorar": "Energia, qualidade do ar, temperatura e uso de equipamentos, para ganhar conforto, segurança e eficiência.",
@@ -357,6 +361,8 @@ SEGMENTOS = {
     },
     "cidades": {
         "rotulo": "Cidades inteligentes",
+        "custo_ponto": 100,
+        "custo_ponto_faixa": (60, 140),
         "nome": "Cidades Inteligentes",
         "modelo": "perdas",
         "taxa_falha_base": None,
@@ -372,10 +378,6 @@ SEGMENTOS = {
                 "label": "Quanto você gasta por mês com manutenção corretiva e energia desses pontos? (R$)",
                 "ajuda": "Considere deslocamento de equipe, reparos e consumo de energia que poderiam ser evitados.",
                 "estimar": "Quanto você gasta por mês, no total, com manutenção e energia desses pontos? (R$)",
-            },
-            "custo_sensor_iot": {
-                "label": "Quanto custa por mês o sensor de cada ponto? (R$)",
-                "ajuda": "Custo mensal de um sensor IoT por ponto monitorado." + AJUDA_SENSOR,
             },
         },
         "monitorar": "Temperatura, qualidade do ar, energia e uso de equipamentos em mobiliário urbano e pontos públicos.",
@@ -394,6 +396,8 @@ SEGMENTOS = {
     },
     "agro": {
         "rotulo": "Agronegócio",
+        "custo_ponto": 65,
+        "custo_ponto_faixa": (40, 100),
         "nome": "Agronegócio",
         "modelo": "perdas",
         "taxa_falha_base": None,
@@ -409,10 +413,6 @@ SEGMENTOS = {
                 "label": "Quanto você perde por mês com produção estragada ou irrigação mal ajustada? (R$)",
                 "ajuda": "Considere colheita perdida, grãos deteriorados e água ou energia gastas sem necessidade.",
                 "estimar": "Quanto vale, por mês, a produção dessas áreas? (R$)",
-            },
-            "custo_sensor_iot": {
-                "label": "Quanto custa por mês o sensor de cada área? (R$)",
-                "ajuda": "Custo mensal de um sensor IoT por área monitorada." + AJUDA_SENSOR,
             },
         },
         "monitorar": "Temperatura e umidade em estufas, silos e áreas de produção, com alerta para agir antes da perda.",

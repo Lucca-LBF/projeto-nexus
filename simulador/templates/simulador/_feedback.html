@@ -6,7 +6,11 @@
         <ul class="mb-4">
             {% if feedback.retorno %}<li>{{ feedback.retorno }}</li>{% endif %}
             {% if feedback.equilibrio %}<li>{{ feedback.equilibrio }}</li>{% endif %}
+            {% if feedback.otimista %}<li>{{ feedback.otimista }}</li>{% endif %}
         </ul>
+
+        <h6 class="text-muted text-uppercase small mb-2">Monitoramento em tempo real</h6>
+        <p class="mb-4">{{ feedback.tempo_real }}</p>
 
         <h6 class="text-muted text-uppercase small mb-2">Como a Bzu ajudaria</h6>
         <ul class="mb-3">

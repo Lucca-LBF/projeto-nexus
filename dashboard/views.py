@@ -3,12 +3,14 @@ from django.shortcuts import redirect, render
 import plotly.graph_objects as go
 import plotly.io as pio
 
-from simulador.segmentos import SEGMENTOS
+from simulador.feedback import faixa_investimento, faixa_roi, moeda_inteira, montar_sensores_atuais
+from simulador.segmentos import ACOMPANHAMENTO_RESUMO, SEGMENTOS
+from simulador.views import _regime
 
 CHAVE_SESSAO = 'simulacao'
 DIAS_POR_MES = 30
 
-COR_SEM_IOT = '#dc2626'
+COR_SEM_IOT = '#64748b'
 COR_COM_IOT = '#16a34a'
 COR_SENSOR = '#2563eb'
 COR_REFERENCIA = '#f59e0b'
@@ -101,17 +103,16 @@ def _figura_linha(simulacao, rotulos):
 
 
 def _figura_sensibilidade(simulacao, segmento):
-    """Resultado líquido para diferentes reduções de perdas.
+    """Economia estimada para diferentes reduções de perdas.
 
-    A linha é exata: resultado = total_sem_iot * redução - investimento.
-    """
+    A linha é exata: economia = total_sem_iot * redução. O investimento não é desenhado:
+    só o ponto de equilíbrio (a redução mínima para os sensores se pagarem) aparece como uma marca."""
     total_sem = simulacao.get('total_sem_iot', 0)
     if total_sem <= 0:
         return None
 
     economia = simulacao.get('economia_bruta', 0)
     investimento = simulacao.get('investimento_periodo', 0)
-    liquido = simulacao.get('resultado_liquido', 0)
 
     efetiva = economia / total_sem * 100
     referencia = segmento['reducao_iot'] * 100
@@ -124,37 +125,32 @@ def _figura_sensibilidade(simulacao, segmento):
     limite = min(math.ceil(limite / 5) * 5, 100)
 
     xs = list(range(0, limite + 1, 5))
-    ys = [total_sem * x / 100 - investimento for x in xs]
-
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=xs, y=ys, mode='lines', name='Resultado líquido',
-        line=dict(color=COR_SENSOR, width=3),
-        hovertemplate='Redução de %{x}%<br>Resultado: R$ %{y:,.2f}<extra></extra>',
+        x=xs, y=[total_sem * x / 100 for x in xs], mode='lines', name='Economia estimada',
+        line=dict(color=COR_COM_IOT, width=3),
+        hovertemplate='Redução de %{x}%<br>Economia: R$ %{y:,.2f}<extra></extra>',
     ))
     fig.add_trace(go.Scatter(
-        x=[efetiva], y=[liquido], mode='markers', name='Sua simulação',
-        marker=dict(size=13, color=COR_COM_IOT if liquido >= 0 else COR_SEM_IOT,
-                    line=dict(width=2, color='white')),
-        hovertemplate=f'Redução efetiva de {_pct(efetiva)}<br>Resultado: {_brl(liquido)}<extra></extra>',
+        x=[efetiva], y=[economia], mode='markers', name='Sua simulação',
+        marker=dict(size=13, color=COR_COM_IOT, line=dict(width=2, color='white')),
+        hovertemplate=f'Redução efetiva de {_pct(efetiva)}<br>Economia: {_brl(economia)}<extra></extra>',
     ))
     fig.add_trace(go.Scatter(
-        x=[referencia], y=[total_sem * referencia / 100 - investimento],
-        mode='markers', name='Premissa de referência',
+        x=[referencia], y=[total_sem * referencia / 100], mode='markers', name='Premissa de referência',
         marker=dict(size=12, symbol='diamond', color=COR_REFERENCIA, line=dict(width=2, color='white')),
         hovertemplate=f'Premissa de {_pct(referencia, 0)}<extra></extra>',
     ))
-
-    fig.add_hline(y=0, line_color='#9ca3af', line_width=1)
     if equilibrio <= limite:
         fig.add_vline(
             x=equilibrio, line_dash='dash', line_color='#6b7280',
             annotation_text=f'Equilíbrio: {_pct(equilibrio)}', annotation_position='top left',
         )
 
-    _layout(fig, 'Sensibilidade do resultado líquido',
-            'Redução de perdas com IoT', 'Resultado líquido (R$)', hovermode='closest')
+    _layout(fig, 'Economia estimada por redução de perdas',
+            'Redução de perdas com IoT', 'Economia no período (R$)', hovermode='closest')
     fig.update_xaxes(ticksuffix='%')
+    fig.update_yaxes(rangemode='tozero')
     return fig
 
 
@@ -163,12 +159,12 @@ def _figura_barras(simulacao, rotulos):
     if total_sem <= 0:
         return None
 
-    nomes = [rotulos['sem_iot'], rotulos['com_iot'], 'Investimento em sensores']
-    valores = [total_sem, simulacao.get('total_com_iot', 0), simulacao.get('investimento_periodo', 0)]
+    nomes = [rotulos['sem_iot'], rotulos['com_iot']]
+    valores = [total_sem, simulacao.get('total_com_iot', 0)]
 
     fig = go.Figure(go.Bar(
         x=nomes, y=valores,
-        marker_color=[COR_SEM_IOT, COR_COM_IOT, COR_SENSOR],
+        marker_color=[COR_SEM_IOT, COR_COM_IOT],
         text=[_brl(v, 0) for v in valores], textposition='outside', cliponaxis=False,
         hovertemplate='%{x}<br>R$ %{y:,.2f}<extra></extra>',
     ))
@@ -184,8 +180,8 @@ def _indicadores(simulacao, segmento):
     investimento = simulacao.get('investimento_periodo', 0)
     liquido = simulacao.get('resultado_liquido', 0)
     dias = simulacao.get('tempo_amostra', 30)
-    pontos = simulacao.get('num_maquinas', 0)
-    custo_sensor = simulacao.get('custo_sensor_iot', 0)
+    # só os pontos que ainda não têm sensor entram no investimento
+    pontos = simulacao.get('pontos_novos', simulacao.get('num_maquinas', 0))
     meses = dias / DIAS_POR_MES
 
     kpis = []
@@ -194,18 +190,63 @@ def _indicadores(simulacao, segmento):
         kpis.append({
             'titulo': f'Resultado líquido ({dias} dias)',
             'valor': _brl(liquido),
-            'detalhe': (f'ROI de {_pct(liquido / investimento * 100)}'
+            'detalhe': (f'ROI estimado de {_pct(liquido / investimento * 100)}'
                         if investimento > 0 else 'Sem investimento informado'),
             'classe': 'text-success',
         })
     else:
-        # sem mostrar valor negativo: explica quanto falta para os sensores se pagarem
+        # sem valor negativo nem vermelho: mostra a economia possível e o que falta para os sensores se pagarem
         kpis.append({
-            'titulo': f'Resultado líquido ({dias} dias)',
-            'valor': 'Ainda sem retorno',
-            'detalhe': (f'A economia de {_brl(economia)} ainda não cobre o investimento de {_brl(investimento)}. '
-                        'Teste um período maior ou menos sensores.'),
-            'classe': 'text-danger',
+            'titulo': f'Potencial de economia ({dias} dias)',
+            'valor': _brl(economia),
+            'detalhe': 'Estimativa. Pelo valor central do investimento, ainda não cobre os sensores.',
+            'classe': 'text-info',
+        })
+        if total_sem > 0 and investimento > 0:
+            equilibrio = investimento / total_sem * 100
+            if equilibrio < 100:
+                valor_eq = f'{_pct(equilibrio, 0)} de redução'
+                detalhe_eq = f"Referência do setor: {_pct(segmento['reducao_iot'] * 100, 0)} de redução de perdas"
+            else:
+                # nem 100% de redução pagaria: mostra quanto a hora parada (ou a perda mensal) teria que valer
+                alvo = simulacao.get('valor_equilibrio', 0)
+                informado = simulacao.get('valor_informado', 0)
+                if segmento['modelo'] == 'paradas':
+                    rotulo_eq, sufixo_eq = 'Hora parada de', ''
+                else:
+                    rotulo_eq, sufixo_eq = 'Perda de', ' por mês'
+                valor_eq = f'{rotulo_eq} {moeda_inteira(alvo)}{sufixo_eq}' if alvo > 0 else 'Começar por poucos pontos'
+                detalhe_eq = (f'Você informou {moeda_inteira(informado)}{sufixo_eq}. '
+                              'Vale começar pelos pontos críticos.' if alvo > 0 else 'Onde a perda é maior')
+            kpis.append({
+                'titulo': 'Para os sensores se pagarem',
+                'valor': valor_eq,
+                'detalhe': detalhe_eq,
+                'classe': 'text-info',
+            })
+        investimento_min = simulacao.get('investimento_min', 0)
+        roi_faixa = faixa_roi(economia, investimento_min, simulacao.get('investimento_max', 0))
+        if roi_faixa:
+            kpis.append({
+                'titulo': 'ROI estimado',
+                'valor': roi_faixa,
+                'detalhe': 'Nos dois extremos da faixa de investimento',
+                'classe': 'text-info',
+            })
+        if economia > investimento_min > 0:
+            kpis.append({
+                'titulo': 'Se o investimento ficar no mínimo da faixa',
+                'valor': _brl(economia - investimento_min),
+                'detalhe': 'Lucro estimado no período. Uma cotação real pode mudar o resultado.',
+                'classe': 'text-success',
+            })
+
+    if simulacao.get('investimento_max', 0) > 0:
+        kpis.append({
+            'titulo': 'Investimento estimado',
+            'valor': faixa_investimento(simulacao['investimento_min'], simulacao['investimento_max'], curta=True),
+            'detalhe': 'Só sensores, estimativa de mercado para o seu setor (não é preço da Bzu)',
+            'classe': '',
         })
 
     economia_mensal = economia / meses
@@ -218,9 +259,11 @@ def _indicadores(simulacao, segmento):
 
     custo_hora = simulacao.get('custo_hora_parada', 0)
     if segmento['modelo'] == 'paradas' and custo_hora > 0:
+        # só a parte das paradas: a economia com conserto de emergência fica de fora
+        economia_paradas = simulacao.get('economia_paradas', economia)
         kpis.append({
             'titulo': 'Horas de parada evitadas',
-            'valor': f"{_num(economia / custo_hora, 1)} h",
+            'valor': f"{_num(economia_paradas / custo_hora, 1)} h",
             'detalhe': f'em {dias} dias',
             'classe': '',
         })
@@ -230,8 +273,16 @@ def _indicadores(simulacao, segmento):
         kpis.append({
             'titulo': 'Economia mensal por ponto',
             'valor': _brl(por_ponto),
-            'detalhe': f'Cada sensor custa {_brl(custo_sensor, 0)} por mês',
-            'classe': 'text-success' if por_ponto >= custo_sensor else 'text-danger',
+            'detalhe': 'Média por ponto que ainda será monitorado',
+            'classe': 'text-success' if por_ponto >= segmento['custo_ponto'] else 'text-info',
+        })
+
+    if simulacao.get('cobertura', 0) > 0:
+        kpis.append({
+            'titulo': 'Já evitado com seus sensores',
+            'valor': _brl(simulacao.get('economia_ja_aproveitada', 0)),
+            'detalhe': f"em {dias} dias, com sensores em cerca de {round(simulacao['cobertura'] * 100)}% dos pontos",
+            'classe': 'text-success',
         })
 
     if total_sem > 0:
@@ -247,6 +298,7 @@ def _indicadores(simulacao, segmento):
 
 def _entradas_e_referencias(simulacao, segmento):
     rotulo_pontos, unidade_pontos = segmento['rotulo_pontos']
+    fator_regime, texto_regime = _regime(simulacao.get('regime_funcionamento'))
 
     entradas = [
         ('Segmento', segmento['nome']),
@@ -255,14 +307,25 @@ def _entradas_e_referencias(simulacao, segmento):
     if segmento['modelo'] == 'perdas':
         entradas.append(('Perda mensal informada', _brl(simulacao.get('perda_mensal', 0), 0)))
     else:
+        # o regime só existe (e só muda a conta) nos segmentos de paradas
+        if texto_regime:
+            entradas.append(('Funcionamento', texto_regime))
         entradas.append(('Custo da hora parada', _brl(simulacao.get('custo_hora_parada', 0), 0)))
-    entradas.append(('Custo mensal do sensor', _brl(simulacao.get('custo_sensor_iot', 0), 0)))
+    entradas.append(('Sensores atuais', ACOMPANHAMENTO_RESUMO.get(simulacao.get('acompanhamento_atual'), 'Não informado')))
+
+    # opcional: só aparece se o usuário preencheu
+    conserto = simulacao.get('conserto_mensal', 0)
+    if conserto > 0:
+        entradas.append(('Conserto de emergência', f"{_brl(conserto, 0)} por mês"))
+
     entradas.append(('Período simulado', f"{simulacao.get('tempo_amostra', 30)} dias"))
 
     referencias = [('Redução de perdas com IoT', _pct(segmento['reducao_iot'] * 100, 0))]
     if segmento['modelo'] == 'paradas':
+        # a taxa base já multiplicada pelo regime de funcionamento, como no cálculo
         referencias.append(
-            ('Horas de parada por máquina ao dia', f"{_num(segmento['taxa_falha_base'], 2)} h"))
+            ('Horas de parada por máquina ao dia',
+             f"{_num(segmento['taxa_falha_base'] * fator_regime, 2)} h"))
 
     return entradas, referencias
 
@@ -276,15 +339,6 @@ def dashboard(request):
     rotulos = ROTULOS[segmento['modelo']]
 
     entradas, referencias = _entradas_e_referencias(simulacao, segmento)
-
-    # manutenção e energia: estimativas complementares, só no modelo "paradas"
-    # e fora do resultado líquido (que considera apenas a redução das perdas)
-    complementares = None
-    if segmento['modelo'] == 'paradas':
-        complementares = [
-            ('Economia estimada em manutenção', _brl(simulacao.get('economia_manutencao', 0))),
-            ('Economia estimada em energia', _brl(simulacao.get('economia_energia', 0))),
-        ]
 
     # a ordem importa: o primeiro gráfico carrega o plotly.js, os outros reaproveitam
     figuras = {
@@ -313,7 +367,10 @@ def dashboard(request):
         'entradas': entradas,
         'referencias': referencias,
         'premissa_confirmada': segmento.get('premissa_confirmada', True),
-        'complementares': complementares,
         'graficos': graficos,
+        'sensores_atuais': montar_sensores_atuais(
+            simulacao.get('cobertura', 0), simulacao.get('economia_ja_aproveitada', 0),
+            simulacao.get('economia_bruta', 0), simulacao.get('economia_potencial_total', 0),
+            simulacao.get('tempo_amostra', 30)),
     }
     return render(request, 'dashboard/index.html', contexto)

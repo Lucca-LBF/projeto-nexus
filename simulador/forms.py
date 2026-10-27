@@ -24,7 +24,6 @@ MAX_PONTOS = 10000
 MAX_CUSTO_HORA = Decimal("10000000")
 MAX_PERDA_MENSAL = Decimal("100000000")
 MAX_CONSERTO_MENSAL = Decimal("100000000")
-MAX_CUSTO_SENSOR = Decimal("100000")
 
 
 def _reais(valor):
@@ -64,7 +63,6 @@ class DadosEmpresaForm(forms.Form):
         "custo_hora_parada",
         "perda_mensal",
         "conserto_mensal",
-        "custo_sensor_iot",
         "tempo_amostra",
         "prioridade",
         "acompanhamento_atual",
@@ -145,21 +143,6 @@ class DadosEmpresaForm(forms.Form):
                   "Se não souber, deixe em branco: não entra na conta.",
     )
 
-    custo_sensor_iot = forms.DecimalField(
-        label="Custo mensal do sensor IoT (R$)",
-        max_digits=10,
-        decimal_places=2,
-        min_value=Decimal("0.01"),
-        max_value=MAX_CUSTO_SENSOR,
-        error_messages=_mensagens(MAX_CUSTO_SENSOR),
-        initial=300,
-        widget=forms.NumberInput(attrs={
-            "class": "form-control",
-            "placeholder": "Ex: 300.00",
-        }),
-        help_text="Custo mensal de um sensor IoT por máquina.",
-    )
-
     tipo_industria = forms.ChoiceField(
         label="Qual é o tipo da sua empresa?",
         choices=TIPO_EMPRESA_CHOICES,
@@ -186,11 +169,11 @@ class DadosEmpresaForm(forms.Form):
     )
 
     acompanhamento_atual = forms.ChoiceField(
-        label="Como vocês acompanham esses pontos hoje?",
+        label="Vocês já têm sensores nesses pontos?",
         choices=[(valor, texto) for valor, texto, _ in ACOMPANHAMENTO],
         initial="manual",
         widget=forms.Select(attrs={"class": "form-select"}),
-        help_text="Ajuda a entender o quanto os sensores acrescentam ao que já existe.",
+        help_text="Se já houver sensores, mostramos o quanto já está sendo evitado e o quanto ainda dá para ganhar.",
     )
 
     conexao_local = forms.ChoiceField(
