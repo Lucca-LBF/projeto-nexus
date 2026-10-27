@@ -228,8 +228,23 @@ def _calcular(salvo):
         texto_economia = f"R$ {economia_bruta:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
         cor_economia = "text-info"
         titulo_resultado = f"ECONOMIA ESTIMADA ({dias_simulados} DIAS)"
-        roi_exibicao = roi_faixa or "—"
-        roi_nota = falta_curto
+        # em vez de um ROI negativo, mostra o que falta para os sensores se pagarem
+        roi_titulo = "Para os sensores se pagarem"
+        if total_operacional_antigo <= 0:
+            roi_exibicao = "Informe a perda ou a hora parada"
+            roi_nota = "Sem perdas informadas, não há economia para comparar com o investimento."
+        elif equilibrio_pct < 100:
+            roi_exibicao = f"Reduzir {equilibrio_pct:.0f}% das perdas"
+            roi_nota = (f"A referência do seu setor é {round(segmento['reducao_iot'] * 100)}%. "
+                        "Por isso a economia estimada ainda não cobre o investimento.")
+        elif valor_equilibrio > 0:
+            rotulo_alvo = "Hora parada de" if segmento['modelo'] == 'paradas' else "Perda de"
+            sufixo_alvo = "" if segmento['modelo'] == 'paradas' else " por mês"
+            roi_exibicao = f"{rotulo_alvo} {moeda_inteira(valor_equilibrio)}{sufixo_alvo}"
+            roi_nota = "Nem evitar todas as perdas pagaria os sensores com o valor informado. Vale começar por poucos pontos críticos."
+        else:
+            roi_exibicao = "Começar por poucos pontos críticos"
+            roi_nota = "Onde a perda é maior."
         resumo_diagnostico = f"economia estimada de {moeda_inteira(economia_bruta)}"
 
     contexto = {

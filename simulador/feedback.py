@@ -52,12 +52,19 @@ def faixa_investimento(minimo, maximo, curta=False):
 
 
 def faixa_roi(economia, investimento_min, investimento_max):
-    """ROI nos dois extremos da faixa de investimento: 'de -35% a 12%' (ou None sem investimento)."""
+    """ROI nos dois extremos da faixa de investimento, sem nunca mostrar número negativo.
+
+    'de 12% a 80%' quando os dois extremos são positivos; 'até 80%' quando só o extremo mais econômico
+    é positivo; None quando nenhum é (quem chama mostra o que falta para os sensores se pagarem)."""
     if investimento_min <= 0 or investimento_max <= 0:
         return None
     pior = (economia - investimento_max) / investimento_max * 100
     melhor = (economia - investimento_min) / investimento_min * 100
-    return f"de {pior:.0f}% a {melhor:.0f}%"
+    if melhor <= 0:
+        return None
+    if pior >= 0:
+        return f"de {pior:.0f}% a {melhor:.0f}%"
+    return f"até {melhor:.0f}%"
 
 
 def link_diagnostico(nome_industria, num_pontos, unidade, resumo_texto):

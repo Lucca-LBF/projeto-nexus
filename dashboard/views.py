@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render
 import plotly.graph_objects as go
 import plotly.io as pio
 
-from simulador.feedback import faixa_investimento, faixa_roi, moeda_inteira, montar_sensores_atuais
+from simulador.feedback import faixa_investimento, moeda_inteira, montar_sensores_atuais
 from simulador.segmentos import ACOMPANHAMENTO_RESUMO, SEGMENTOS
 from simulador.views import _regime
 
@@ -225,14 +225,6 @@ def _indicadores(simulacao, segmento):
                 'classe': 'text-info',
             })
         investimento_min = simulacao.get('investimento_min', 0)
-        roi_faixa = faixa_roi(economia, investimento_min, simulacao.get('investimento_max', 0))
-        if roi_faixa:
-            kpis.append({
-                'titulo': 'ROI estimado',
-                'valor': roi_faixa,
-                'detalhe': 'Nos dois extremos da faixa de investimento',
-                'classe': 'text-info',
-            })
         if economia > investimento_min > 0:
             kpis.append({
                 'titulo': 'Se o investimento ficar no mínimo da faixa',

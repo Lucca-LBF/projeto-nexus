@@ -1,0 +1,8 @@
+<ul class="nav nav-tabs mb-4 relatorio-dica" aria-label="Resultado e dashboard">
+    <li class="nav-item">
+        <a class="nav-link {% if aba == 'resultado' %}active fw-bold{% endif %}" {% if aba == 'resultado' %}aria-current="page"{% endif %} href="{% url 'resultado_simulacao' %}">Resultado</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if aba == 'dashboard' %}active fw-bold{% endif %}" {% if aba == 'dashboard' %}aria-current="page"{% endif %} href="{% url 'dashboard_home' %}">Dashboard</a>
+    </li>
+</ul>

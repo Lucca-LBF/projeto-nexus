@@ -1,6 +1,6 @@
-<div class="card shadow-sm border-0 mt-4">
-    <div class="card-body">
-        <h5 class="card-title text-info mb-3">O que isso significa para a sua empresa</h5>
+<details class="card shadow-sm border-0 mt-4">
+    <summary class="card-body fw-bold text-info" style="cursor: pointer;">O que isso significa para a sua empresa</summary>
+    <div class="card-body pt-0">
 
         <p class="{{ feedback.classe }} fw-bold mb-2">{{ feedback.leitura }}</p>
         <ul class="mb-4">
@@ -26,4 +26,4 @@
         <a href="{{ link_diagnostico }}" target="_blank" rel="noopener" class="btn btn-primary">Pedir diagnóstico</a>
         <p class="small text-muted mt-2 mb-0 feedback-whatsapp">Abre o WhatsApp da Bzu com a mensagem pronta. Se preferir, escreva para <a href="mailto:{{ feedback.email }}">{{ feedback.email }}</a>.</p>
     </div>
-</div>
+</details>

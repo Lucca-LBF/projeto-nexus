@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% include 'simulador/_abas.html' with aba='resultado' %}
 <div class="relatorio-cab">
     <div class="relatorio-marca"><strong>BZU</strong> &middot; Relatório de economia com IoT</div>
     <div class="relatorio-data">{{ nome_industria }} &middot; gerado em {% now "d/m/Y" %}</div>
