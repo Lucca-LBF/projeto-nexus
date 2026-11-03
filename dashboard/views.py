@@ -65,8 +65,9 @@ def _layout(fig, titulo, eixo_x=None, eixo_y=None, hovermode='x unified'):
     fig.update_yaxes(tickprefix='R$ ', tickformat=',.0f')
 
 
-def _agrupar_por_mes(valores):
-    return [sum(valores[i:i + DIAS_POR_MES]) for i in range(0, len(valores), DIAS_POR_MES)]
+def _agrupar(valores, tamanho_bloco):
+    """Soma os valores em blocos de N dias (ex: 7 para semanas, 15 para quinzenas, 30 para meses)."""
+    return [sum(valores[i:i + tamanho_bloco]) for i in range(0, len(valores), tamanho_bloco)]
 
 
 def _figura_linha(simulacao, rotulos):
@@ -79,14 +80,28 @@ def _figura_linha(simulacao, rotulos):
         return None
     dias, sem_iot, com_iot = dias[:n], sem_iot[:n], com_iot[:n]
 
-    if n <= DIAS_POR_MES:
-        eixo_x = [f'Dia {d}' for d in dias]
-        unidade = 'diária'
-    else:
-        sem_iot = _agrupar_por_mes(sem_iot)
-        com_iot = _agrupar_por_mes(com_iot)
+   
+    if n >= 360:  
+        bloco = 30
+        sem_iot = _agrupar(sem_iot, bloco)
+        com_iot = _agrupar(com_iot, bloco)
         eixo_x = [f'Mês {i}' for i in range(1, len(sem_iot) + 1)]
         unidade = 'mensal'
+    elif n >= 180: 
+        bloco = 15
+        sem_iot = _agrupar(sem_iot, bloco)
+        com_iot = _agrupar(com_iot, bloco)
+        eixo_x = [f'Quinzena {i}' for i in range(1, len(sem_iot) + 1)]
+        unidade = 'quinzenal'
+    elif n >= 120:  
+        bloco = 7
+        sem_iot = _agrupar(sem_iot, bloco)
+        com_iot = _agrupar(com_iot, bloco)
+        eixo_x = [f'Semana {i}' for i in range(1, len(sem_iot) + 1)]
+        unidade = 'semanal'
+    else:  
+        eixo_x = [f'Dia {d}' for d in dias]
+        unidade = 'diária'
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(

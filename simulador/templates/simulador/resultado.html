@@ -115,9 +115,55 @@
     const custosSemIot = {{ dados_grafico_sem_iot|safe }};
     const custosComIot = {{ dados_grafico_com_iot|safe }};
 
+    // Função auxiliar para somar em blocos (semanas, quinzenas ou meses)
+    function agruparBlocos(arr, tamanho) {
+        let res = [];
+        for (let i = 0; i < arr.length; i += tamanho) {
+            let chunk = arr.slice(i, i + tamanho);
+            let soma = chunk.reduce((a, b) => a + b, 0);
+            res.push(soma);
+        }
+        return res;
+    }
+
+    let xLabels = [];
+    let semIotFinal = [];
+    let comIotFinal = [];
+    let tituloEixoX = 'Dias de Operação';
+    let tituloEixoY = 'Custo Diário (R$)';
+
+    const n = Math.min(dias.length, custosSemIot.length, custosComIot.length);
+
+   
+    if (n >= 360) { 
+        semIotFinal = agruparBlocos(custosSemIot, 30);
+        comIotFinal = agruparBlocos(custosComIot, 30);
+        xLabels = semIotFinal.map((_, i) => `Mês ${i + 1}`);
+        tituloEixoX = 'Período (Meses)';
+        tituloEixoY = 'Custo Mensal (R$)';
+    } else if (n >= 180) {
+        semIotFinal = agruparBlocos(custosSemIot, 15);
+        comIotFinal = agruparBlocos(custosComIot, 15);
+        xLabels = semIotFinal.map((_, i) => `Quinzena ${i + 1}`);
+        tituloEixoX = 'Período (Quinzenas)';
+        tituloEixoY = 'Custo Quinzenal (R$)';
+    } else if (n >= 120) { 
+        semIotFinal = agruparBlocos(custosSemIot, 7);
+        comIotFinal = agruparBlocos(custosComIot, 7);
+        xLabels = semIotFinal.map((_, i) => `Semana ${i + 1}`);
+        tituloEixoX = 'Período (Semanas)';
+        tituloEixoY = 'Custo Semanal (R$)';
+    } else { 
+        semIotFinal = custosSemIot;
+        comIotFinal = custosComIot;
+        xLabels = dias.map(d => `Dia ${d}`);
+        tituloEixoX = 'Dias de Operação';
+        tituloEixoY = 'Custo Diário (R$)';
+    }
+
     const trace1 = {
-        x: dias,
-        y: custosSemIot,
+        x: xLabels,
+        y: semIotFinal,
         mode: 'lines+markers',
         name: 'Sem IoT (Corretiva)',
         line: {color: '#64748b', width: 2},
@@ -125,8 +171,8 @@
     };
 
     const trace2 = {
-        x: dias,
-        y: custosComIot,
+        x: xLabels,
+        y: comIotFinal,
         mode: 'lines+markers',
         name: 'Com IoT (Preditiva)',
         line: {color: '#81358D', width: 3},
@@ -140,11 +186,11 @@
         margin: { l: 50, r: 20, t: 10, b: 40 },
         legend: { orientation: 'h', y: -0.25, x: 0.1 },
         xaxis: { 
-            title: 'Dias de Operação',
+            title: tituloEixoX,
             gridcolor: '#EFE4F3'
         },
         yaxis: { 
-            title: 'Custo Diário (R$)', 
+            title: tituloEixoY, 
             rangemode: 'tozero',
             gridcolor: '#EFE4F3'
         }
