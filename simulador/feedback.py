@@ -10,9 +10,7 @@ WHATSAPP_BZU = "5581992259287"
 EMAIL_BZU = "bzu@bzutech.com"
 
 # o investimento é uma faixa de mercado para o tipo de empresa e conta só os sensores: o resto a Bzu define na proposta
-ESCOPO = ("O investimento é uma estimativa de mercado para o seu tipo de empresa, em faixa, e considera só os sensores. "
-          "Não é preço da Bzu. Gateways, a plataforma (BZU Cloud) e o diagnóstico não entram nesta conta: "
-          "a Bzu define o valor final e esses itens na proposta.")
+ESCOPO = ("")
 
 
 # vale para todos os setores: o ganho de medir o tempo todo, sem depender de rondas e anotações
