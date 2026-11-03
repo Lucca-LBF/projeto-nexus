@@ -66,8 +66,16 @@ def _layout(fig, titulo, eixo_x=None, eixo_y=None, hovermode='x unified'):
 
 
 def _agrupar(valores, tamanho_bloco):
-    """Soma os valores em blocos de N dias (ex: 7 para semanas, 15 para quinzenas, 30 para meses)."""
-    return [sum(valores[i:i + tamanho_bloco]) for i in range(0, len(valores), tamanho_bloco)]
+    """Soma os valores em blocos, aplicando escalonamento proporcional no último bloco se for incompleto."""
+    resultado = []
+    for i in range(0, len(valores), tamanho_bloco):
+        chunk = valores[i:i + tamanho_bloco]
+        soma = sum(chunk)
+        if 0 < len(chunk) < tamanho_bloco:
+            soma = soma * (tamanho_bloco / len(chunk))
+            
+        resultado.append(soma)
+    return resultado
 
 
 def _figura_linha(simulacao, rotulos):

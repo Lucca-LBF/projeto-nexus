@@ -116,11 +116,17 @@
     const custosComIot = {{ dados_grafico_com_iot|safe }};
     const n = Math.min(dias.length, custosSemIot.length, custosComIot.length);
 
-    function agruparBlocos(arr, tamanho) {
+function agruparBlocos(arr, tamanho) {
         let res = [];
         for (let i = 0; i < arr.length; i += tamanho) {
             let chunk = arr.slice(i, i + tamanho);
             let soma = chunk.reduce((a, b) => a + b, 0);
+            
+
+            if (chunk.length > 0 && chunk.length < tamanho) {
+                soma = soma * (tamanho / chunk.length);
+            }
+            
             res.push(soma);
         }
         return res;
