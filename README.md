@@ -198,15 +198,27 @@ O arquivo `simulador/feedback.py` monta tudo o que a empresa lê junto com o nú
 * **Seus sensores atuais** (`montar_sensores_atuais`): para quem já tem sensores, mostra quanto já está sendo evitado, quanto ainda dá para ganhar ampliando e sugere ampliar a cobertura.
 * **Personalização**: usa as respostas de prioridade, acompanhamento atual e conexão do local para sugerir por onde começar, o que monitorar e qual conexão usar (Wi-Fi, LoRa ou LTE), além de um caso de referência do segmento.
 * **Como calculamos** (`explicar_calculo`): o passo a passo da conta em frases, com os números da própria simulação.
-* **Contato com a Bzu**: link do WhatsApp com a mensagem de diagnóstico já preenchida (só segmento, quantidade e ROI, sem dado pessoal), e-mail e site.
+* **Contato com a Bzu**: link do WhatsApp com a mensagem de diagnóstico já preenchida (só segmento, quantidade e ROI, sem dado pessoal), e-mail e site. O botão "Pedir diagnóstico" fica sempre visível no resultado, no dashboard e no relatório. O resultado aparece sem pedir nome nem e-mail.
+* **Por mês** (`montar_por_mes`): o custo dos sensores no simulador é mensal (pontos × custo por ponto), e não um investimento único, por isso não existe um "mês do payback". O bloco mostra a economia por mês (separada entre paradas ou perdas evitadas e conserto de emergência), o custo dos sensores por mês com a faixa de mercado e o que sobra (ou o que falta) por mês, além dos mesmos valores por ponto.
+* **Fontes dos números** (`fontes_reducao` e `REDUCAO_REFERENCIAS` em segmentos.py): para cada setor, a faixa de redução de perdas encontrada nos estudos, o nível de confiança (alta, média ou baixa, em que baixa quer dizer premissa do grupo), o resumo da evidência e os links. Também lista as fontes de preço usadas na faixa de investimento.
+* **Economia em faixa** (`faixa_economia`): além do valor simulado, mostra a economia se a redução de perdas ficar nos extremos da faixa dos estudos. O lucro e o ROI continuam usando o percentual do simulador.
+* **Custo de esperar**: quanto a empresa deixa de evitar a cada mês sem monitoramento (antes de descontar os sensores).
 
 ## Dashboard de Custos
-O arquivo `dashboard/views.py` monta o dashboard a partir da simulação guardada na sessão (e não mais do banco de dados) e gera os gráficos com a biblioteca **Plotly**.
-* **Indicadores**: resultado líquido com ROI, economia evitada por mês, horas de parada evitadas (segmentos de `paradas`), economia mensal por ponto, quanto já é evitado com os sensores atuais (quando existem) e redução efetiva de perdas. Quando o resultado é negativo, o dashboard não mostra valor negativo nem vermelho: mostra o "Potencial de economia", a redução necessária para os sensores se pagarem e o lucro estimado no mínimo da faixa de investimento. Também mostra o "Investimento estimado" em faixa.
-* **Projeção de custos**: gráfico de linhas "Sem IoT" e "Com IoT". Até 30 dias o eixo é diário, e acima disso é mensal.
-* **Economia por redução de perdas**: mostra como a economia muda se a redução real for maior ou menor que a premissa, com uma marca no ponto de equilíbrio (a redução mínima para os sensores se pagarem). A linha do investimento não é desenhada.
-* **Comparativo do período**: barras com o custo sem IoT e o custo com IoT.
-* **Dados informados e premissas de referência** usadas na simulação.
+
+O dashboard (`/dashboard/`) mostra a simulação na ordem em que um gestor lê, sempre com termos positivos e sem número negativo:
+
+* **Topo**: abas Resultado e Dashboard, com "Baixar relatório (PDF)" e "Editar dados" como links simples.
+* **Veredito**: a conclusão numa frase ("Os sensores se pagam e sobram cerca de R$ X por mês" ou "A economia já cobre X% do custo dos sensores. Veja como chegar a 100%"), com o botão "Pedir diagnóstico" ao lado. Quando a economia ainda está abaixo do custo, uma barra mostra quanto do custo ela já cobre.
+* **Quatro números**: perdas hoje por mês, economia por mês (separada entre paradas ou perdas evitadas e conserto), custo dos sensores por mês (com a faixa de mercado) e "Sobra por mês" ou "Para cobrir 100%".
+* **Caminhos para chegar a 100%** (só quando a economia ainda está abaixo do custo): a redução de perdas que cobre o custo (ou o valor da hora parada, se nem 100% de redução bastaria), o efeito do custo no mínimo da faixa e um piloto nos pontos com maior perda.
+* **Mês a mês** (semana a semana até 60 dias): barras com a economia de cada período e uma marca tracejada com o custo dos sensores no mesmo período. Nada é multiplicado: sobras de poucos dias entram no último período.
+* **Três cenários**: cauteloso, premissa do simulador e otimista, pela faixa de redução encontrada nos estudos do setor, com a sobra por mês (ou quanto do custo a economia cobre) em cada um.
+* **Régua do equilíbrio**: a faixa dos estudos, o valor usado pelo simulador e o ponto em que a economia cobre o custo.
+* **Detalhes**: horas de parada evitadas (ou a redução usada), economia e custo por ponto e economia no período com a faixa dos estudos.
+* **Seções recolhidas**: "Como calculamos", "Fontes dos números" e "Dados informados", e uma faixa final com o "Pedir diagnóstico".
+
+O dashboard roda a simulação de novo com a mesma semente (como o relatório), então os números são os mesmos do resultado. Os gráficos são feitos em HTML e CSS com a paleta da Bzu; os gráficos em Plotly continuam no relatório.
 
 ## Tecnologias e Bibliotecas Utilizadas
 - **Django:** Framework web para as views, formulários, sessão e banco de dados (SQLite).

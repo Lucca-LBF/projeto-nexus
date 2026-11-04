@@ -41,12 +41,13 @@ def relatorio(request):
 
     # roda de novo a simulação (mesma semente): garante totais e séries atualizados e o texto do resultado
     resultado = _calcular(salvo)
+    request.session[CHAVE_SESSAO] = salvo
     segmento = SEGMENTOS.get(salvo.get('tipo_industria'), SEGMENTOS['padrao'])
     rotulos = dash.ROTULOS[segmento['modelo']]
 
     liquido = salvo.get('resultado_liquido', 0)
     figuras = {
-        'linha': dash._figura_linha(salvo, rotulos),
+        'linha': dash._figura_linha(salvo, rotulos, com_menu=False),
         'barras': dash._figura_barras(salvo, rotulos),
         'equilibrio': dash._figura_sensibilidade(salvo, segmento),
     }
@@ -72,6 +73,10 @@ def relatorio(request):
         'roi_titulo': resultado['roi_titulo'],
         'roi': resultado['roi'],
         'roi_nota': resultado['roi_nota'],
+        'fontes': resultado['fontes'],
+        'por_mes': resultado['por_mes'],
+        'economia_faixa': resultado.get('economia_faixa'),
+        'link_diagnostico': resultado['link_diagnostico'],
         'imprimir': request.GET.get('imprimir') == '1',
     }
     return render(request, 'dashboard/relatorio.html', contexto)

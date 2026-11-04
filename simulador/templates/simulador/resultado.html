@@ -33,7 +33,12 @@
                 </div>
                 {% endfor %}
 
-                <a href="{% url 'relatorio' %}?imprimir=1" id="baixar-relatorio" class="btn btn-primary w-100 mt-2 fw-bold">
+                <a href="{{ link_diagnostico }}" target="_blank" rel="noopener" class="btn btn-primary w-100 mt-2 fw-bold">
+                    Pedir diagnóstico
+                </a>
+                <p class="small text-muted mt-1 mb-2 relatorio-dica">Abre o WhatsApp da Bzu com a sua simulação resumida.</p>
+
+                <a href="{% url 'relatorio' %}?imprimir=1" id="baixar-relatorio" class="btn btn-outline-info w-100 mt-2 fw-bold">
                     Baixar relatório completo (PDF)
                 </a>
                 <p class="small text-muted mt-1 mb-0 relatorio-dica">Inclui resultado e dashboard. Na janela que abrir, escolha "Salvar como PDF".</p>
@@ -56,6 +61,7 @@
                         {{ titulo_resultado }}
                         </h6>
                         <h3 class="{{ cor_economia }} mb-0 fw-bold">{{ economia_mensal }}</h3>
+                        {% if economia_faixa %}<p class="small text-muted mt-2 mb-0">Economia: {{ economia_faixa }}</p>{% endif %}
                     </div>
                 </div>
             </div>
@@ -75,12 +81,14 @@
             <div class="card-body">
                 <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.85rem;">Investimento estimado (só sensores)</h6>
                 <h4 class="mb-1 fw-bold">{{ investimento_faixa }}</h4>
-                <p class="small text-muted mb-0">Estimativa de mercado para o seu setor, não é preço da Bzu. O lucro e o ROI usam o valor central da faixa ({{ investimento_central }}).</p>
+                <p class="small text-muted mb-0">Estimativa de mercado para o seu setor: o valor final vem na proposta da Bzu. O lucro e o ROI usam o valor central da faixa ({{ investimento_central }}).</p>
             </div>
         </div>
         {% endif %}
 
-        <p class="small text-muted mb-4">{{ feedback.escopo }}</p>
+        {% include 'simulador/_por_mes.html' %}
+
+        <p class="small text-muted mb-4">Estimativa indicativa: o diagnóstico da Bzu confirma os números no seu cenário.</p>
 
         {% include 'simulador/_sensores_atuais.html' %}
 
@@ -118,6 +126,13 @@
             </div>
         </details>
 
+        <details class="card shadow-sm border-0 mt-4">
+            <summary class="card-body fw-bold text-info" style="cursor: pointer;">Fontes dos números</summary>
+            <div class="card-body pt-0">
+                {% include 'simulador/_fontes.html' %}
+            </div>
+        </details>
+
         {% include 'simulador/_feedback.html' %}
     </div>
 </div>
@@ -131,20 +146,32 @@
     const custosComIot = {{ dados_grafico_com_iot|safe }};
     const n = Math.min(dias.length, custosSemIot.length, custosComIot.length);
 
-function agruparBlocos(arr, tamanho) {
-        let res = [];
-        for (let i = 0; i < arr.length; i += tamanho) {
-            let chunk = arr.slice(i, i + tamanho);
-            let soma = chunk.reduce((a, b) => a + b, 0);
-            
-
-            if (chunk.length > 0 && chunk.length < tamanho) {
-                soma = soma * (tamanho / chunk.length);
-            }
-            
-            res.push(soma);
+function blocos(qtd, tamanho) {
+        // intervalos de cada bloco; poucos dias no fim (menos da metade de um bloco) entram no bloco anterior,
+        // mais que isso viram um bloco parcial. Nada é multiplicado: o total do gráfico é o total do período.
+        const res = [];
+        for (let i = 0; i < qtd; i += tamanho) res.push([i, Math.min(i + tamanho, qtd)]);
+        const sobra = qtd % tamanho;
+        if (tamanho > 1 && sobra && res.length > 1 && sobra < tamanho / 2) {
+            const inicio = res[res.length - 2][0];
+            res.splice(res.length - 2, 2, [inicio, qtd]);
         }
         return res;
+    }
+
+    function agruparBlocos(arr, tamanho) {
+        return blocos(arr.length, tamanho).map(([a, b]) => arr.slice(a, b).reduce((x, y) => x + y, 0));
+    }
+
+    function rotulosBlocos(qtd, tamanho, nome) {
+        return blocos(n, tamanho).map(([a, b], i) => {
+            const dias = b - a;
+            let rotulo = `${nome} ${i + 1}`;
+            if (tamanho > 1 && dias !== tamanho) {
+                rotulo += dias > tamanho ? ` (${dias} dias)` : ` (parcial, ${dias} dia${dias > 1 ? 's' : ''})`;
+            }
+            return rotulo;
+        });
     }
 
     function desenharGrafico(tamanhoBloco) {
@@ -157,19 +184,19 @@ function agruparBlocos(arr, tamanho) {
         if (tamanhoBloco === 30) {
             semIotFinal = agruparBlocos(custosSemIot, 30);
             comIotFinal = agruparBlocos(custosComIot, 30);
-            xLabels = semIotFinal.map((_, i) => `Mês ${i + 1}`);
+            xLabels = rotulosBlocos(semIotFinal.length, 30, 'Mês');
             tituloEixoX = 'Período (Meses)';
             tituloEixoY = 'Custo Mensal (R$)';
         } else if (tamanhoBloco === 15) {
             semIotFinal = agruparBlocos(custosSemIot, 15);
             comIotFinal = agruparBlocos(custosComIot, 15);
-            xLabels = semIotFinal.map((_, i) => `Quinzena ${i + 1}`);
+            xLabels = rotulosBlocos(semIotFinal.length, 15, 'Quinzena');
             tituloEixoX = 'Período (Quinzenas)';
             tituloEixoY = 'Custo Quinzenal (R$)';
         } else if (tamanhoBloco === 7) {
             semIotFinal = agruparBlocos(custosSemIot, 7);
             comIotFinal = agruparBlocos(custosComIot, 7);
-            xLabels = semIotFinal.map((_, i) => `Semana ${i + 1}`);
+            xLabels = rotulosBlocos(semIotFinal.length, 7, 'Semana');
             tituloEixoX = 'Período (Semanas)';
             tituloEixoY = 'Custo Semanal (R$)';
         } else {

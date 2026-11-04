@@ -1,11 +1,11 @@
 import math
 from django.shortcuts import redirect, render
 import plotly.graph_objects as go
-import plotly.io as pio
 
-from simulador.feedback import faixa_investimento, moeda_inteira, montar_sensores_atuais
+from simulador.feedback import (faixa_investimento, moeda_estimada, moeda_inteira, montar_sensores_atuais,
+                                NIVEL_EVIDENCIA)
 from simulador.segmentos import ACOMPANHAMENTO_RESUMO, SEGMENTOS
-from simulador.views import _regime
+from simulador.views import _calcular, _regime
 
 CHAVE_SESSAO = 'simulacao'
 DIAS_POR_MES = 30
@@ -65,20 +65,55 @@ def _layout(fig, titulo, eixo_x=None, eixo_y=None, hovermode='x unified'):
     fig.update_yaxes(tickprefix='R$ ', tickformat=',.0f')
 
 
+# escalas do gráfico de linha: (dias por bloco, nome do bloco, unidade no título)
+ESCALAS = [(1, 'Dia', 'diária'), (7, 'Semana', 'semanal'), (15, 'Quinzena', 'quinzenal'), (30, 'Mês', 'mensal')]
+
+
+def escala_padrao(n):
+    """Escala inicial do gráfico pelo tamanho do período (a mesma regra da tela de resultado)."""
+    if n >= 360:
+        return 30
+    if n >= 180:
+        return 15
+    if n >= 120:
+        return 7
+    return 1
+
+
+def _blocos(n, tamanho_bloco):
+    """Intervalos de dias de cada bloco do gráfico: [(início, fim), ...].
+
+    Quando sobram poucos dias no fim (menos da metade de um bloco), eles entram no bloco anterior, para o
+    gráfico não terminar numa queda falsa; quando sobram mais, viram um bloco parcial. Nunca se multiplica
+    nada: o total do gráfico é sempre o total do período."""
+    blocos = [(i, min(i + tamanho_bloco, n)) for i in range(0, n, tamanho_bloco)]
+    sobra = n % tamanho_bloco
+    if tamanho_bloco > 1 and sobra and len(blocos) > 1 and sobra < tamanho_bloco / 2:
+        inicio = blocos[-2][0]
+        blocos = blocos[:-2] + [(inicio, n)]
+    return blocos
+
+
 def _agrupar(valores, tamanho_bloco):
-    """Soma os valores em blocos, aplicando escalonamento proporcional no último bloco se for incompleto."""
-    resultado = []
-    for i in range(0, len(valores), tamanho_bloco):
-        chunk = valores[i:i + tamanho_bloco]
-        soma = sum(chunk)
-        if 0 < len(chunk) < tamanho_bloco:
-            soma = soma * (tamanho_bloco / len(chunk))
-            
-        resultado.append(soma)
-    return resultado
+    """Soma os valores em blocos (veja _blocos)."""
+    return [sum(valores[a:b]) for a, b in _blocos(len(valores), tamanho_bloco)]
 
 
-def _figura_linha(simulacao, rotulos):
+def _rotulos_blocos(n, tamanho_bloco, nome):
+    """'Semana 1', 'Semana 2', ... com o último marcado quando não tem o tamanho normal."""
+    rotulos = []
+    for i, (a, b) in enumerate(_blocos(n, tamanho_bloco), start=1):
+        dias = b - a
+        rotulo = f'{nome} {i}'
+        if tamanho_bloco > 1 and dias != tamanho_bloco:
+            rotulo += f' ({dias} dias)' if dias > tamanho_bloco else f' (parcial, {dias} dia{"s" if dias > 1 else ""})'
+        rotulos.append(rotulo)
+    return rotulos
+
+
+def _figura_linha(simulacao, rotulos, com_menu=True):
+    """Custos com e sem IoT ao longo do período. Com menu, dá para trocar a escala (dia, semana, quinzena, mês)
+    a partir de 90 dias, como na tela de resultado."""
     dias = simulacao.get('dados_grafico_dias', [])
     sem_iot = simulacao.get('dados_grafico_sem_iot', [])
     com_iot = simulacao.get('dados_grafico_com_iot', [])
@@ -86,42 +121,40 @@ def _figura_linha(simulacao, rotulos):
     n = min(len(dias), len(sem_iot), len(com_iot))
     if n == 0:
         return None
-    dias, sem_iot, com_iot = dias[:n], sem_iot[:n], com_iot[:n]
+    sem_iot, com_iot = sem_iot[:n], com_iot[:n]
 
-   
-    if n >= 360:  
-        bloco = 30
-        sem_iot = _agrupar(sem_iot, bloco)
-        com_iot = _agrupar(com_iot, bloco)
-        eixo_x = [f'Mês {i}' for i in range(1, len(sem_iot) + 1)]
-        unidade = 'mensal'
-    elif n >= 180: 
-        bloco = 15
-        sem_iot = _agrupar(sem_iot, bloco)
-        com_iot = _agrupar(com_iot, bloco)
-        eixo_x = [f'Quinzena {i}' for i in range(1, len(sem_iot) + 1)]
-        unidade = 'quinzenal'
-    elif n >= 120:  
-        bloco = 7
-        sem_iot = _agrupar(sem_iot, bloco)
-        com_iot = _agrupar(com_iot, bloco)
-        eixo_x = [f'Semana {i}' for i in range(1, len(sem_iot) + 1)]
-        unidade = 'semanal'
-    else:  
-        eixo_x = [f'Dia {d}' for d in dias]
-        unidade = 'diária'
+    padrao = escala_padrao(n)
+    escalas = ESCALAS if (com_menu and n >= 90) else [e for e in ESCALAS if e[0] == padrao]
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=eixo_x, y=sem_iot, mode='lines+markers', name=rotulos['sem_iot'],
-        line=dict(color=COR_SEM_IOT, width=3), marker=dict(size=6),
-    ))
-    fig.add_trace(go.Scatter(
-        x=eixo_x, y=com_iot, mode='lines+markers', name=rotulos['com_iot'],
-        line=dict(color=COR_COM_IOT, width=3), marker=dict(size=6),
-    ))
-    _layout(fig, f"Projeção {unidade} de {rotulos['titulo']}", 'Período de análise', rotulos['eixo_y'])
+    botoes = []
+    for indice, (bloco, nome, unidade) in enumerate(escalas):
+        eixo_x = _rotulos_blocos(n, bloco, nome)
+        visivel = bloco == padrao
+        fig.add_trace(go.Scatter(
+            x=eixo_x, y=_agrupar(sem_iot, bloco), mode='lines+markers', name=rotulos['sem_iot'],
+            line=dict(color=COR_SEM_IOT, width=3), marker=dict(size=6), visible=visivel,
+        ))
+        fig.add_trace(go.Scatter(
+            x=eixo_x, y=_agrupar(com_iot, bloco), mode='lines+markers', name=rotulos['com_iot'],
+            line=dict(color=COR_COM_IOT, width=3), marker=dict(size=6), visible=visivel,
+        ))
+        mascara = [False] * (2 * len(escalas))
+        mascara[2 * indice] = mascara[2 * indice + 1] = True
+        botoes.append(dict(label=nome, method='update',
+                           args=[{'visible': mascara}, {'title.text': f"Projeção {unidade} de {rotulos['titulo']}"}]))
+
+    unidade_padrao = next(u for b, _, u in escalas if b == padrao)
+    _layout(fig, f"Projeção {unidade_padrao} de {rotulos['titulo']}", 'Período de análise', rotulos['eixo_y'])
     fig.update_yaxes(rangemode='tozero')
+    if len(escalas) > 1:
+        fig.update_layout(updatemenus=[dict(
+            type='buttons', direction='right', buttons=botoes, showactive=True,
+            active=[b for b, _, _ in escalas].index(padrao),
+            x=0, xanchor='left', y=1.02, yanchor='bottom', pad=dict(r=4, t=0),
+            bgcolor='#ffffff', bordercolor='#d1d5db', font=dict(size=12),
+        )])
+        fig.update_layout(margin=dict(t=110), title=dict(y=0.97, yanchor='top'))
     return fig
 
 
@@ -164,6 +197,15 @@ def _figura_sensibilidade(simulacao, segmento):
         marker=dict(size=12, symbol='diamond', color=COR_REFERENCIA, line=dict(width=2, color='white')),
         hovertemplate=f'Premissa de {_pct(referencia, 0)}<extra></extra>',
     ))
+    # faixa de redução encontrada nos estudos do setor (veja "Fontes dos números")
+    ref = segmento.get('reducao_ref')
+    if ref:
+        minimo, maximo = ref['faixa']
+        fig.add_vrect(
+            x0=minimo, x1=min(maximo, limite), fillcolor=COR_REFERENCIA, opacity=0.10, line_width=0,
+            annotation_text='Faixa dos estudos', annotation_position='bottom right',
+            annotation_font=dict(size=11, color='#92400e'),
+        )
     if equilibrio <= limite:
         fig.add_vline(
             x=equilibrio, line_dash='dash', line_color='#6b7280',
@@ -178,21 +220,45 @@ def _figura_sensibilidade(simulacao, segmento):
 
 
 def _figura_barras(simulacao, rotulos):
-    total_sem = simulacao.get('total_sem_iot', 0)
-    if total_sem <= 0:
+    """Por mês: a economia evitada (separada por origem) ao lado do custo dos sensores.
+
+    Substitui o comparativo de totais do período, que repetia os números dos cards."""
+    custo = simulacao.get('custo_mensal', 0)
+    economia = simulacao.get('economia_mensal', 0)
+    if custo <= 0 or simulacao.get('total_sem_iot', 0) <= 0:
         return None
 
-    nomes = [rotulos['sem_iot'], rotulos['com_iot']]
-    valores = [total_sem, simulacao.get('total_com_iot', 0)]
+    meses = simulacao.get('tempo_amostra', 30) / DIAS_POR_MES
+    conserto = simulacao.get('economia_conserto_nova', 0) / meses if meses > 0 else 0
+    principal = max(economia - conserto, 0)
+    nome_principal = 'Paradas evitadas' if rotulos is ROTULOS['paradas'] else 'Perdas evitadas'
+    colunas = ['Economia por mês', 'Custo dos sensores por mês']
 
-    fig = go.Figure(go.Bar(
-        x=nomes, y=valores,
-        marker_color=[COR_SEM_IOT, COR_COM_IOT],
-        text=[_brl(v, 0) for v in valores], textposition='outside', cliponaxis=False,
-        hovertemplate='%{x}<br>R$ %{y:,.2f}<extra></extra>',
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=colunas[:1], y=[principal], name=nome_principal, marker_color=COR_COM_IOT,
+        hovertemplate=nome_principal + ': R$ %{y:,.2f}<extra></extra>',
     ))
-    _layout(fig, 'Comparativo do período', None, 'Valor no período (R$)', hovermode='closest')
-    fig.update_layout(showlegend=False)
+    if conserto > 0:
+        fig.add_trace(go.Bar(
+            x=colunas[:1], y=[conserto], name='Conserto de emergência evitado', marker_color='#86efac',
+            hovertemplate='Conserto evitado: R$ %{y:,.2f}<extra></extra>',
+        ))
+    minimo, maximo = simulacao.get('custo_mensal_min', custo), simulacao.get('custo_mensal_max', custo)
+    fig.add_trace(go.Bar(
+        x=colunas[1:], y=[custo], name='Custo dos sensores (valor central)', marker_color=COR_SEM_IOT,
+        error_y=dict(type='data', symmetric=False, array=[maximo - custo], arrayminus=[custo - minimo],
+                     color='#334155', thickness=1.5, width=10),
+        hovertemplate=(f'Custo central: R$ %{{y:,.2f}}<br>Faixa: {_brl(minimo, 0)} a {_brl(maximo, 0)}'
+                       '<extra></extra>'),
+    ))
+    _layout(fig, 'Economia e custo dos sensores por mês', None, 'R$ por mês', hovermode='closest')
+    fig.update_layout(barmode='stack', legend=dict(orientation='h', yanchor='top', y=-0.12, xanchor='left', x=0),
+                      margin=dict(b=110))
+    # o valor de cada coluna escrito em cima, para ler mesmo quando uma barra é muito menor que a outra
+    for coluna, valor, topo in ((colunas[0], economia, economia), (colunas[1], custo, maximo)):
+        fig.add_annotation(x=coluna, y=topo, text=_brl(valor, 2 if valor < 1000 else 0), showarrow=False,
+                           yshift=12, font=dict(size=12, color='#111827'))
     fig.update_yaxes(rangemode='tozero')
     return fig
 
@@ -222,7 +288,8 @@ def _indicadores(simulacao, segmento):
         kpis.append({
             'titulo': f'Potencial de economia ({dias} dias)',
             'valor': _brl(economia),
-            'detalhe': 'Estimativa. Pelo valor central do investimento, ainda não cobre os sensores.',
+            'detalhe': (f'Estimativa. Já cobre {_pct_curto(economia / investimento * 100)} do custo dos sensores.'
+                        if investimento > 0 else 'Estimativa'),
             'classe': 'text-info',
         })
         if total_sem > 0 and investimento > 0:
@@ -260,7 +327,7 @@ def _indicadores(simulacao, segmento):
         kpis.append({
             'titulo': 'Investimento estimado',
             'valor': faixa_investimento(simulacao['investimento_min'], simulacao['investimento_max'], curta=True),
-            'detalhe': 'Só sensores, estimativa de mercado para o seu setor (não é preço da Bzu)',
+            'detalhe': 'Só sensores, estimativa de mercado para o seu setor. O valor final vem na proposta da Bzu.',
             'classe': '',
         })
 
@@ -271,6 +338,18 @@ def _indicadores(simulacao, segmento):
         'detalhe': f'{_brl(economia)} no período',
         'classe': '',
     })
+
+    # o custo dos sensores é mensal: o saldo de cada mês diz se compensa (sem número negativo)
+    custo_mensal = simulacao.get('custo_mensal', investimento / meses if meses else 0)
+    if custo_mensal > 0:
+        saldo = economia_mensal - custo_mensal
+        kpis.append({
+            'titulo': 'Sobra por mês' if saldo >= 0 else 'Para cobrir 100%',
+            'valor': _brl(saldo) if saldo >= 0 else f'+ {_brl(-saldo)}',
+            'detalhe': (f'Depois de pagar os sensores ({_brl(custo_mensal)} por mês)' if saldo >= 0
+                        else f'De economia por mês para cobrir os sensores ({_brl(custo_mensal)} por mês)'),
+            'classe': 'text-success' if saldo >= 0 else 'text-info',
+        })
 
     custo_hora = simulacao.get('custo_hora_parada', 0)
     if segmento['modelo'] == 'paradas' and custo_hora > 0:
@@ -288,7 +367,7 @@ def _indicadores(simulacao, segmento):
         kpis.append({
             'titulo': 'Economia mensal por ponto',
             'valor': _brl(por_ponto),
-            'detalhe': 'Média por ponto que ainda será monitorado',
+            'detalhe': f"Custo dos sensores: {_brl(segmento['custo_ponto'], 0)} por ponto por mês",
             'classe': 'text-success' if por_ponto >= segmento['custo_ponto'] else 'text-info',
         })
 
@@ -345,47 +424,272 @@ def _entradas_e_referencias(simulacao, segmento):
     return entradas, referencias
 
 
+# ---------------------------------------------------------------------------------------------
+# Painel do dashboard: veredito, quatro números, mês a mês, cenários e régua do equilíbrio.
+# Tudo em texto positivo e sem número negativo; os valores vêm da própria simulação.
+# ---------------------------------------------------------------------------------------------
+
+ALTURA_GRAFICO = 220  # px
+
+
+def _pct_curto(valor):
+    """9.6 -> '9,6%'; 44.7 -> '45%'; 0.2 -> '0,2%'."""
+    return f"{_num(valor, 1 if valor < 10 else 0)}%"
+
+
+def _moeda_curta(valor):
+    """Valor arredondado sem centavos a partir de R$ 100 (abaixo disso mostra os centavos)."""
+    return moeda_inteira(valor) if abs(valor) >= 100 else moeda_estimada(valor)
+
+
+def _css(valor):
+    """Número para CSS com ponto decimal: o template localizado escreveria '30,0', que o navegador ignora."""
+    return f"{valor:.1f}"
+
+
+def _moeda_eixo(valor):
+    """Rótulo curto do eixo: 'R$ 18 mil' ou 'R$ 4.500'."""
+    if valor >= 10_000:
+        return f"R$ {_num(valor / 1000, 0 if valor % 1000 == 0 else 1)} mil"
+    return f"R$ {_num(valor, 0 if valor >= 10 else 2)}"
+
+
+def _grafico_periodos(simulacao):
+    """Economia de cada mês (ou semana, em simulações curtas) com a marca do custo dos sensores no mesmo período."""
+    sem = simulacao.get('dados_grafico_sem_iot', [])
+    com = simulacao.get('dados_grafico_com_iot', [])
+    n = min(len(sem), len(com))
+    custo_dia = simulacao.get('custo_mensal', 0) / DIAS_POR_MES
+    if n == 0 or custo_dia <= 0:
+        return None
+    bloco, nome = (DIAS_POR_MES, 'Mês') if n > 60 else (7, 'Semana')
+    rotulos = _rotulos_blocos(n, bloco, nome)
+    economias = [sum(sem[a:b]) - sum(com[a:b]) for a, b in _blocos(n, bloco)]
+    custos = [custo_dia * (b - a) for a, b in _blocos(n, bloco)]
+    # eixo com valores redondos: três degraus iguais (por exemplo R$ 8 mil, R$ 16 mil, R$ 24 mil)
+    maior = max(max(economias), max(custos)) * 1.08 or 1
+    degrau_bruto = maior / 3
+    potencia = 10 ** math.floor(math.log10(degrau_bruto))
+    degrau = next(m * potencia for m in (1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10) if m * potencia >= degrau_bruto)
+    escala = degrau * 3
+    itens = []
+    for rotulo, economia, custo in zip(rotulos, economias, custos):
+        itens.append({
+            'rotulo': rotulo,
+            'altura': max(round(max(economia, 0) / escala * ALTURA_GRAFICO), 2),
+            'marca': round(custo / escala * ALTURA_GRAFICO),
+            'descricao': f"{rotulo}: economia de {moeda_estimada(max(economia, 0))}, custo dos sensores de {moeda_estimada(custo)}",
+        })
+    cobre_todos = all(e >= c for e, c in zip(economias, custos))
+    periodo = 'mês' if bloco == DIAS_POR_MES else 'semana'
+    if cobre_todos:
+        legenda = "Em todos os períodos a economia passa da marca do custo dos sensores."
+    else:
+        legenda = "Cada barra é a economia do período. A marca tracejada é a meta: o custo dos sensores no mesmo período."
+    return {
+        'titulo': f"{'Mês a mês' if bloco == DIAS_POR_MES else 'Semana a semana'}: economia e custo dos sensores",
+        'itens': itens,
+        'colunas': len(itens),
+        'eixo': [_moeda_eixo(degrau * k) for k in (3, 2, 1)] + ['R$ 0'],
+        'altura': ALTURA_GRAFICO,
+        'legenda_custo': (f"Custo dos sensores por {periodo}" if cobre_todos else f"Meta: custo dos sensores por {periodo}"),
+        'legenda': legenda,
+    }
+
+
+def _cenarios(simulacao, segmento):
+    """Três cenários pela faixa de redução dos estudos: cauteloso, premissa do simulador e otimista."""
+    ref = segmento.get('reducao_ref')
+    reducao = segmento['reducao_iot']
+    economia = simulacao.get('economia_mensal', 0)
+    custo = simulacao.get('custo_mensal', 0)
+    if not ref or reducao <= 0 or economia <= 0 or custo <= 0:
+        return None
+    minimo, maximo = ref['faixa']
+    premissa = round(reducao * 100)
+    base = [('Cauteloso', minimo, f'{minimo}% de redução', 'O menor valor encontrado nos estudos', False),
+            ('Premissa do simulador', premissa, f'{premissa}%', 'O valor usado no resultado', True),
+            ('Otimista', maximo, f'{maximo}% de redução', 'O maior valor encontrado nos estudos', False)]
+    # a economia cresce na mesma proporção da redução (mesma conta da faixa de economia)
+    economias = [economia * pct / 100 / reducao for _, pct, _, _, _ in base]
+    escala = max(max(economias), custo)
+    cenarios = []
+    for (nome, pct, rotulo_pct, descricao, destaque), valor_economia in zip(base, economias):
+        saldo = valor_economia - custo
+        cenarios.append({
+            'nome': nome, 'pct': rotulo_pct, 'descricao': descricao, 'destaque': destaque,
+            'rotulo': 'Sobra por mês' if saldo >= 0 else 'Cobre do custo',
+            'valor': _moeda_curta(saldo) if saldo >= 0 else _pct_curto(valor_economia / custo * 100),
+            'economia': _moeda_curta(valor_economia),
+            'largura_economia': round(valor_economia / escala * 100),
+            'largura_custo': round(custo / escala * 100),
+        })
+    return {'lista': cenarios, 'custo': _moeda_curta(custo)}
+
+
+def _regua(simulacao, segmento):
+    """Régua de 0% a 50% (ou 100%): faixa dos estudos, valor do simulador e ponto em que a economia cobre o custo."""
+    ref = segmento.get('reducao_ref')
+    if not ref or simulacao.get('total_sem_iot', 0) <= 0:
+        return None
+    minimo, maximo = ref['faixa']
+    premissa = round(segmento['reducao_iot'] * 100)
+    equilibrio = simulacao.get('equilibrio_pct', 0)
+    no_alcance = 0 < equilibrio < 100
+    limite = 50 if max(maximo, premissa, equilibrio if no_alcance else 0) <= 45 else 100
+    passo = limite // 5
+
+    def pos(valor):
+        return min(valor, limite) / limite * 100
+
+    nivel = NIVEL_EVIDENCIA.get(ref['confianca'], ref['confianca'])
+    if no_alcance:
+        texto = (f"A economia cobre o custo a partir de {_pct_curto(equilibrio)} de redução das perdas. "
+                 f"Os estudos do setor indicam de {minimo}% a {maximo}% ({nivel}).")
+        if equilibrio > premissa:
+            texto += " O diagnóstico mede o potencial real da sua operação."
+    else:
+        alvo = simulacao.get('valor_equilibrio', 0)
+        if alvo > 0:
+            grandeza = 'cada hora parada custa' if segmento['modelo'] == 'paradas' else 'a perda mensal é de'
+            texto = (f"Com os valores informados, a economia cobre o custo quando {grandeza} cerca de "
+                     f"{moeda_inteira(alvo)}. Os estudos do setor indicam de {minimo}% a {maximo}% de redução ({nivel}).")
+        else:
+            texto = (f"Os estudos do setor indicam de {minimo}% a {maximo}% de redução ({nivel}). "
+                     "Vale começar pelos pontos críticos, onde a perda é maior.")
+    return {
+        'texto': texto,
+        'faixa_inicio': _css(pos(minimo)), 'faixa_largura': _css(pos(maximo) - pos(minimo)),
+        'premissa': _css(pos(premissa)), 'premissa_rotulo': f'{premissa}%',
+        'equilibrio': _css(pos(equilibrio)) if no_alcance else None,
+        'equilibrio_rotulo': f'Cobre o custo: {_pct_curto(equilibrio)}' if no_alcance else '',
+        'faixa_rotulo': f'{minimo}% a {maximo}%',
+        'marcas': [f'{v}%' for v in range(0, limite + 1, passo)],
+    }
+
+
+def _caminhos(simulacao, segmento):
+    """Quando a economia ainda está abaixo do custo: o que leva a cobrir 100%."""
+    economia = simulacao.get('economia_mensal', 0)
+    custo_min = simulacao.get('custo_mensal_min', 0)
+    equilibrio = simulacao.get('equilibrio_pct', 0)
+    ref = segmento.get('reducao_ref') or {'faixa': (0, 0)}
+    minimo, maximo = ref['faixa']
+    caminhos = []
+    if 0 < equilibrio < 100:
+        caminhos.append({
+            'titulo': 'Redução de perdas que cobre o custo', 'valor': _pct_curto(equilibrio),
+            'texto': f'Os estudos do setor indicam de {minimo}% a {maximo}%. O diagnóstico mede o potencial real da sua operação.',
+        })
+    elif simulacao.get('valor_equilibrio', 0) > 0:
+        rotulo = 'Valor da hora parada que cobre o custo' if segmento['modelo'] == 'paradas' else 'Perda mensal que cobre o custo'
+        caminhos.append({
+            'titulo': rotulo, 'valor': moeda_inteira(simulacao['valor_equilibrio']),
+            'texto': f"Você informou {moeda_inteira(simulacao.get('valor_informado', 0))}. O diagnóstico confirma o custo real.",
+        })
+    if custo_min > 0 and economia > 0:
+        if economia >= custo_min:
+            texto = f'A economia passa a cobrir o custo, com sobra de cerca de {moeda_estimada(economia - custo_min)} por mês.'
+        else:
+            texto = f'A economia passa a cobrir {_pct_curto(economia / custo_min * 100)} do custo.'
+        caminhos.append({'titulo': 'Com o custo no mínimo da faixa', 'valor': f'{moeda_inteira(custo_min)}/mês',
+                         'texto': texto + ' Uma cotação real confirma esse valor.'})
+    caminhos.append({'titulo': 'Caminho mais realista', 'valor': 'Piloto nos pontos com maior perda',
+                     'texto': 'O diagnóstico mostra onde a perda se concentra e por quais pontos começar.',
+                     'destaque': True})
+    return caminhos
+
+
+def _painel(simulacao, segmento):
+    """Veredito, os quatro números e os detalhes do topo do dashboard."""
+    dias = simulacao.get('tempo_amostra', 30)
+    meses = dias / DIAS_POR_MES
+    unidade_pontos = segmento['rotulo_pontos'][1]
+    meta = f"{segmento['nome']} · {simulacao.get('num_maquinas', 0)} {unidade_pontos.lower()} · {dias} dias"
+    total_sem = simulacao.get('total_sem_iot', 0)
+    economia = simulacao.get('economia_mensal', 0)
+    custo = simulacao.get('custo_mensal', 0)
+    if total_sem <= 0 or custo <= 0:
+        return {'meta': meta, 'sem_perdas': True,
+                'titulo': 'Informe a perda mensal ou o custo da hora parada para ver a sua economia.',
+                'sub': 'Com esse valor, o simulador calcula a economia e o custo dos sensores mês a mês.'}
+
+    saldo = economia - custo
+    cobre = saldo >= 0
+    conserto = simulacao.get('economia_conserto_nova', 0) / meses if meses > 0 else 0
+    principal = 'Paradas evitadas' if segmento['modelo'] == 'paradas' else 'Perdas evitadas'
+    origem = (f"{principal} {moeda_estimada(max(economia - conserto, 0))} · Conserto {moeda_estimada(conserto)}"
+              if conserto > 0 else principal)
+    investimento = simulacao.get('investimento_periodo', 0)
+    economia_periodo = simulacao.get('economia_bruta', 0)
+
+    if cobre:
+        vezes = economia / custo
+        roi = simulacao.get('resultado_liquido', 0) / investimento * 100 if investimento > 0 else 0
+        titulo = f"Os sensores se pagam e sobram cerca de {moeda_inteira(saldo)} por mês."
+        sub = f"A economia estimada é {_num(vezes, 1)} vezes o custo dos sensores. ROI de {_num(roi, 0)}% no período."
+    else:
+        cobertura = economia / custo * 100
+        titulo = f"A economia já cobre {_pct_curto(cobertura)} do custo dos sensores. Veja como chegar a 100%."
+        sub = f"O monitoramento evita cerca de {moeda_estimada(economia_periodo)} em perdas no período."
+
+    detalhes = []
+    custo_hora = simulacao.get('custo_hora_parada', 0)
+    if segmento['modelo'] == 'paradas' and custo_hora > 0:
+        horas = simulacao.get('economia_paradas', economia_periodo) / custo_hora
+        detalhes.append({'titulo': 'Horas de parada evitadas', 'valor': f"{_num(horas, 1)} h", 'nota': f'em {dias} dias'})
+    else:
+        ref = segmento.get('reducao_ref')
+        nota = f"Faixa dos estudos do setor: {ref['faixa'][0]}% a {ref['faixa'][1]}%" if ref else 'Premissa do simulador'
+        detalhes.append({'titulo': 'Redução de perdas usada', 'valor': f"{round(segmento['reducao_iot'] * 100)}%", 'nota': nota})
+    pontos = simulacao.get('pontos_novos', 0)
+    if pontos > 0:
+        detalhes.append({'titulo': 'Por ponto, por mês',
+                         'valor': f"{_moeda_curta(economia / pontos)} × {_moeda_curta(segmento['custo_ponto'])}",
+                         'nota': 'Economia e custo do sensor'})
+    if simulacao.get('economia_max', 0) > 0:
+        detalhes.append({'titulo': 'Economia no período', 'valor': moeda_estimada(economia_periodo),
+                         'nota': (f"Pela faixa dos estudos: {moeda_estimada(simulacao['economia_min'])} a "
+                                  f"{moeda_estimada(simulacao['economia_max'])}")})
+
+    return {
+        'meta': meta, 'sem_perdas': False, 'cobre': cobre, 'titulo': titulo, 'sub': sub,
+        'cobertura': min(round(economia / custo * 100), 100),
+        'perdas': moeda_estimada(total_sem / meses) if meses > 0 else moeda_estimada(total_sem),
+        'economia': moeda_estimada(economia), 'origem': origem,
+        'custo': moeda_estimada(custo),
+        'custo_faixa': f"Faixa de mercado: {faixa_investimento(simulacao.get('custo_mensal_min', 0), simulacao.get('custo_mensal_max', 0), curta=True)}",
+        'saldo_titulo': 'Sobra por mês' if cobre else 'Para cobrir 100%',
+        'saldo': moeda_estimada(saldo) if cobre else f"+ {moeda_estimada(-saldo)}",
+        'saldo_nota': 'Depois de pagar os sensores' if cobre else 'de economia por mês',
+        'detalhes': detalhes,
+    }
+
+
 def dashboard(request):
     simulacao = request.session.get(CHAVE_SESSAO)
     if not simulacao or 'total_sem_iot' not in simulacao:
         return redirect('formulario_simulador')
 
+    # roda de novo a simulação (mesma semente, mesmo resultado): traz os textos do resultado
+    # (como calculamos, fontes) e completa na sessão os valores que versões antigas não guardavam
+    resultado = _calcular(simulacao)
+    request.session[CHAVE_SESSAO] = simulacao
+
     segmento = SEGMENTOS.get(simulacao.get('tipo_industria'), SEGMENTOS['padrao'])
-    rotulos = ROTULOS[segmento['modelo']]
-
-    entradas, referencias = _entradas_e_referencias(simulacao, segmento)
-
-    # a ordem importa: o primeiro gráfico carrega o plotly.js, os outros reaproveitam
-    figuras = {
-        'linha': _figura_linha(simulacao, rotulos),
-        'sensibilidade': _figura_sensibilidade(simulacao, segmento),
-        'barras': _figura_barras(simulacao, rotulos),
-    }
-    graficos = {}
-    incluir_js = True
-    for chave, fig in figuras.items():
-        if fig is None:
-            graficos[chave] = None
-            continue
-        graficos[chave] = pio.to_html(
-            fig, full_html=False,
-            include_plotlyjs='cdn' if incluir_js else False,
-            config=CONFIG_PLOTLY,
-        )
-        incluir_js = False
+    entradas, _ = _entradas_e_referencias(simulacao, segmento)
+    painel = _painel(simulacao, segmento)
 
     contexto = {
-        'segmento_nome': segmento['nome'],
-        'dias': simulacao.get('tempo_amostra', 30),
-        'sem_perdas': simulacao.get('total_sem_iot', 0) <= 0,
-        'kpis': _indicadores(simulacao, segmento),
+        'painel': painel,
+        'grafico': None if painel['sem_perdas'] else _grafico_periodos(simulacao),
+        'cenarios': None if painel['sem_perdas'] else _cenarios(simulacao, segmento),
+        'regua': None if painel['sem_perdas'] else _regua(simulacao, segmento),
+        'caminhos': None if painel['sem_perdas'] or painel['cobre'] else _caminhos(simulacao, segmento),
         'entradas': entradas,
-        'referencias': referencias,
-        'premissa_confirmada': segmento.get('premissa_confirmada', True),
-        'graficos': graficos,
-        'sensores_atuais': montar_sensores_atuais(
-            simulacao.get('cobertura', 0), simulacao.get('economia_ja_aproveitada', 0),
-            simulacao.get('economia_bruta', 0), simulacao.get('economia_potencial_total', 0),
-            simulacao.get('tempo_amostra', 30)),
+        'como_calculamos': resultado['como_calculamos'],
+        'fontes': resultado['fontes'],
+        'link_diagnostico': resultado['link_diagnostico'],
+        'sensores_atuais': resultado['sensores_atuais'],
     }
     return render(request, 'dashboard/index.html', contexto)

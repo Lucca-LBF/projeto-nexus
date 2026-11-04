@@ -1,77 +1,209 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% include 'simulador/_abas.html' with aba='dashboard' %}
+<div class="painel">
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-    <div>
-      <h1 class="h3 fw-bold mb-1">Dashboard da simulação</h1>
-      <p class="text-muted mb-0">{{ segmento_nome }}, com {{ dias }} dias simulados.</p>
-    </div>
-    <div class="d-flex flex-wrap gap-2">
-      <a href="{% url 'relatorio' %}?imprimir=1" class="btn btn-primary w-100 mt-2 fw-bold">Baixar relatório (PDF)</a>
-      <a href="{% url 'formulario_simulador' %}" class="btn btn-outline-info w-100 mt-2 fw-bold">Editar dados e simular de novo</a>
+  <!-- topo: abas e links simples -->
+  <div class="painel-topo">
+    {% include 'simulador/_abas.html' with aba='dashboard' %}
+    <div class="painel-links">
+      <a href="{% url 'relatorio' %}?imprimir=1">Baixar relatório (PDF)</a>
+      <a href="{% url 'formulario_simulador' %}">Editar dados</a>
     </div>
   </div>
 
-  {% if sem_perdas %}
-  <div class="alert alert-warning">
-    A simulação não encontrou perdas para comparar, então os gráficos de sensibilidade e de comparação foram omitidos.
-    Confira se a perda mensal ou o custo da hora parada foi preenchido.
+  <!-- veredito: a conclusão numa frase, com o próximo passo ao lado -->
+  <section class="veredito">
+    <div class="veredito-linha">
+      <div class="veredito-texto">
+        <p class="veredito-meta">{{ painel.meta }}</p>
+        <h1>{{ painel.titulo }}</h1>
+        <p class="veredito-sub">{{ painel.sub }}</p>
+      </div>
+      <div class="veredito-acao">
+        {% if painel.sem_perdas %}
+        <a href="{% url 'formulario_simulador' %}" class="btn-veredito">Editar dados</a>
+        {% else %}
+        <a href="{{ link_diagnostico }}" target="_blank" rel="noopener" class="btn-veredito">Pedir diagnóstico</a>
+        <small>Estimativa indicativa: o diagnóstico confirma os valores.</small>
+        {% endif %}
+      </div>
+    </div>
+    {% if not painel.sem_perdas and not painel.cobre %}
+    <div class="d-flex flex-column gap-2">
+      <div class="medidor" role="img" aria-label="A economia cobre {{ painel.cobertura }}% do custo dos sensores"><div style="width: {{ painel.cobertura }}%"></div></div>
+      <div class="medidor-legenda">
+        <span>Economia: <strong>{{ painel.economia }}</strong> por mês</span>
+        <span>Meta: <strong>{{ painel.custo }}</strong> por mês (custo dos sensores)</span>
+      </div>
+    </div>
+    {% endif %}
+  </section>
+
+  {% if not painel.sem_perdas %}
+
+  <!-- os quatro números: perda de hoje, economia, custo e saldo -->
+  <div class="painel-grade">
+    <div class="painel-card">
+      <p class="painel-rotulo">Perdas hoje, por mês</p>
+      <p class="painel-valor">{{ painel.perdas }}</p>
+      <p class="painel-nota">Estimativa sem sensores</p>
+    </div>
+    <div class="painel-card">
+      <p class="painel-rotulo">Economia por mês</p>
+      <p class="painel-valor cor-economia">{{ painel.economia }}</p>
+      <p class="painel-nota">{{ painel.origem }}</p>
+    </div>
+    <div class="painel-card">
+      <p class="painel-rotulo">Custo dos sensores por mês</p>
+      <p class="painel-valor">{{ painel.custo }}</p>
+      <p class="painel-nota">{{ painel.custo_faixa }}</p>
+    </div>
+    <div class="painel-card destaque">
+      <p class="painel-rotulo">{{ painel.saldo_titulo }}</p>
+      <p class="painel-valor cor-saldo">{{ painel.saldo }}</p>
+      <p class="painel-nota">{{ painel.saldo_nota }}</p>
+    </div>
   </div>
+
+  {% if caminhos %}
+  <!-- quando a economia ainda está abaixo do custo: o que leva a cobrir 100% -->
+  <section class="d-flex flex-column gap-3">
+    <h2>Caminhos para chegar a 100%</h2>
+    <div class="painel-grade tres">
+      {% for c in caminhos %}
+      <div class="painel-card d-flex flex-column gap-2{% if c.destaque %} destaque{% endif %}">
+        <p class="painel-rotulo">{{ c.titulo }}</p>
+        <p class="painel-valor cor-saldo" style="font-size: 1.6rem">{{ c.valor }}</p>
+        <p class="painel-nota">{{ c.texto }}</p>
+        {% if c.destaque %}<a href="{{ link_diagnostico }}" target="_blank" rel="noopener" class="btn btn-primary align-self-start mt-1 fw-bold" style="border-radius: 999px">Pedir diagnóstico</a>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
   {% endif %}
 
+  {% if grafico %}
+  <!-- economia de cada período com a marca do custo dos sensores -->
+  <section class="painel-card" style="padding: 28px">
+    <div class="periodos-cab">
+      <h2>{{ grafico.titulo }}</h2>
+      <div class="periodos-legenda">
+        <span><span class="amostra-barra"></span>Economia</span>
+        <span><span class="amostra-meta"></span>{{ grafico.legenda_custo }}</span>
+      </div>
+    </div>
+    <div class="periodos" style="height: {{ grafico.altura }}px">
+      <div class="periodos-eixo" aria-hidden="true">
+        {% for rotulo in grafico.eixo %}<span>{{ rotulo }}</span>{% endfor %}
+      </div>
+      <div class="periodos-area" style="grid-template-columns: repeat({{ grafico.colunas }}, minmax(0, 1fr))">
+        {% for p in grafico.itens %}
+        <div class="periodo" role="img" aria-label="{{ p.descricao }}" title="{{ p.descricao }}">
+          <div class="barra" style="height: {{ p.altura }}px"></div>
+          <div class="meta" style="bottom: {{ p.marca }}px"></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="periodos-rotulos" style="grid-template-columns: repeat({{ grafico.colunas }}, minmax(0, 1fr))">
+      {% for p in grafico.itens %}<span><span class="rotulo-longo">{{ p.rotulo }}</span><span class="rotulo-curto" aria-hidden="true">{{ forloop.counter }}</span></span>{% endfor %}
+    </div>
+    <p class="painel-nota mt-3">{{ grafico.legenda }}</p>
+  </section>
+  {% endif %}
 
-  <div class="row g-3 mb-4">
-    {% for k in kpis %}
-    <div class="col-sm-6 col-xl">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body">
-          <div class="small text-muted fw-semibold">{{ k.titulo }}</div>
-          <div class="fs-5 fw-bold {{ k.classe }}">{{ k.valor }}</div>
-          <div class="small text-muted">{{ k.detalhe }}</div>
+  {% if cenarios %}
+  <!-- três cenários pela faixa de redução dos estudos do setor -->
+  <section class="d-flex flex-column gap-3">
+    <div>
+      <h2>Três cenários para a sua economia</h2>
+      <p class="painel-nota mt-1" style="font-size: .95rem">Usam a faixa de redução de perdas encontrada nos estudos do setor.</p>
+    </div>
+    <div class="painel-grade tres">
+      {% for c in cenarios.lista %}
+      <div class="cenario{% if c.destaque %} destaque{% endif %}">
+        <div class="cenario-cab"><h3>{{ c.nome }}</h3><span>{{ c.pct }}</span></div>
+        <p class="painel-nota">{{ c.descricao }}</p>
+        <div><p class="painel-rotulo" style="font-size: .82rem">{{ c.rotulo }}</p><p class="painel-valor cor-saldo">{{ c.valor }}</p></div>
+        <div class="cenario-barras">
+          <div><span>Economia {{ c.economia }}</span><div class="trilho"><div class="eco" style="width: {{ c.largura_economia }}%"></div></div></div>
+          <div><span>Custo dos sensores {{ cenarios.custo }}</span><div class="trilho"><div class="custo" style="width: {{ c.largura_custo }}%"></div></div></div>
         </div>
       </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if regua %}
+  <!-- régua: onde a economia cobre o custo, a faixa dos estudos e o valor do simulador -->
+  <section class="painel-card" style="padding: 28px">
+    <h2>Quanto as perdas precisam cair para cobrir o custo?</h2>
+    <p class="mt-2 mb-0" style="font-size: 1.02rem; line-height: 1.5">{{ regua.texto }}</p>
+    <div class="regua" role="img" aria-label="{{ regua.texto }}">
+      <div class="fundo"></div>
+      <div class="faixa" style="left: {{ regua.faixa_inicio }}%; width: {{ regua.faixa_largura }}%"></div>
+      {% if regua.equilibrio is not None %}
+      <div class="equilibrio" style="left: {{ regua.equilibrio }}%"></div>
+      <span class="rotulo" style="left: {{ regua.equilibrio }}%; top: 0; color: var(--bzu-dark)">{{ regua.equilibrio_rotulo }}</span>
+      {% endif %}
+      <div class="premissa" style="left: {{ regua.premissa }}%"></div>
+      <span class="rotulo" style="left: {{ regua.premissa }}%; top: 56px; color: var(--bzu-purple)">Simulador {{ regua.premissa_rotulo }}</span>
+    </div>
+    <div class="regua-marcas" aria-hidden="true">{% for m in regua.marcas %}<span>{{ m }}</span>{% endfor %}</div>
+    <div class="regua-legenda">
+      <span><span style="width: 18px; height: 10px; background: #C7E8E5"></span>Faixa dos estudos: {{ regua.faixa_rotulo }}</span>
+      {% if regua.equilibrio is not None %}<span><span style="height: 14px; border-left: 3px dashed var(--bzu-dark)"></span>Ponto em que a economia cobre o custo</span>{% endif %}
+      <span><span style="width: 12px; height: 12px; border-radius: 50%; background: var(--bzu-purple)"></span>Valor usado pelo simulador</span>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- detalhes menores -->
+  <div class="painel-grade tres">
+    {% for t in painel.detalhes %}
+    <div class="painel-card" style="padding: 18px 20px">
+      <p class="painel-rotulo" style="font-size: .82rem">{{ t.titulo }}</p>
+      <p class="mb-0 mt-1" style="font-size: 1.35rem; font-weight: 800">{{ t.valor }}</p>
+      <p class="painel-nota mt-1">{{ t.nota }}</p>
     </div>
     {% endfor %}
   </div>
 
-
   {% include 'simulador/_sensores_atuais.html' %}
 
-  {% if graficos.linha %}
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-body">{{ graficos.linha|safe }}</div>
-  </div>
   {% endif %}
 
-  <div class="row g-4 mb-4">
-    {% if graficos.sensibilidade %}
-    <div class="col-lg-7">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body">
-          {{ graficos.sensibilidade|safe }}
-          <p class="small text-muted mb-0">
-            Cada ponto da linha é a economia estimada se as perdas caíssem naquele percentual.
-            A linha vertical tracejada marca a redução mínima para os sensores se pagarem.
-            O círculo é a sua simulação e o losango é a premissa de referência.
-          </p>
-        </div>
+  <!-- o que fica recolhido: método, fontes e dados -->
+  <div class="painel-secoes">
+    <details>
+      <summary>Como calculamos</summary>
+      <div class="conteudo"><ol class="mb-0">{% for passo in como_calculamos %}<li class="mb-2">{{ passo }}</li>{% endfor %}</ol></div>
+    </details>
+    <details>
+      <summary>Fontes dos números</summary>
+      <div class="conteudo">{% include 'simulador/_fontes.html' %}</div>
+    </details>
+    <details>
+      <summary>Dados informados</summary>
+      <div class="conteudo">
+        <dl class="row mb-0">
+          {% for rotulo, valor in entradas %}<dt class="col-sm-5 fw-semibold">{{ rotulo }}</dt><dd class="col-sm-7">{{ valor }}</dd>{% endfor %}
+        </dl>
       </div>
-    </div>
-    {% endif %}
-
-    {% if graficos.barras %}
-    <div class="col-lg-5">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body">{{ graficos.barras|safe }}</div>
-      </div>
-    </div>
-    {% endif %}
+    </details>
   </div>
 
+  {% if not painel.sem_perdas %}
+  <section class="painel-cta">
+    <div style="flex: 1 1 420px; min-width: 0">
+      <h2>Quer confirmar esses números na sua operação?</h2>
+      <p class="painel-nota mt-1" style="font-size: .95rem">A Bzu faz um diagnóstico e mostra por onde começar.</p>
+    </div>
+    <a href="{{ link_diagnostico }}" target="_blank" rel="noopener" class="btn btn-primary">Pedir diagnóstico</a>
+  </section>
+  {% endif %}
 
 </div>
-</body>
-
 {% endblock %}
