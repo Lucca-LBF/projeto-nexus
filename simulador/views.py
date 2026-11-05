@@ -239,7 +239,7 @@ def _calcular(salvo):
         titulo_resultado = f"LUCRO LÍQUIDO ESTIMADO ({dias_simulados} DIAS)"
         roi_exibicao = f"{roi:.1f}%"
         roi_nota = f"Pela faixa de investimento: {roi_faixa}" if roi_faixa else ""
-        resumo_diagnostico = f"ROI estimado de {roi:.1f}%"
+        resumo_diagnostico = f"ROI estimado de {roi:.0f}%"
     else:
         # sem vermelho: mostra a economia estimada, o ROI em faixa e o que falta para os sensores se pagarem
         texto_economia = f"R$ {economia_bruta:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')

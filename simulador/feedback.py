@@ -75,9 +75,11 @@ def faixa_roi(economia, investimento_min, investimento_max):
 
 
 def link_diagnostico(nome_industria, num_pontos, unidade, resumo_texto):
-    """Link do WhatsApp da Bzu com a mensagem pronta (só segmento, quantidade e estimativa, nada pessoal)."""
-    mensagem = (f"Olá, Bzu! Fiz uma simulação no simulador de economia com IoT (segmento: {nome_industria}, "
-                f"{num_pontos} {unidade.lower()}, {resumo_texto}) e gostaria de pedir um diagnóstico.")
+    """Link do WhatsApp da Bzu com a mensagem pronta: diz só que a pessoa veio do simulador.
+
+    Os parâmetros ficam para quem chama não precisar mudar; os dados da simulação não vão na mensagem."""
+    mensagem = ("Olá, Bzu! Usei o simulador e estou interessado em contratar soluções IoT. "
+                "Gostaria de um diagnóstico.")
     return f"https://wa.me/{WHATSAPP_BZU}?text={quote(mensagem)}"
 
 
