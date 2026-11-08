@@ -464,3 +464,8 @@ Funcionalidade: Relatório do resultado em PDF
 | 5 - Contato e leads | Formulário de contato (contato.html) | [Views do Sistema](#views-do-sistema) |
 | 6 - Feedback e sugestões | Formulário de contato, assunto "Feedback / Sugestões" | [Views do Sistema](#views-do-sistema) |
 | 7 - Relatório em PDF | Tela de resultado (botão "Baixar relatório") | [Simulador Financeiro](#simulador-financeiro) |
+
+## Quarta Entrega
+### Quadro da Sprint 04
+![foto da sprint4](Sprint4.png)
+
