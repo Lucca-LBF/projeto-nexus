@@ -25,9 +25,6 @@ Relatório da analise de competidores:  https://github.com/Lucca-LBF/projeto-nex
 
 ![bugtracker2](Issuebugtracker2.png)
 
-## Print da Sprint 
-![Foto da Sprint 03](Sprintentrega3fds.png)
-
 ### Histórias de usuário
 
 As 7 histórias do projeto, com critérios de aceite e cenários BDD, estão em [user_stories.md](user_stories.md) e na seção [Histórias de Usuário](#histórias-de-usuário) deste README.
@@ -61,6 +58,8 @@ Jira: https://cesar-team-wuiwsqgi.atlassian.net/jira/software/projects/KAN/list?
 <!-- Para publicar o print, salve o arquivo Backlog_Entrega03.png na pasta do projeto e troque este comentário por: ![Backlog do Jira](Backlog_Entrega03.png) -->
 
 ### Quadro da Sprint 03
+![Foto da Sprint 03](Sprintentrega3fds.png)
+
 
 <!-- Para publicar o print, salve o arquivo Quadro_Sprint03.png na pasta do projeto e troque este comentário por: ![Quadro da Sprint 03](Quadro_Sprint03.png) -->
 
