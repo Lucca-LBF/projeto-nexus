@@ -33,17 +33,18 @@
                 </div>
                 {% endfor %}
 
-                <a href="{% url 'relatorio' %}?imprimir=1" id="baixar-relatorio" class="btn btn-primary w-100 mt-2 fw-bold">
+                <a href="{{ link_diagnostico }}" target="_blank" rel="noopener" class="btn btn-primary w-100 mt-2 fw-bold">
+                    Pedir diagnóstico
+                </a>
+                <p class="small text-muted mt-1 mb-2 relatorio-dica">Abre o WhatsApp da Bzu com a sua simulação resumida.</p>
+
+                <a href="{% url 'relatorio' %}?imprimir=1" id="baixar-relatorio" class="btn btn-outline-info w-100 mt-2 fw-bold">
                     Baixar relatório completo (PDF)
                 </a>
                 <p class="small text-muted mt-1 mb-0 relatorio-dica">Inclui resultado e dashboard. Na janela que abrir, escolha "Salvar como PDF".</p>
 
                 <a href="{% url 'formulario_simulador' %}?nova=1" class="btn btn-outline-info w-100 mt-2 fw-bold">
                     Nova Simulação
-                </a>
-
-                <a href="{% url 'dashboard_home' %}" class="btn btn-outline-info w-100 mt-2 fw-bold">
-                    Ir para o Dashboard
                 </a>
             </div>
         </div>
@@ -60,6 +61,7 @@
                         {{ titulo_resultado }}
                         </h6>
                         <h3 class="{{ cor_economia }} mb-0 fw-bold">{{ economia_mensal }}</h3>
+                        {% if economia_faixa %}<p class="small text-muted mt-2 mb-0">Economia: {{ economia_faixa }}</p>{% endif %}
                     </div>
                 </div>
             </div>
@@ -79,25 +81,41 @@
             <div class="card-body">
                 <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.85rem;">Investimento estimado (só sensores)</h6>
                 <h4 class="mb-1 fw-bold">{{ investimento_faixa }}</h4>
-                <p class="small text-muted mb-0">Estimativa de mercado para o seu setor, não é preço da Bzu. O lucro e o ROI usam o valor central da faixa ({{ investimento_central }}).</p>
+                <p class="small text-muted mb-0">Estimativa de mercado para o seu setor: o valor final vem na proposta da Bzu. O lucro e o ROI usam o valor central da faixa ({{ investimento_central }}).</p>
             </div>
         </div>
         {% endif %}
 
-        <p class="small text-muted mb-4">{{ feedback.escopo }}</p>
+        {% include 'simulador/_por_mes.html' %}
+
+        <p class="small text-muted mb-4">Estimativa indicativa: o diagnóstico da Bzu confirma os números no seu cenário.</p>
 
         {% include 'simulador/_sensores_atuais.html' %}
 
-        <!-- Gráfico -->
+
         <div class="card shadow-sm border-0">
             <div class="card-body">
-                <h5 class="card-title text-secondary mb-1">Projeção de Custos de Falha ({{ dias_simulados }} Dias)</h5>
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h5 class="card-title text-secondary mb-0">Projeção de Custos de Falha ({{ dias_simulados }} Dias)</h5>
+                    
+                    {% if dias_simulados >= 90 %}
+                    <div class="d-flex align-items-center">
+                        <label for="seletor-escala" class="form-label me-2 mb-0 small text-muted">Ver por:</label>
+                        <select id="seletor-escala" class="form-select form-select-sm shadow-none" style="width: auto;">
+                            <option value="1">Dia</option>
+                            <option value="7">Semana</option>
+                            <option value="15">Quinzena</option>
+                            <option value="30">Mês</option>
+                        </select>
+                    </div>
+                    {% endif %}
+                </div>
+                
                 <p class="small text-muted mb-4">Nota: O gráfico reflete o ganho de eficiência na sua operação. O custo de aquisição dos sensores não está na linha, mas é descontado no cálculo do ROI acima.</p>
                 <div id="meu_grafico_iot" style="width: 100%; height: 380px;"></div>
             </div>
         </div>
-
-        <details class="card shadow-sm border-0 mt-4">
+                <details class="card shadow-sm border-0 mt-4">
             <summary class="card-body fw-bold text-info" style="cursor: pointer;">Como calculamos</summary>
             <div class="card-body pt-0">
                 <ol class="mb-0">
@@ -108,9 +126,17 @@
             </div>
         </details>
 
+        <details class="card shadow-sm border-0 mt-4">
+            <summary class="card-body fw-bold text-info" style="cursor: pointer;">Fontes dos números</summary>
+            <div class="card-body pt-0">
+                {% include 'simulador/_fontes.html' %}
+            </div>
+        </details>
+
         {% include 'simulador/_feedback.html' %}
     </div>
 </div>
+
 
 <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 
@@ -118,43 +144,106 @@
     const dias = {{ dados_grafico_dias|safe }};
     const custosSemIot = {{ dados_grafico_sem_iot|safe }};
     const custosComIot = {{ dados_grafico_com_iot|safe }};
+    const n = Math.min(dias.length, custosSemIot.length, custosComIot.length);
 
-    const trace1 = {
-        x: dias,
-        y: custosSemIot,
-        mode: 'lines+markers',
-        name: 'Sem IoT (Corretiva)',
-        line: {color: '#64748b', width: 2},
-        marker: {size: 5}
-    };
-
-    const trace2 = {
-        x: dias,
-        y: custosComIot,
-        mode: 'lines+markers',
-        name: 'Com IoT (Preditiva)',
-        line: {color: '#81358D', width: 3},
-        marker: {size: 5}
-    };
-
-    const layout = {
-        paper_bgcolor: 'transparent',
-        plot_bgcolor: 'transparent',
-        font: { color: '#2F2E2E', family: 'Raleway, Segoe UI, sans-serif' },
-        margin: { l: 50, r: 20, t: 10, b: 40 },
-        legend: { orientation: 'h', y: -0.25, x: 0.1 },
-        xaxis: { 
-            title: 'Dias de Operação',
-            gridcolor: '#EFE4F3'
-        },
-        yaxis: { 
-            title: 'Custo Diário (R$)', 
-            rangemode: 'tozero',
-            gridcolor: '#EFE4F3'
+function blocos(qtd, tamanho) {
+        // intervalos de cada bloco; poucos dias no fim (menos da metade de um bloco) entram no bloco anterior,
+        // mais que isso viram um bloco parcial. Nada é multiplicado: o total do gráfico é o total do período.
+        const res = [];
+        for (let i = 0; i < qtd; i += tamanho) res.push([i, Math.min(i + tamanho, qtd)]);
+        const sobra = qtd % tamanho;
+        if (tamanho > 1 && sobra && res.length > 1 && sobra < tamanho / 2) {
+            const inicio = res[res.length - 2][0];
+            res.splice(res.length - 2, 2, [inicio, qtd]);
         }
-    };
+        return res;
+    }
 
-    Plotly.newPlot('meu_grafico_iot', [trace1, trace2], layout, {responsive: true});
+    function agruparBlocos(arr, tamanho) {
+        return blocos(arr.length, tamanho).map(([a, b]) => arr.slice(a, b).reduce((x, y) => x + y, 0));
+    }
+
+    function rotulosBlocos(qtd, tamanho, nome) {
+        return blocos(n, tamanho).map(([a, b], i) => {
+            const dias = b - a;
+            let rotulo = `${nome} ${i + 1}`;
+            if (tamanho > 1 && dias !== tamanho) {
+                rotulo += dias > tamanho ? ` (${dias} dias)` : ` (parcial, ${dias} dia${dias > 1 ? 's' : ''})`;
+            }
+            return rotulo;
+        });
+    }
+
+    function desenharGrafico(tamanhoBloco) {
+        let xLabels = [];
+        let semIotFinal = [];
+        let comIotFinal = [];
+        let tituloEixoX = '';
+        let tituloEixoY = '';
+
+        if (tamanhoBloco === 30) {
+            semIotFinal = agruparBlocos(custosSemIot, 30);
+            comIotFinal = agruparBlocos(custosComIot, 30);
+            xLabels = rotulosBlocos(semIotFinal.length, 30, 'Mês');
+            tituloEixoX = 'Período (Meses)';
+            tituloEixoY = 'Custo Mensal (R$)';
+        } else if (tamanhoBloco === 15) {
+            semIotFinal = agruparBlocos(custosSemIot, 15);
+            comIotFinal = agruparBlocos(custosComIot, 15);
+            xLabels = rotulosBlocos(semIotFinal.length, 15, 'Quinzena');
+            tituloEixoX = 'Período (Quinzenas)';
+            tituloEixoY = 'Custo Quinzenal (R$)';
+        } else if (tamanhoBloco === 7) {
+            semIotFinal = agruparBlocos(custosSemIot, 7);
+            comIotFinal = agruparBlocos(custosComIot, 7);
+            xLabels = rotulosBlocos(semIotFinal.length, 7, 'Semana');
+            tituloEixoX = 'Período (Semanas)';
+            tituloEixoY = 'Custo Semanal (R$)';
+        } else {
+            semIotFinal = custosSemIot;
+            comIotFinal = custosComIot;
+            xLabels = dias.map(d => `Dia ${d}`);
+            tituloEixoX = 'Dias de Operação';
+            tituloEixoY = 'Custo Diário (R$)';
+        }
+
+        const trace1 = {
+            x: xLabels, y: semIotFinal, mode: 'lines+markers', name: 'Sem IoT (Corretiva)',
+            line: {color: '#64748b', width: 2}, marker: {size: 5}
+        };
+
+        const trace2 = {
+            x: xLabels, y: comIotFinal, mode: 'lines+markers', name: 'Com IoT (Preditiva)',
+            line: {color: '#81358D', width: 3}, marker: {size: 5}
+        };
+
+        const layout = {
+            paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
+            font: { color: '#2F2E2E', family: 'Raleway, Segoe UI, sans-serif' },
+            margin: { l: 50, r: 20, t: 10, b: 40 },
+            legend: { orientation: 'h', y: -0.25, x: 0.1 },
+            xaxis: { title: tituloEixoX, gridcolor: '#EFE4F3' },
+            yaxis: { title: tituloEixoY, rangemode: 'tozero', gridcolor: '#EFE4F3' }
+        };
+
+        Plotly.react('meu_grafico_iot', [trace1, trace2], layout, {responsive: true});
+    }
+
+    let escalaPadrao = 1;
+    if (n >= 360) escalaPadrao = 30;
+    else if (n >= 180) escalaPadrao = 15;
+    else if (n >= 120) escalaPadrao = 7;
+    desenharGrafico(escalaPadrao);
+
+   
+    const seletor = document.getElementById('seletor-escala');
+    if (seletor) {
+        seletor.value = escalaPadrao.toString();
+        
+        seletor.addEventListener('change', function() {
+            desenharGrafico(parseInt(this.value)); 
+        });
+    }
 </script>
 
 <div class="relatorio-rodape">

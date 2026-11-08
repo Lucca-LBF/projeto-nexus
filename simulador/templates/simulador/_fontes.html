@@ -1,0 +1,10 @@
+<p class="mb-2"><strong>Redução de perdas: {{ fontes.percentual }}%</strong> (faixa encontrada: {{ fontes.faixa }}). Nível da fonte: <strong>{{ fontes.nivel }}</strong>.</p>
+<p class="mb-2">{{ fontes.base }}</p>
+<p class="mb-2"><em>{{ fontes.aviso }}</em></p>
+<ul class="mb-3">
+    {% for titulo, url in fontes.links %}<li><a href="{{ url }}" target="_blank" rel="noopener">{{ titulo }}</a></li>{% endfor %}
+</ul>
+<p class="mb-2"><strong>Investimento:</strong> a faixa vem de preços públicos de fornecedores de sensores. É uma estimativa: a cotação vem na proposta da Bzu.</p>
+<ul class="mb-0">
+    {% for titulo, url in fontes.investimento %}<li><a href="{{ url }}" target="_blank" rel="noopener">{{ titulo }}</a></li>{% endfor %}
+</ul>

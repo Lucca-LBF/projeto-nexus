@@ -11,6 +11,7 @@
         </div>
         <div class="d-flex flex-wrap gap-2">
             <button type="button" id="rel-baixar" class="btn btn-primary fw-bold">Baixar relatório (PDF)</button>
+            <a href="{{ link_diagnostico }}" target="_blank" rel="noopener" class="btn btn-outline-info fw-bold">Pedir diagnóstico</a>
             <a href="{% url 'resultado_simulacao' %}" class="btn btn-outline-info fw-bold">Voltar ao resultado</a>
             <a href="{% url 'dashboard_home' %}" class="btn btn-outline-info fw-bold">Ver dashboard</a>
         </div>
@@ -27,6 +28,7 @@
             <div class="rel-destaque rel-destaque-1">
                 <small>{{ lucro_titulo }}</small>
                 <strong class="{% if tem_retorno %}text-success{% else %}text-info{% endif %}">{{ lucro }}</strong>
+                {% if economia_faixa %}<span class="rel-nota">Economia: {{ economia_faixa }}</span>{% endif %}
             </div>
             <div class="rel-destaque rel-destaque-2">
                 <small>{{ roi_titulo }}</small>
@@ -35,9 +37,10 @@
             </div>
         </div>
         {% if investimento_faixa %}
-        <p class="rel-nota"><strong>Investimento estimado (só sensores): {{ investimento_faixa }}.</strong> Estimativa de mercado para o setor, não é preço da Bzu. O lucro e o ROI usam o valor central da faixa ({{ investimento_central }}).</p>
+        <p class="rel-nota"><strong>Investimento estimado (só sensores): {{ investimento_faixa }}.</strong> Estimativa de mercado para o setor: o valor final vem na proposta da Bzu. O lucro e o ROI usam o valor central da faixa ({{ investimento_central }}).</p>
         {% endif %}
-        <p class="rel-nota">{{ feedback.escopo }}</p>
+        {% include 'simulador/_por_mes.html' %}
+        <p class="rel-nota">Estimativa indicativa: o diagnóstico da Bzu confirma os números no seu cenário.</p>
         {% include 'simulador/_sensores_atuais.html' %}
 
         <h2 class="rel-titulo">Dados informados</h2>
@@ -73,10 +76,11 @@
         {% endif %}
         {% if graficos.barras %}
         <div class="rel-grafico">{{ graficos.barras|safe }}</div>
+        <p class="rel-nota">O custo dos sensores é mensal. A barra cinza é o valor central e o traço mostra a faixa de mercado.</p>
         {% endif %}
         {% if graficos.equilibrio %}
         <div class="rel-grafico">{{ graficos.equilibrio|safe }}</div>
-        <p class="rel-nota">A linha vertical tracejada marca a redução mínima de perdas para os sensores se pagarem. O círculo é a sua simulação e o losango é a premissa de referência.</p>
+        <p class="rel-nota">A linha vertical tracejada marca a redução mínima de perdas para os sensores se pagarem. O círculo é a sua simulação, o losango é a premissa de referência e a área amarela é a faixa de redução encontrada nos estudos.</p>
         {% endif %}
     </section>
 
@@ -92,6 +96,7 @@
         <ul class="rel-lista">
             {% if feedback.retorno %}<li>{{ feedback.retorno }}</li>{% endif %}
             {% if feedback.equilibrio %}<li>{{ feedback.equilibrio }}</li>{% endif %}
+            {% if feedback.esperar %}<li>{{ feedback.esperar }}</li>{% endif %}
             {% if feedback.prioridade %}<li><strong>Sua prioridade:</strong> {{ feedback.prioridade }}. Comece por {{ feedback.comece_por }}.</li>{% endif %}
             <li><strong>O que monitorar:</strong> {{ feedback.monitorar }}</li>
             {% if feedback.acompanhamento %}<li><strong>Como é hoje:</strong> {{ feedback.acompanhamento }}</li>{% endif %}
@@ -100,9 +105,12 @@
         </ul>
         <p class="rel-nota">{{ feedback.premissa }}</p>
 
+        <h2 class="rel-titulo">Fontes dos números</h2>
+        <div class="rel-fontes">{% include 'simulador/_fontes.html' %}</div>
+
         <div class="rel-rodape">
             <p class="mb-1"><strong>Quer confirmar esses números no seu cenário?</strong> A Bzu faz um diagnóstico e define o que vale a pena monitorar.</p>
-            <p class="mb-0">{{ feedback.email }} &middot; {{ feedback.site }}</p>
+            <p class="mb-0">{{ feedback.email }} &middot; {{ feedback.site }} &middot; <a href="{{ link_diagnostico }}" target="_blank" rel="noopener">pedir diagnóstico pelo WhatsApp</a></p>
         </div>
     </section>
 </div>

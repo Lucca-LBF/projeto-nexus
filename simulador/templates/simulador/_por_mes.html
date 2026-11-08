@@ -1,0 +1,27 @@
+{% if por_mes %}
+<div class="card shadow-sm border-0 mb-3">
+    <div class="card-body">
+        <h6 class="text-muted text-uppercase mb-3" style="font-size: 0.85rem;">Por mês</h6>
+        <div class="row g-3 text-center text-md-start">
+            <div class="col-md-4">
+                <small class="text-muted d-block">Economia estimada</small>
+                <div class="fs-5 fw-bold">{{ por_mes.economia }}</div>
+                {% for rotulo, valor in por_mes.origem %}<small class="text-muted d-block">{{ rotulo }}: {{ valor }}</small>{% endfor %}
+            </div>
+            <div class="col-md-4">
+                <small class="text-muted d-block">Custo dos sensores</small>
+                <div class="fs-5 fw-bold">{{ por_mes.custo }}</div>
+                <small class="text-muted d-block">Faixa: {{ por_mes.custo_faixa }}</small>
+            </div>
+            <div class="col-md-4">
+                <small class="text-muted d-block">{{ por_mes.saldo_titulo }}</small>
+                <div class="fs-5 fw-bold {{ por_mes.saldo_classe }}">{{ por_mes.saldo }}</div>
+                <small class="text-muted d-block">{{ por_mes.saldo_texto }}</small>
+            </div>
+        </div>
+        {% if por_mes.economia_ponto %}
+        <p class="small text-muted mt-3 mb-0">Por ponto monitorado: economia de {{ por_mes.economia_ponto }} por mês, contra um custo de {{ por_mes.custo_ponto }} por mês (faixa de {{ por_mes.custo_ponto_faixa }}).</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

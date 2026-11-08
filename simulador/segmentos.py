@@ -432,6 +432,108 @@ SEGMENTOS = {
 }
 
 
+# De onde vem o percentual de redução (reducao_iot) de cada segmento. Aparece em "Fontes" no
+# resultado e no relatório. confianca: "alta", "média" ou "baixa" (baixa = premissa do grupo, sem
+# estudo que meça a perda evitada). Pesquisa completa: reducoes_iot_por_setor_v2.pdf.
+_F_MANUT = ("Reliamag: resumo dos estudos de manutenção preditiva (McKinsey, Deloitte, DOE)",
+            "https://reliamag.com/maintenance-and-reliability/predictive-maintenance-roi-benchmarks-what-the-studies-show/")
+_F_DELOITTE = ("Fabrico: estatísticas de manutenção preditiva (Deloitte)",
+               "https://www.fabrico.io/blog/predictive-maintenance-statistics/")
+_F_DOE = ("ASHE: guia de operação e manutenção do governo dos EUA (DOE)", "https://www.ashe.org/pdm?page=55")
+
+REDUCAO_REFERENCIAS = {
+    "padrao": {
+        "faixa": (10, 30), "confianca": "alta",
+        "base": ("Estudos de manutenção preditiva indicam queda de 30% a 50% nas paradas em programas maduros "
+                 "(McKinsey) e aumento de 10% a 20% na disponibilidade dos equipamentos (Deloitte)."),
+        "fontes": [_F_MANUT, _F_DELOITTE],
+    },
+    "textil": {
+        "faixa": (8, 25), "confianca": "média",
+        "base": ("Para o setor têxtil, a referência é a faixa dos estudos da indústria em geral."),
+        "fontes": [_F_MANUT, _F_DELOITTE],
+    },
+    "pesada": {
+        "faixa": (15, 40), "confianca": "alta",
+        "base": ("Em máquinas críticas o ganho tende a ser maior: a McKinsey cita queda de 30% a 50% nas paradas e "
+                 "o guia do governo dos EUA (DOE) cita 35% a 45%."),
+        "fontes": [_F_MANUT, _F_DOE],
+    },
+    "refrigeracao": {
+        "faixa": (15, 40), "confianca": "baixa",
+        "base": ("A referência de campo mais próxima é a queda de "
+                 "25% nos vazamentos de refrigerante em 100 lojas (dado de fornecedor), e uma revisão cita que mais de "
+                 "75% dos incidentes de temperatura na cadeia fria farmacêutica seriam evitáveis. "
+                 "O diagnóstico mede a perda de produto evitada na sua operação. "),
+        "fontes": [("Copeland: programa de detecção de vazamentos em 100 lojas",
+                    "https://e360blog.copeland.com/leak-detection-program-shrinks-grocers-carbon-footprint-and-grows-its-bottom-line/"),
+                   ("Revisão sobre IoT e inteligência artificial na cadeia fria (PubMed Central)",
+                    "https://pmc.ncbi.nlm.nih.gov/articles/PMC12910151/")],
+    },
+    "alimentos": {
+        "faixa": (10, 25), "confianca": "baixa",
+        "base": ("Há números do tamanho do problema (supermercados brasileiros perdem cerca de R$ 3,9 bilhões por ano "
+                 "em hortifrúti e perecíveis, segundo a ABRAS, com dados de 2017). O diagnóstico mede o efeito do "
+                 "monitoramento na sua operação."),
+        "fontes": [("IHU Unisinos: ABRAS e o desperdício nos supermercados",
+                    "https://ihu.unisinos.br/581949-supermercados-desperdicam-r-3-9-bi-em-alimentos-por-ano-diz-abras")],
+    },
+    "saude": {
+        "faixa": (10, 30), "confianca": "baixa",
+        "base": ("Uma meta-análise indica que 14% a 35% das vacinas entregues ficam expostas a temperatura inadequada, "
+                 "e um estudo em uma rede hospitalar mostrou que o monitoramento automático detecta desvios que a "
+                 "checagem manual deixa passar. O diagnóstico mede a perda evitada na sua operação."),
+        "fontes": [("NIST: monitoramento de temperatura na cadeia fria",
+                    "https://www.nist.gov/document/nic45-cold-chain-management-temperature-monitoring-solutionspdf"),
+                   ("ACHSM: monitoramento automático em uma rede hospitalar",
+                    "https://journal.achsm.org.au/index.php/achsm/article/view/899")],
+    },
+    "utilities": {
+        "faixa": (10, 25), "confianca": "baixa",
+        "base": ("As perdas não técnicas são grande parte das perdas das distribuidoras brasileiras (ANEEL, 2022), "
+                 "o que mostra o tamanho do espaço para reduzir com sensores."),
+        "fontes": [("FGV IBRE: perdas de eletricidade no Brasil",
+                    "https://blogdoibre.fgv.br/posts/como-evitar-insanidade-nas-perdas-de-eletricidade")],
+    },
+    "edificios": {
+        "faixa": (3, 25), "confianca": "alta",
+        "base": ("Na maior amostra publicada (5.900 edifícios), a economia mediana de energia foi de 3% com sistemas de "
+                 "informação e de 9% com detecção automática de falhas; a automação predial chega a 10% a 25%. "),
+        "fontes": [("Relatório da campanha de análise de energia em edifícios (EMIS)",
+                    "https://smartenergyanalytics.org/assets/EMIS%20Report.pdf"),
+                   ("ACEEE: tecnologia inteligente em edifícios existentes",
+                    "https://www.aceee.org/sites/default/files/publications/researchreports/a1701.pdf")],
+    },
+    "cidades": {
+        "faixa": (10, 35), "confianca": "média",
+        "base": ("Dublin reduziu os vazamentos de água em 29% e o Banco Mundial considera realista cortar pela metade a "
+                 "água não faturada em países em desenvolvimento (meta de programa completo). A iluminação pública "
+                 "adaptativa chega a cerca de 35% em simulação."),
+        "fontes": [("Banco Mundial: como reduzir a água não faturada",
+                    "https://documents1.worldbank.org/curated/en/385761468330326484/pdf/394050Reducing1e0water0WSS81PUBLIC1.pdf"),
+                   ("Economia de energia em iluminação pública adaptativa (simulação)",
+                    "https://merit.url.edu/ca/publications/estimating-energy-savings-in-smart-street-lighting-by-using-an-ad/")],
+    },
+    "agro": {
+        "faixa": (10, 40), "confianca": "média",
+        "base": ("A irrigação guiada por sensor de umidade economizou de 20% a 42% de água em um ensaio com alface e de "
+                 "10% a 64% em outros estudos citados no mesmo artigo. A água é só parte do custo da operação."),
+        "fontes": [("Irrigation Science (2025): irrigação com sensores de umidade",
+                    "https://link.springer.com/article/10.1007/s00271-024-00969-9")],
+    },
+}
+for _chave, _ref in REDUCAO_REFERENCIAS.items():
+    SEGMENTOS[_chave]["reducao_ref"] = _ref
+
+# onde estão os preços usados para a faixa de investimento (custo_ponto_faixa)
+FONTES_INVESTIMENTO = [
+    ("Erbessd: sistemas de monitoramento de vibração e preços", "https://www.erbessd-instruments.com/en/articles/best-vibration-monitoring-systems/"),
+    ("Monnit: monitoramento de cadeia fria", "https://www.monnit.com/temperature-monitoring/cold-chain"),
+    ("Mitti: monitoramento de temperatura", "https://mitti.com/apps/temperature-monitoring-solutions"),
+    ("OXMaint: custos de sensores sem fio", "https://oxmaint.com/blog/post/wireless-predictive-maintenance-cost-pricing-roi"),
+]
+
+
 def opcoes_prioridade(chave):
     """Opções do select "prioridade" de um segmento: [(valor, texto), ...]."""
     dados = SEGMENTOS.get(chave, SEGMENTOS["padrao"])

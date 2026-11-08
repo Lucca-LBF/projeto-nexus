@@ -5,8 +5,8 @@ import numpy as np
 from .forms import DadosEmpresaForm
 from .segmentos import (ACOMPANHAMENTO_RESUMO, COBERTURA_SENSORES, PERCENTUAIS_ESTIMATIVA,
                         REGIME_FUNCIONAMENTO, REGIME_PADRAO, SEGMENTOS, segmentos_para_formulario)
-from .feedback import (explicar_calculo, faixa_investimento, faixa_roi, link_diagnostico, moeda_inteira,
-                       montar_feedback, montar_sensores_atuais)
+from .feedback import (explicar_calculo, faixa_economia, faixa_investimento, fontes_reducao, faixa_roi, link_diagnostico, moeda_estimada, moeda_inteira,
+                       montar_feedback, montar_por_mes, montar_sensores_atuais)
 
 # chave da sessão onde ficam os dados da última simulação
 CHAVE_SESSAO = 'simulacao'
@@ -74,6 +74,9 @@ def _calcular(salvo):
     fator_regime, texto_regime = _regime(salvo.get('regime_funcionamento'))
 
     np.random.seed(42)
+    # usados no "Como calculamos" (só no modelo de paradas)
+    media_horas_perdidas_dia = None
+    horas_limitadas = False
 
     # taxa de falha, redução com IoT e nome vêm do catálogo (segmentos.py)
     segmento = SEGMENTOS.get(tipo_industria, SEGMENTOS['padrao'])
@@ -103,6 +106,7 @@ def _calcular(salvo):
         teto_diario = horas_trabalhadas_dia * 0.10
         if media_horas_perdidas_dia > teto_diario:
             media_horas_perdidas_dia = teto_diario
+            horas_limitadas = True
 
         # 4. GERAÇÃO DOS DIAS COM NUMPY USANDO A MÉDIA CORRIGIDA
         horas_paradas_sem_iot = np.random.normal(loc=media_horas_perdidas_dia, scale=media_horas_perdidas_dia * 0.3, size=dias_simulados)
@@ -200,10 +204,9 @@ def _calcular(salvo):
             grandeza, unidade_grandeza = "a perda mensal fosse de", "por mês"
         if valor_equilibrio > 0:
             falta_curto = f"Os sensores se pagam se {grandeza} cerca de {moeda_inteira(valor_equilibrio)}."
-            falta_pagar = (f"Com os valores informados, a economia fica abaixo do investimento estimado, e nem evitar "
-                           f"todas as perdas pagaria os sensores. Eles se pagariam se {grandeza} cerca de "
-                           f"{moeda_inteira(valor_equilibrio)} (você informou {moeda_inteira(informado)}). "
-                           "Vale começar por poucos pontos críticos, onde a perda é maior.")
+            falta_pagar = (f"Os sensores se pagam se {grandeza} cerca de {moeda_inteira(valor_equilibrio)} "
+                           f"(você informou {moeda_inteira(informado)}). Vale começar por poucos pontos críticos, "
+                           "onde a perda é maior, e confirmar o custo real no diagnóstico.")
         else:
             falta_curto = "Vale começar por poucos pontos críticos, onde a perda é maior."
             falta_pagar = falta_curto
@@ -214,6 +217,20 @@ def _calcular(salvo):
         'valor_equilibrio': float(valor_equilibrio),
         'valor_informado': float(custo_hora_parada if segmento['modelo'] == 'paradas' else perda_mensal),
     })
+    # por mês: o custo dos sensores é mensal (pontos × custo por ponto), então o que decide é o saldo de cada mês
+    economia_mensal = float(economia_bruta / meses_simulados) if meses_simulados > 0 else 0.0
+    custo_mensal = float(investimento_periodo / meses_simulados) if meses_simulados > 0 else 0.0
+    economia_conserto_nova = float(economia_conserto * fator_novo)
+    economia_min, economia_max = faixa_economia(float(economia_bruta), segmento)
+    salvo.update({
+        'economia_mensal': economia_mensal,
+        'custo_mensal': custo_mensal,
+        'custo_mensal_min': float(pontos_novos * faixa_min),
+        'custo_mensal_max': float(pontos_novos * faixa_max),
+        'economia_conserto_nova': economia_conserto_nova,
+        'economia_min': float(economia_min),
+        'economia_max': float(economia_max),
+    })
     roi_faixa = faixa_roi(economia_bruta, investimento_min, investimento_max)
     roi_titulo = "Retorno sobre Investimento (ROI) estimado"
     if resultado_liquido >= 0:
@@ -222,7 +239,7 @@ def _calcular(salvo):
         titulo_resultado = f"LUCRO LÍQUIDO ESTIMADO ({dias_simulados} DIAS)"
         roi_exibicao = f"{roi:.1f}%"
         roi_nota = f"Pela faixa de investimento: {roi_faixa}" if roi_faixa else ""
-        resumo_diagnostico = f"ROI estimado de {roi:.1f}%"
+        resumo_diagnostico = f"ROI estimado de {roi:.0f}%"
     else:
         # sem vermelho: mostra a economia estimada, o ROI em faixa e o que falta para os sensores se pagarem
         texto_economia = f"R$ {economia_bruta:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
@@ -232,16 +249,16 @@ def _calcular(salvo):
         roi_titulo = "Para os sensores se pagarem"
         if total_operacional_antigo <= 0:
             roi_exibicao = "Informe a perda ou a hora parada"
-            roi_nota = "Sem perdas informadas, não há economia para comparar com o investimento."
+            roi_nota = "Com esse valor, o simulador compara a economia com o investimento."
         elif equilibrio_pct < 100:
             roi_exibicao = f"Reduzir {equilibrio_pct:.0f}% das perdas"
             roi_nota = (f"A referência do seu setor é {round(segmento['reducao_iot'] * 100)}%. "
-                        "Por isso a economia estimada ainda não cobre o investimento.")
+                        "O diagnóstico mede o potencial real da sua operação.")
         elif valor_equilibrio > 0:
             rotulo_alvo = "Hora parada de" if segmento['modelo'] == 'paradas' else "Perda de"
             sufixo_alvo = "" if segmento['modelo'] == 'paradas' else " por mês"
             roi_exibicao = f"{rotulo_alvo} {moeda_inteira(valor_equilibrio)}{sufixo_alvo}"
-            roi_nota = "Nem evitar todas as perdas pagaria os sensores com o valor informado. Vale começar por poucos pontos críticos."
+            roi_nota = "Vale começar por poucos pontos críticos, onde a perda é maior, e confirmar o custo real no diagnóstico."
         else:
             roi_exibicao = "Começar por poucos pontos críticos"
             roi_nota = "Onde a perda é maior."
@@ -287,16 +304,26 @@ def _calcular(salvo):
         conexao_local=salvo.get('conexao_local'),
         investimento_min=investimento_min,
         falta_pagar=falta_pagar,
+        meses=meses_simulados,
     )
     contexto['como_calculamos'] = explicar_calculo(
         segmento, {**salvo, 'custo_hora_parada': custo_hora_parada, 'perda_mensal': perda_mensal,
                    'conserto_mensal': conserto_mensal},
         texto_regime, fator_regime, dias_simulados, economia_conserto,
         cobertura=cobertura, economia_potencial=economia_potencial, economia_ja_aproveitada=economia_ja_aproveitada,
-        investimento_min=investimento_min, investimento_max=investimento_max)
+        investimento_min=investimento_min, investimento_max=investimento_max,
+        horas_dia=media_horas_perdidas_dia, horas_limitadas=horas_limitadas)
     contexto['sensores_atuais'] = montar_sensores_atuais(
         cobertura, economia_ja_aproveitada, float(economia_bruta), economia_potencial, dias_simulados)
     contexto['link_diagnostico'] = link_diagnostico(segmento["rotulo"], num_maquinas, unidade_pontos, resumo_diagnostico)
+    # o dashboard e o relatório também mostram o botão "Pedir diagnóstico"
+    salvo['link_diagnostico'] = contexto['link_diagnostico']
+    contexto['fontes'] = fontes_reducao(segmento)
+    contexto['por_mes'] = montar_por_mes(salvo, segmento)
+    if economia_max > 0:
+        contexto['economia_faixa'] = (f"Entre {moeda_estimada(economia_min)} e {moeda_estimada(economia_max)} se a redução "
+                                      f"de perdas ficar entre {contexto['fontes']['minimo']}% e {contexto['fontes']['maximo']}% "
+                                      "(faixa encontrada nos estudos).")
     return contexto
 
 
