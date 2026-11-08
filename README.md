@@ -467,5 +467,6 @@ Funcionalidade: Relatório do resultado em PDF
 
 ## Quarta Entrega
 ### Quadro da Sprint 04
-![foto da sprint4](sprint4.png)
+![foto da sprint4](Sprint4.png)
+
 
