@@ -13,9 +13,6 @@ Relatório da analise de competidores:  https://github.com/Lucca-LBF/projeto-nex
 
 ![foto da sprint2](entregavel2fds.png)
 
-## Issue/Bug Tracker 1
-
-![bugtracker1](Issuebugtracker1.png)
 
 ## Terceira Entrega
 
@@ -24,6 +21,14 @@ Relatório da analise de competidores:  https://github.com/Lucca-LBF/projeto-nex
 ### Quadro da Sprint 03
 ![Foto da Sprint 03](Sprintentrega3fds.png)
 
+## Quarta Entrega
+### Quadro da Sprint 04
+![foto da sprint4](Sprint4.png)
+
+
+## Issue/Bug Tracker 1
+
+![bugtracker1](Issuebugtracker1.png)
 
 ## Issue/Bug Tracker 2
 
@@ -465,9 +470,7 @@ Funcionalidade: Relatório do resultado em PDF
 | 6 - Feedback e sugestões | Formulário de contato, assunto "Feedback / Sugestões" | [Views do Sistema](#views-do-sistema) |
 | 7 - Relatório em PDF | Tela de resultado (botão "Baixar relatório") | [Simulador Financeiro](#simulador-financeiro) |
 
-## Quarta Entrega
-### Quadro da Sprint 04
-![foto da sprint4](Sprint4.png)
+
 
 ### Testes automatizados
 
