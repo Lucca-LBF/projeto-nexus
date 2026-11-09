@@ -469,4 +469,45 @@ Funcionalidade: Relatório do resultado em PDF
 ### Quadro da Sprint 04
 ![foto da sprint4](Sprint4.png)
 
+### Testes automatizados
+
+Os testes de sistema (E2E) usam **Selenium** com o Chrome sem janela (headless). Cada teste sobe o site num servidor de teste do Django e usa as telas como um visitante: clica nos botões, responde o formulário passo a passo e confere o que aparece. Ao fim de cada teste, um print da tela fica em `e2e/prints/`.
+
+| Tipo | Arquivo | O que cobre |
+| --- | --- | --- |
+| Sistema (E2E, Selenium) | `e2e/test_historias.py` | 12 testes, um ou mais por história (1 a 7): navegação da home e do menu, envio de contato, lead comercial e feedback, campo obrigatório, valor inválido no formulário, simulação que se paga, simulação abaixo do custo sem número negativo, dashboard e relatório em PDF |
+| Unidade | `simulador/tests.py` | Formulário, cálculo do ROI, faixa de economia e contato |
+| Unidade | `dashboard/tests.py` | Dashboard, agrupamento por semana ou mês e relatório |
+
+Para rodar na sua máquina (precisa do Google Chrome instalado):
+
+```
+pip install -r requirements-dev.txt
+python manage.py test --tag e2e           # só os testes E2E com Selenium
+python manage.py test --exclude-tag e2e   # só os testes de unidade
+python manage.py test                     # todos
+```
+
+Para ver o navegador abrindo durante os testes, no PowerShell: `$env:E2E_MOSTRAR=1; python manage.py test --tag e2e`.
+
+### Pipeline de CI/CD (GitHub Actions)
+
+O pipeline fica em `.github/workflows/ci-cd.yml` e roda a cada push e pull request na `main` (aba **Actions** do GitHub):
+
+1. **Build**: instala as dependências, roda `manage.py check`, confere se falta migração e coleta os arquivos estáticos.
+2. **Testes de unidade** e **Testes de sistema (E2E com Selenium)**, em paralelo. Os prints das telas testadas ficam salvos na execução, como artefato `prints-e2e`.
+3. **Deploy no PythonAnywhere**: só em push na `main` e só se todos os testes passarem. O script `scripts/deploy_pythonanywhere.py` envia os arquivos que mudaram pela API do PythonAnywhere, recarrega o site e confere se ele respondeu.
+
+Para o deploy funcionar, o dono da conta do PythonAnywhere cadastra estes secrets em **Settings → Secrets and variables → Actions** do repositório:
+
+| Secret | Valor |
+| --- | --- |
+| `PA_API_TOKEN` | Token da API (PythonAnywhere → Account → API token) |
+| `PA_USERNAME` | Usuário do PythonAnywhere (ex.: `lucca`) |
+| `PA_DOMAIN` | Endereço do site (ex.: `lucca.pythonanywhere.com`) |
+| `PA_PROJECT_DIR` | Pasta do projeto no PythonAnywhere (padrão: `/home/<usuário>/projeto-nexus`) |
+| `PA_HOST` | Só se a conta for europeia: `eu.pythonanywhere.com` |
+
+Sem o `PA_API_TOKEN`, o pipeline roda build e testes normalmente e só pula o deploy, com um aviso. Quando um commit muda o `requirements.txt` ou cria uma migração, o pipeline avisa para rodar `pip install -r requirements.txt` ou `python manage.py migrate` no console do PythonAnywhere.
+
 
