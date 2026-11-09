@@ -16,3 +16,17 @@ Nós utilizamos o **GitHub Issues** e o nosso quadro no **Jira** para rastrear t
 
 ---
 
+## 💻 2. Configurando o Ambiente de Desenvolvimento Local
+
+Para contribuir com o código, você precisará rodar o projeto na sua máquina. Siga os passos abaixo:
+
+### Pré-requisitos
+- **Python 3.8+** instalado.
+- **Git** instalado.
+
+### Passo a passo (Setup)
+
+1. **Clone o repositório:**
+   ```bash
+   git clone [https://github.com/Lucca-LBF/projeto-nexus.git](https://github.com/Lucca-LBF/projeto-nexus.git)
+   cd projeto-nexus
