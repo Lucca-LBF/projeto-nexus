@@ -76,6 +76,7 @@ Jira: https://cesar-team-wuiwsqgi.atlassian.net/jira/software/projects/KAN/list?
 
 * Historias do Usuários 1 (a URL aparece no vídeo): https://youtu.be/dmjxWsUrp20?si=QtJPG9ZcHkYxGNvY
 * Historias do Usuários 2 (a URL aparece no vídeo): https://youtu.be/NW7ibOL6-BU
+* Testes do Selenium: https://youtu.be/QrsudvE1Joc
 * Explicação do código Django, de cada história até a view, o template e o model: https://www.youtube.com/watch?v=vIdkuO2PEOo
 <!-- Troque "link a ser adicionado" pelo link do YouTube de cada vídeo. -->
 
