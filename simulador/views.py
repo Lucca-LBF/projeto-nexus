@@ -17,6 +17,14 @@ def _limpo(valor):
     return int(valor) if float(valor).is_integer() else valor
 
 
+def _sem_repetidos(valores, principal):
+    vistos = []
+    for valor in valores or []:
+        if valor != principal and valor not in vistos:
+            vistos.append(valor)
+    return vistos
+
+
 def _dados_validados(form):
     """Transforma os dados já validados do formulário no dicionário guardado na sessão."""
     c = form.cleaned_data
@@ -32,6 +40,8 @@ def _dados_validados(form):
         'acompanhamento_atual': c['acompanhamento_atual'],
         'conexao_local': c['conexao_local'],
     }
+    dados['tipos_extras'] = _sem_repetidos(c.get('tipos_extras'), c['tipo_industria'])
+    dados['prioridades_extras'] = _sem_repetidos(c.get('prioridades_extras'), c['prioridade'])
     # só os segmentos do modelo "perdas" enviam a perda mensal
     if segmento['modelo'] == 'perdas':
         dados['perda_mensal'] = _limpo(float(c['perda_mensal']))
@@ -295,11 +305,15 @@ def _calcular(salvo):
     contexto['resumo'].append(linha_perda)
     if conserto_diario > 0:
         contexto['resumo'].append(('Conserto de Emergência', f"R$ {_limpo(conserto_mensal)} por mês"))
+    extras = [SEGMENTOS[t]['nome'] for t in salvo.get('tipos_extras', []) if t in SEGMENTOS]
+    if extras:
+        contexto['resumo'].insert(0, ('Também atua em', ', '.join(extras)))
     contexto['resumo'].append(('Sensores Atuais', ACOMPANHAMENTO_RESUMO.get(salvo.get('acompanhamento_atual'), 'Não informado')))
 
     contexto['feedback'] = montar_feedback(
         segmento, roi, economia_bruta, investimento_periodo, total_operacional_antigo,
         prioridade=salvo.get('prioridade'),
+        prioridades_extras=salvo.get('prioridades_extras'),
         acompanhamento=salvo.get('acompanhamento_atual'),
         conexao_local=salvo.get('conexao_local'),
         investimento_min=investimento_min,

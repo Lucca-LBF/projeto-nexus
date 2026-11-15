@@ -123,13 +123,14 @@ class HistoriasE2E(StaticLiveServerTestCase):
             passo, campo = self.pergunta_atual()
             selects = passo.find_elements(By.CSS_SELECTOR, ".wiz-resposta select")
             if selects:
-                # perguntas de escolha: clica no botão da opção (a escolha já avança)
+                # perguntas de escolha: clica na opção e depois em Continuar
                 indice = self.navegador.execute_script(
                     "var s = arguments[0], v = arguments[1];"
                     "for (var i = 0; i < s.options.length; i++) { if (s.options[i].value === v) return i; }"
                     "return s.selectedIndex;", selects[0], respostas.get(campo, ""))
                 opcoes = self.esperar(lambda n: passo.find_elements(By.CSS_SELECTOR, ".wiz-opcao") or False)
                 opcoes[indice].click()
+                self.navegador.find_element(By.ID, "wiz-continuar").click()
             else:
                 caixa = passo.find_element(By.CSS_SELECTOR, ".wiz-resposta input")
                 caixa.clear()
@@ -194,7 +195,8 @@ class HistoriasE2E(StaticLiveServerTestCase):
     def test_h1_valor_invalido_nao_avanca(self):
         self.abrir("/simulador/?nova=1")
         passo, campo = self.pergunta_atual()
-        passo.find_elements(By.CSS_SELECTOR, ".wiz-opcao")[0].click()  # primeiro tipo de empresa
+        passo.find_elements(By.CSS_SELECTOR, ".wiz-opcao")[0].click()
+        self.navegador.find_element(By.ID, "wiz-continuar").click()
         self.esperar_proxima_pergunta(campo)
         passo, campo = self.pergunta_atual()
         self.assertEqual(campo, "num_maquinas")
@@ -204,6 +206,68 @@ class HistoriasE2E(StaticLiveServerTestCase):
         self.navegador.find_element(By.ID, "wiz-continuar").click()
         self.esperar_texto("Informe pelo menos 1.")
         self.assertEqual(self.pergunta_atual()[1], "num_maquinas")
+
+    def test_h1_escolher_opcao_nao_avanca_sozinho(self):
+        self.abrir("/simulador/?nova=1")
+        passo, campo = self.pergunta_atual()
+        passo.find_elements(By.CSS_SELECTOR, ".wiz-opcao")[1].click()
+        self.assertEqual(self.pergunta_atual()[1], campo)
+        self.navegador.find_element(By.ID, "wiz-continuar").click()
+        self.esperar_proxima_pergunta(campo)
+
+    def test_h1_tipo_de_empresa_aceita_mais_de_uma_opcao(self):
+        self.abrir("/simulador/?nova=1")
+        passo, campo = self.pergunta_atual()
+        opcoes = passo.find_elements(By.CSS_SELECTOR, ".wiz-opcao")
+        opcoes[1].click()
+        opcoes[2].click()
+        marcadas = passo.find_elements(By.CSS_SELECTOR, ".wiz-opcao.sel")
+        self.assertEqual(len(marcadas), 3)
+        opcoes[2].click()
+        self.assertEqual(len(passo.find_elements(By.CSS_SELECTOR, ".wiz-opcao.sel")), 2)
+
+    def test_h1_prioridade_aceita_mais_de_uma_opcao_e_aparece_no_resultado(self):
+        self.abrir("/simulador/?nova=1")
+        for _ in range(15):
+            passo, campo = self.pergunta_atual()
+            if campo == "prioridade":
+                break
+            selects = passo.find_elements(By.CSS_SELECTOR, ".wiz-resposta select")
+            if not selects:
+                caixa = passo.find_element(By.CSS_SELECTOR, ".wiz-resposta input")
+                caixa.clear()
+                caixa.send_keys("10")
+            self.navegador.find_element(By.ID, "wiz-continuar").click()
+            self.esperar_proxima_pergunta(campo)
+        opcoes = passo.find_elements(By.CSS_SELECTOR, ".wiz-opcao")
+        nomes = [o.text for o in opcoes[:2]]
+        opcoes[0].click()
+        opcoes[1].click()
+        self.assertGreaterEqual(len(passo.find_elements(By.CSS_SELECTOR, ".wiz-opcao.sel")), 2)
+        for _ in range(5):
+            if "/resultado/" in self.navegador.current_url:
+                break
+            passo, campo = self.pergunta_atual()
+            self.navegador.find_element(By.ID, "wiz-continuar").click()
+            self.esperar_proxima_pergunta(campo)
+        self.esperar(EC.url_contains("/resultado/"))
+        self.navegador.execute_script("document.querySelectorAll('details').forEach(function (d) { d.open = true; });")
+        self.esperar_texto(nomes[0].lower())
+        self.assertIn(nomes[1].lower(), self.texto_da_pagina())
+
+    def test_h4_pagina_inicial_tem_um_unico_botao_de_descobrir(self):
+        self.abrir("/")
+        botoes = self.navegador.find_elements(By.PARTIAL_LINK_TEXT, "Descobrir minha economia")
+        self.assertEqual(len(botoes), 1)
+
+    def test_h3_dashboard_mostra_so_os_dados_informados(self):
+        self.responder_formulario(CENARIO_POSITIVO)
+        self.clicar_link("Dashboard")
+        self.esperar(EC.url_contains("/dashboard/"))
+        self.esperar_texto("Dados informados")
+        corpo = self.texto_da_pagina()
+        self.assertNotIn("como calculamos", corpo)
+        self.assertNotIn("fontes dos números", corpo)
 
     def test_h1_h2_simulacao_que_se_paga(self):
         self.responder_formulario(CENARIO_POSITIVO)

@@ -250,7 +250,7 @@ def _achar(lista, valor, posicao):
 
 
 def montar_feedback(segmento, roi, economia_bruta, investimento_periodo, perda_total_sem_iot,
-                    prioridade=None, acompanhamento=None, conexao_local=None, investimento_min=None,
+                    prioridade=None, prioridades_extras=None, acompanhamento=None, conexao_local=None, investimento_min=None,
                     falta_pagar=None, meses=None):
     reducao = segmento["reducao_iot"]
 
@@ -299,6 +299,10 @@ def montar_feedback(segmento, roi, economia_bruta, investimento_periodo, perda_t
 
     # respostas das perguntas de contexto (não entram na conta do ROI)
     prioridade_texto = _achar(segmento["prioridades"], prioridade, 1)
+    if prioridade_texto:
+        extras_texto = [t for t in (_achar(segmento["prioridades"], v, 1) for v in (prioridades_extras or [])) if t]
+        if extras_texto:
+            prioridade_texto = ", ".join([prioridade_texto] + extras_texto)
     comece_por = _achar(segmento["prioridades"], prioridade, 2)
     acompanhamento_texto = _achar(ACOMPANHAMENTO, acompanhamento, 2)
     conexao = _achar(CONEXAO_LOCAL, conexao_local, 2) or segmento["conexao"]

@@ -184,6 +184,18 @@ class DadosEmpresaForm(forms.Form):
         help_text="Define se os sensores usam Wi-Fi, LoRa ou LTE.",
     )
 
+    tipos_extras = forms.MultipleChoiceField(
+        required=False,
+        choices=TIPO_EMPRESA_CHOICES,
+        widget=forms.MultipleHiddenInput,
+    )
+
+    prioridades_extras = forms.MultipleChoiceField(
+        required=False,
+        choices=[],
+        widget=forms.MultipleHiddenInput,
+    )
+
     def __init__(self, *args, segmento=None, **kwargs):
         super().__init__(*args, **kwargs)
         if segmento not in SEGMENTOS:
@@ -193,6 +205,7 @@ class DadosEmpresaForm(forms.Form):
         self.intro = dados["intro"]
         self.monitorar = dados["monitorar"]
         self.fields["prioridade"].choices = opcoes_prioridade(segmento)
+        self.fields["prioridades_extras"].choices = opcoes_prioridade(segmento)
         # o campo que o segmento não usa fica desligado (e escondido na tela)
         for nome in ("custo_hora_parada", "perda_mensal"):
             self.fields[nome].disabled = nome not in dados["campos"]
