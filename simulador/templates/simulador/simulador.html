@@ -28,7 +28,9 @@
     <form method="post" action="{% url 'resultado_simulacao' %}" id="wiz-form">
         {% csrf_token %}
 
-        {% for campo in form %}
+        <div id="wiz-extras">{% for oculto in form.hidden_fields %}{{ oculto }}{% endfor %}</div>
+
+        {% for campo in form.visible_fields %}
         <section class="wiz-passo" data-campo="{{ campo.name }}"{% if campo.field.disabled %} hidden{% endif %}>
             <label for="{{ campo.id_for_label }}" class="wiz-pergunta" data-rotulo="{{ campo.name }}">{{ campo.label }}</label>
             {% if campo.help_text %}
@@ -107,7 +109,24 @@
         var passos = [];
         var atual = 0;
         var enviando = false;
-        var avancando = false;
+        var extrasDe = {tipo_industria: 'tipos_extras', prioridade: 'prioridades_extras'};
+        var extrasEstado = {tipos_extras: [], prioridades_extras: []};
+        var areaExtras = document.getElementById('wiz-extras');
+        Object.keys(extrasEstado).forEach(function (nome) {
+            extrasEstado[nome] = Array.prototype.map.call(areaExtras.querySelectorAll('input[name="' + nome + '"]'), function (i) { return i.value; });
+        });
+        function gravarExtras() {
+            areaExtras.innerHTML = '';
+            Object.keys(extrasEstado).forEach(function (nome) {
+                extrasEstado[nome].forEach(function (valor) {
+                    var campo = document.createElement('input');
+                    campo.type = 'hidden';
+                    campo.name = nome;
+                    campo.value = valor;
+                    areaExtras.appendChild(campo);
+                });
+            });
+        }
 
         /* ---------- estimador "não sei o valor" (segmentos de perda mensal) ---------- */
         var painel = document.getElementById('painel-estimativa');
@@ -163,6 +182,9 @@
             var prioridade = document.getElementById('id_prioridade');
             var escolhida = prioridade.value;
             prioridade.innerHTML = '';
+            var validas = seg.prioridades.map(function (op) { return op.valor; });
+            extrasEstado.prioridades_extras = extrasEstado.prioridades_extras.filter(function (v) { return validas.indexOf(v) >= 0 && v !== escolhida; });
+            gravarExtras();
             seg.prioridades.forEach(function (op) {
                 var opcao = document.createElement('option');
                 opcao.value = op.valor;
@@ -186,9 +208,9 @@
         function campoDe(b) { return b.querySelector('.wiz-resposta input, .wiz-resposta select'); }
         function caixaErro(b) { return b.querySelector('.wiz-erro:not(.wiz-erro-servidor)'); }
 
-        function marcarOpcao(cont, indice) {
-            Array.prototype.forEach.call(cont.children, function (btn, i) {
-                var sel = i === indice;
+        function marcarOpcao(cont, marcadas) {
+            Array.prototype.forEach.call(cont.children, function (btn) {
+                var sel = marcadas.indexOf(btn.dataset.valor) >= 0;
                 btn.classList.toggle('sel', sel);
                 btn.setAttribute('aria-checked', String(sel));
             });
@@ -197,27 +219,53 @@
         function montarOpcoes(b) {
             var select = b.querySelector('.wiz-resposta select');
             var cont = b.querySelector('.wiz-opcoes');
+            var nomeExtras = extrasDe[b.dataset.campo];
+            var multi = !!nomeExtras;
+            var marcadas = [select.value];
+            if (multi) marcadas = marcadas.concat(extrasEstado[nomeExtras].filter(function (v) { return v !== select.value; }));
+            var dica = b.querySelector('.wiz-multi-dica');
+            if (dica) dica.remove();
+            if (multi) {
+                dica = document.createElement('p');
+                dica.className = 'wiz-multi-dica';
+                dica.textContent = 'Você pode marcar mais de uma opção.';
+                cont.parentNode.insertBefore(dica, cont);
+            }
             cont.innerHTML = '';
+            cont.setAttribute('role', multi ? 'group' : 'radiogroup');
             cont.classList.toggle('wiz-opcoes-grande', select.options.length > 6);
-            Array.prototype.forEach.call(select.options, function (op, i) {
+            Array.prototype.forEach.call(select.options, function (op) {
                 var btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'wiz-opcao';
-                btn.setAttribute('role', 'radio');
+                btn.dataset.valor = op.value;
+                btn.setAttribute('role', multi ? 'checkbox' : 'radio');
                 btn.textContent = op.textContent;
                 btn.addEventListener('click', function () {
-                    if (avancando) return;
-                    select.value = op.value;
-                    select.dispatchEvent(new Event('change', {bubbles: true}));
-                    marcarOpcao(cont, i);
+                    if (multi) {
+                        var posicao = marcadas.indexOf(op.value);
+                        if (posicao >= 0) {
+                            if (marcadas.length === 1) return;
+                            marcadas.splice(posicao, 1);
+                        } else {
+                            marcadas.push(op.value);
+                        }
+                    } else {
+                        marcadas = [op.value];
+                    }
+                    var mudouPrincipal = select.value !== marcadas[0];
+                    select.value = marcadas[0];
+                    if (multi) {
+                        extrasEstado[nomeExtras] = marcadas.slice(1);
+                        gravarExtras();
+                    }
+                    if (mudouPrincipal) select.dispatchEvent(new Event('change', {bubbles: true}));
+                    marcarOpcao(cont, marcadas);
                     atualizarTopo();
-                    // responder já leva à próxima pergunta
-                    avancando = true;
-                    setTimeout(function () { avancando = false; avancar(); }, 280);
                 });
                 cont.appendChild(btn);
             });
-            marcarOpcao(cont, select.selectedIndex);
+            marcarOpcao(cont, marcadas);
             cont.hidden = false;
         }
 
@@ -246,7 +294,10 @@
             btnVoltar.style.visibility = atual === 0 ? 'hidden' : 'visible';
             if (memoria) memoria.hidden = atual !== 0;
             pill.hidden = atual === 0;
-            if (atual > 0) pill.textContent = seletor.options[seletor.selectedIndex].textContent;
+            if (atual > 0) {
+                var quantos = extrasEstado.tipos_extras.length;
+                pill.textContent = seletor.options[seletor.selectedIndex].textContent + (quantos ? ' +' + quantos : '');
+            }
         }
 
         function mostrar(i, direcao) {
