@@ -1,0 +1,112 @@
+# Pipeline do projeto Nexus: build -> testes (unidade e E2E com Selenium) -> deploy no PythonAnywhere.
+# Roda a cada push e pull request na main. O deploy só acontece em push na main, depois de todos os testes passarem.
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# um push novo na mesma branch cancela a execução anterior
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.13"
+  # chave só para o CI; a chave de produção fica no .env do PythonAnywhere
+  SECRET_KEY: chave-usada-apenas-nos-testes-do-ci
+  DEBUG: "False"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+
+      - name: Instalar as dependências
+        run: pip install -r requirements-dev.txt
+
+      - name: Verificar a configuração do Django
+        run: python manage.py check
+
+      - name: Conferir se falta alguma migração
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Coletar os arquivos estáticos
+        run: python manage.py collectstatic --noinput
+
+  testes-unidade:
+    name: Testes de unidade
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Rodar os testes de unidade
+        run: python manage.py test --exclude-tag e2e -v 2
+
+  testes-e2e:
+    name: Testes de sistema (E2E com Selenium)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      # o ubuntu-latest já vem com o Google Chrome; o Selenium baixa o driver certo sozinho
+      - name: Rodar os testes E2E das histórias
+        run: python manage.py test --tag e2e -v 2
+      - name: Guardar os prints das telas testadas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prints-e2e
+          path: e2e/prints/
+          if-no-files-found: ignore
+
+  deploy:
+    name: Deploy no PythonAnywhere
+    needs: [testes-unidade, testes-e2e]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: producao
+      url: https://lucca.pythonanywhere.com
+    steps:
+      - name: Baixar o código com o histórico
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Enviar os arquivos alterados e recarregar o site
+        env:
+          PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
+          PA_USERNAME: ${{ secrets.PA_USERNAME }}
+          PA_DOMAIN: ${{ secrets.PA_DOMAIN }}
+          PA_PROJECT_DIR: ${{ secrets.PA_PROJECT_DIR }}
+          PA_HOST: ${{ secrets.PA_HOST }}
+          COMMIT_ANTERIOR: ${{ github.event.before }}
+        run: python scripts/deploy_pythonanywhere.py

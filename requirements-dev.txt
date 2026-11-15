@@ -1,0 +1,3 @@
+# Dependências para desenvolver e testar (o site em produção usa só o requirements.txt)
+-r requirements.txt
+selenium>=4.25
