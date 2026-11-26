@@ -1,7 +1,7 @@
 # Projeto Nexus
 Repositório destinado ao projetos 2
 
-[Acessar o Deploy do Simulador Bzu](https://lucca.pythonanywhere.com)
+[Acessar o Deploy do Simulador Bzu](https://ivonbuarquedacostaneto.pythonanywhere.com)
 
 ## Primeira Entrega
 
