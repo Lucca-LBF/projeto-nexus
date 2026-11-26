@@ -109,8 +109,8 @@
         var passos = [];
         var atual = 0;
         var enviando = false;
-        var extrasDe = {tipo_industria: 'tipos_extras', prioridade: 'prioridades_extras'};
-        var extrasEstado = {tipos_extras: [], prioridades_extras: []};
+        var extrasDe = {prioridade: 'prioridades_extras'};
+        var extrasEstado = {prioridades_extras: []};
         var areaExtras = document.getElementById('wiz-extras');
         Object.keys(extrasEstado).forEach(function (nome) {
             extrasEstado[nome] = Array.prototype.map.call(areaExtras.querySelectorAll('input[name="' + nome + '"]'), function (i) { return i.value; });
@@ -294,10 +294,7 @@
             btnVoltar.style.visibility = atual === 0 ? 'hidden' : 'visible';
             if (memoria) memoria.hidden = atual !== 0;
             pill.hidden = atual === 0;
-            if (atual > 0) {
-                var quantos = extrasEstado.tipos_extras.length;
-                pill.textContent = seletor.options[seletor.selectedIndex].textContent + (quantos ? ' +' + quantos : '');
-            }
+            if (atual > 0) pill.textContent = seletor.options[seletor.selectedIndex].textContent;
         }
 
         function mostrar(i, direcao) {

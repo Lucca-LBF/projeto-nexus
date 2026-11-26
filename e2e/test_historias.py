@@ -215,16 +215,15 @@ class HistoriasE2E(StaticLiveServerTestCase):
         self.navegador.find_element(By.ID, "wiz-continuar").click()
         self.esperar_proxima_pergunta(campo)
 
-    def test_h1_tipo_de_empresa_aceita_mais_de_uma_opcao(self):
+    def test_h1_tipo_de_empresa_aceita_uma_unica_opcao(self):
         self.abrir("/simulador/?nova=1")
         passo, campo = self.pergunta_atual()
         opcoes = passo.find_elements(By.CSS_SELECTOR, ".wiz-opcao")
         opcoes[1].click()
         opcoes[2].click()
         marcadas = passo.find_elements(By.CSS_SELECTOR, ".wiz-opcao.sel")
-        self.assertEqual(len(marcadas), 3)
-        opcoes[2].click()
-        self.assertEqual(len(passo.find_elements(By.CSS_SELECTOR, ".wiz-opcao.sel")), 2)
+        self.assertEqual(len(marcadas), 1)
+        self.assertEqual(marcadas[0].text, opcoes[2].text)
 
     def test_h1_prioridade_aceita_mais_de_uma_opcao_e_aparece_no_resultado(self):
         self.abrir("/simulador/?nova=1")

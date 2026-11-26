@@ -184,12 +184,6 @@ class DadosEmpresaForm(forms.Form):
         help_text="Define se os sensores usam Wi-Fi, LoRa ou LTE.",
     )
 
-    tipos_extras = forms.MultipleChoiceField(
-        required=False,
-        choices=TIPO_EMPRESA_CHOICES,
-        widget=forms.MultipleHiddenInput,
-    )
-
     prioridades_extras = forms.MultipleChoiceField(
         required=False,
         choices=[],
